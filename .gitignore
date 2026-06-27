@@ -1,0 +1,17 @@
+# Dépendances
+/vendor/
+
+# Base de données
+/storage/*.sqlite
+/storage/*.sqlite-wal
+/storage/*.sqlite-shm
+
+# Uploads utilisateur
+/public/uploads/*
+!/public/uploads/.htaccess
+
+# Clé secrète de licence — NE JAMAIS VERSIONNER
+/config/license.secret
+
+# Logs et caches
+*.log

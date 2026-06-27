@@ -1,0 +1,322 @@
+<?php
+/**
+ * Shared invoice form template.
+ * Expects: $formAction, $invoice (array|null), $lines (array), $errors (array)
+ */
+use App\Database\SettingsRepository;
+
+$inv      = $invoice ?? [];
+$e        = $errors  ?? [];
+$settings = (new SettingsRepository())->all();
+
+$today     = date('Y-m-d');
+$nextMonth = date('Y-m-d', strtotime('+1 month'));
+
+/* Priority: invoice record → company settings → hardcoded default */
+$fv = function(string $key, string $default = '') use ($inv, $settings): string {
+    $val = $inv[$key] ?? $settings[$key] ?? $default;
+    return htmlspecialchars((string) $val);
+};
+
+$prestationLabel  = $fv('prestation_label', $settings['prestation_label'] ?? 'Frais de prestation');
+$prestationAmount = (int) ($inv['prestation_amount'] ?? 0);
+?>
+
+<form method="POST" action="<?= $formAction ?>" enctype="multipart/form-data">
+<?php if (!empty($inv['id'])): ?>
+    <input type="hidden" name="id" value="<?= (int)$inv['id'] ?>">
+<?php endif; ?>
+
+<!-- ── Entreprise ── -->
+<div class="section-title" style="margin-top:0">🏢 Votre entreprise</div>
+
+<?php
+$logoPath = $inv['issuer_logo_path'] ?? $settings['issuer_logo_path'] ?? '';
+if ($logoPath && file_exists($logoPath)):
+?>
+<div style="margin-bottom:10px">
+    <img src="/uploads/<?= basename($logoPath) ?>"
+         style="max-height:55px;object-fit:contain;border-radius:6px;border:1px solid var(--border);padding:5px">
+    <span style="font-size:.74rem;color:var(--muted);margin-left:8px">Logo actuel</span>
+</div>
+<?php endif; ?>
+
+<div class="form-grid-2" style="margin-bottom:14px">
+    <div class="field">
+        <label>Nom *</label>
+        <input type="text" name="issuer_name" value="<?= $fv('issuer_name') ?>" required>
+        <input type="hidden" name="issuer_logo_path" value="<?= htmlspecialchars($logoPath) ?>">
+    </div>
+    <div class="field">
+        <label>Remplacer le logo</label>
+        <input type="file" name="logo" accept="image/*">
+    </div>
+</div>
+<div class="form-grid-3">
+    <div class="field">
+        <label>Adresse</label>
+        <input type="text" name="issuer_address" value="<?= $fv('issuer_address') ?>">
+    </div>
+    <div class="field">
+        <label>Téléphone</label>
+        <input type="text" name="issuer_phone" value="<?= $fv('issuer_phone') ?>">
+    </div>
+    <div class="field">
+        <label>N°IFU</label>
+        <input type="text" name="issuer_ifu" value="<?= $fv('issuer_ifu') ?>">
+    </div>
+</div>
+<div class="field" style="margin-top:12px">
+    <label>Email *</label>
+    <input type="email" name="issuer_email" value="<?= $fv('issuer_email') ?>" required>
+    <span style="font-size:.72rem;color:var(--muted);margin-top:2px">
+        Ces informations sont pré-remplies depuis vos <a href="/settings.php" style="color:var(--gold)">Paramètres</a>.
+    </span>
+</div>
+
+<!-- ── Facture ── -->
+<div class="section-title">🧾 Informations de la facture</div>
+<div class="form-grid-3">
+    <div class="field">
+        <label>Type</label>
+        <select name="type">
+            <?php foreach (['FACTURE PROFORMA','FACTURE','DEVIS'] as $t): ?>
+            <option value="<?= $t ?>" <?= ($inv['type'] ?? 'FACTURE PROFORMA') === $t ? 'selected' : '' ?>><?= $t ?></option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+    <div class="field">
+        <label>N° Facture</label>
+        <input type="text" name="number" value="<?= $fv('number') ?>"
+               <?= empty($inv['id']) ? 'readonly style="background:#f5f5f5;color:var(--muted);cursor:default"' : '' ?>>
+        <?php if (empty($inv['id'])): ?>
+        <span style="font-size:.72rem;color:var(--muted);margin-top:2px">Généré automatiquement · modifiable si besoin</span>
+        <?php endif; ?>
+    </div>
+    <div class="field">
+        <label>Statut</label>
+        <select name="status">
+            <?php foreach (['brouillon'=>'Brouillon','envoyée'=>'Envoyée','payée'=>'Payée','annulée'=>'Annulée'] as $val => $lbl): ?>
+            <option value="<?= $val ?>" <?= ($inv['status'] ?? 'brouillon') === $val ? 'selected' : '' ?>><?= $lbl ?></option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+</div>
+<div class="form-grid-3" style="margin-top:12px">
+    <div class="field">
+        <label>Objet</label>
+        <input type="text" name="subject" value="<?= $fv('subject') ?>">
+    </div>
+    <div class="field">
+        <label>Date d'émission</label>
+        <input type="date" name="issued_at" value="<?= $fv('issued_at', $today) ?>">
+    </div>
+    <div class="field">
+        <label>Date limite</label>
+        <input type="date" name="due_at" value="<?= $fv('due_at', $nextMonth) ?>">
+    </div>
+</div>
+
+<!-- ── Client ── -->
+<div class="section-title">👤 Client — Envoyé à</div>
+<div class="form-grid-3">
+    <div class="field">
+        <label>Nom / Entreprise</label>
+        <input type="text" name="client_name" value="<?= $fv('client_name') ?>">
+    </div>
+    <div class="field">
+        <label>Adresse</label>
+        <input type="text" name="client_address" value="<?= $fv('client_address') ?>">
+    </div>
+    <div class="field">
+        <label>Contact</label>
+        <input type="text" name="client_contact" value="<?= $fv('client_contact') ?>">
+    </div>
+</div>
+
+<!-- ── Lignes ── -->
+<div class="section-title">📦 Articles</div>
+<table class="lines-tbl" style="margin-bottom:10px">
+    <thead>
+        <tr>
+            <th style="width:36px;text-align:center">#</th>
+            <th>Description</th>
+            <th style="width:90px">Quantité</th>
+            <th style="width:150px">Prix unitaire (FCFA)</th>
+            <th style="width:120px;text-align:right">Total</th>
+            <th style="width:36px"></th>
+        </tr>
+    </thead>
+    <tbody id="lines-body">
+    <?php foreach ($lines as $i => $line): ?>
+        <tr>
+            <td style="text-align:center;color:var(--muted);font-size:.78rem"><?= $i + 1 ?></td>
+            <td><input type="text" name="line_desc[]" value="<?= htmlspecialchars($line['description'] ?? '') ?>"></td>
+            <td><input type="number" name="line_qty[]" value="<?= (int)($line['quantity'] ?? 1) ?>" min="1" class="qty-i"></td>
+            <td><input type="number" name="line_price[]" value="<?= (int)($line['unit_price'] ?? 0) ?>" min="0" class="price-i"></td>
+            <td class="line-total" style="text-align:right;padding:0 10px;font-weight:600;font-size:.83rem">
+                <?= number_format((int)($line['quantity'] ?? 1) * (int)($line['unit_price'] ?? 0), 0, ',', ' ') ?>
+            </td>
+            <td><button type="button" onclick="removeLine(this)"
+                style="background:none;border:none;color:var(--red);cursor:pointer;font-size:1rem;padding:4px">✕</button></td>
+        </tr>
+    <?php endforeach; ?>
+    </tbody>
+</table>
+<button type="button" onclick="addLine()"
+    style="background:none;border:1px dashed var(--gold);color:var(--gold);border-radius:6px;padding:6px 14px;cursor:pointer;font-size:.82rem;font-weight:600">
+    ＋ Ajouter une ligne
+</button>
+
+<!-- ── Ligne Prestation (toujours en dernier) ── -->
+<div class="section-title" style="margin-top:22px">🔧 Frais de prestation
+    <span style="font-size:.7rem;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;margin-left:6px">
+        — apparaît en dernière position dans la facture
+    </span>
+</div>
+<div style="display:flex;align-items:center;gap:12px;background:#fffbf0;border:1px solid #f5c040;border-radius:8px;padding:12px 16px">
+    <div style="flex:1">
+        <label style="font-size:.75rem;color:var(--muted);display:block;margin-bottom:4px">Libellé</label>
+        <input type="text" name="prestation_label"
+               value="<?= $prestationLabel ?>"
+               style="border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:.85rem;width:100%">
+    </div>
+    <div style="width:180px">
+        <label style="font-size:.75rem;color:var(--muted);display:block;margin-bottom:4px">Montant (FCFA)</label>
+        <input type="number" name="prestation_amount" id="prestation-amount"
+               value="<?= $prestationAmount ?>" min="0"
+               style="border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:.85rem;width:100%">
+    </div>
+    <div style="width:130px;text-align:right;padding-top:18px">
+        <span style="font-weight:700;font-size:.9rem" id="prestation-display">
+            <?= number_format($prestationAmount, 0, ',', ' ') ?> FCFA
+        </span>
+    </div>
+</div>
+
+<!-- Taxes -->
+<div class="form-grid-2" style="margin-top:18px">
+    <div class="field">
+        <label>Taux de prélèvement (%)</label>
+        <input type="number" name="tax_rate" id="tax-rate" value="<?= $fv('tax_rate', $settings['default_tax_rate'] ?? '5') ?>" min="0" max="100" step="0.1">
+    </div>
+    <div class="field">
+        <label>Libellé de la taxe</label>
+        <input type="text" name="tax_label" value="<?= $fv('tax_label', $settings['default_tax_label'] ?? 'Prelevement 5%') ?>">
+    </div>
+</div>
+
+<!-- Aperçu totaux -->
+<div class="totals-preview">
+    <div class="row"><span>Total H.T</span><span id="prev-ht">—</span></div>
+    <div class="row"><span id="prev-tax-label">Prélèvement 5%</span><span id="prev-tax">—</span></div>
+    <div class="row final"><span>Total Net à Payer</span><span id="prev-net">—</span></div>
+</div>
+
+<!-- ── Signature ── -->
+<div class="section-title">✍️ Signature</div>
+<div class="form-grid-2">
+    <div class="field">
+        <label>Titre</label>
+        <input type="text" name="signatory_title" value="<?= $fv('signatory_title') ?>">
+    </div>
+    <div class="field">
+        <label>Nom</label>
+        <input type="text" name="signatory_name" value="<?= $fv('signatory_name') ?>">
+    </div>
+</div>
+
+<!-- ── Pied de page ── -->
+<div class="section-title">📝 Pied de page</div>
+<div class="field">
+    <textarea name="footer_text" rows="3"><?= $fv('footer_text') ?></textarea>
+    <span style="font-size:.72rem;color:var(--muted);margin-top:2px">
+        Pré-rempli depuis vos <a href="/settings.php" style="color:var(--gold)">Paramètres</a>.
+    </span>
+</div>
+
+<!-- Champs cachés totaux -->
+<input type="hidden" name="total_ht"  id="input-total-ht">
+<input type="hidden" name="total_net" id="input-total-net">
+
+<!-- Actions -->
+<div style="display:flex;gap:10px;margin-top:28px;padding-top:20px;border-top:1px solid var(--border)">
+    <button type="submit" class="btn btn-primary" style="flex:1;justify-content:center;padding:12px">
+        💾 Enregistrer la facture
+    </button>
+    <a href="/invoice/list.php" class="btn btn-secondary" style="justify-content:center;padding:12px 20px">
+        Annuler
+    </a>
+</div>
+
+</form>
+
+<script>
+let lineCount = document.querySelectorAll('#lines-body tr').length;
+const fmt = n => Number(n||0).toLocaleString('fr-FR');
+
+function updateTotals() {
+    let ht = 0;
+    document.querySelectorAll('#lines-body tr').forEach(row => {
+        const qty   = parseFloat(row.querySelector('.qty-i')?.value   || 0);
+        const price = parseFloat(row.querySelector('.price-i')?.value || 0);
+        const total = qty * price;
+        ht += total;
+        const cell = row.querySelector('.line-total');
+        if (cell) cell.textContent = fmt(total);
+    });
+
+    /* Add prestation */
+    const prestation = parseFloat(document.getElementById('prestation-amount')?.value || 0);
+    ht += prestation;
+    document.getElementById('prestation-display').textContent = fmt(prestation) + ' FCFA';
+
+    const rate = parseFloat(document.getElementById('tax-rate').value) || 0;
+    const tax  = Math.round(ht * rate / 100);
+    const net  = ht - tax;
+
+    document.getElementById('prev-ht').textContent        = fmt(ht);
+    document.getElementById('prev-tax').textContent       = fmt(tax);
+    document.getElementById('prev-net').textContent       = fmt(net) + ' FCFA';
+    document.getElementById('prev-tax-label').textContent = 'Prélèvement ' + rate + '%';
+    document.getElementById('input-total-ht').value       = Math.round(ht);
+    document.getElementById('input-total-net').value      = Math.round(net);
+}
+
+function addLine() {
+    lineCount++;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td style="text-align:center;color:var(--muted);font-size:.78rem">${lineCount}</td>
+        <td><input type="text" name="line_desc[]" placeholder="Description"></td>
+        <td><input type="number" name="line_qty[]" value="1" min="1" class="qty-i"></td>
+        <td><input type="number" name="line_price[]" value="0" min="0" class="price-i"></td>
+        <td class="line-total" style="text-align:right;padding:0 10px;font-weight:600;font-size:.83rem">0</td>
+        <td><button type="button" onclick="removeLine(this)" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:1rem;padding:4px">✕</button></td>
+    `;
+    document.getElementById('lines-body').appendChild(tr);
+    tr.querySelectorAll('input').forEach(el => el.addEventListener('input', updateTotals));
+    renumberLines();
+}
+
+function removeLine(btn) {
+    const rows = document.querySelectorAll('#lines-body tr');
+    if (rows.length <= 1) return;
+    btn.closest('tr').remove();
+    renumberLines();
+    updateTotals();
+}
+
+function renumberLines() {
+    document.querySelectorAll('#lines-body tr').forEach((tr, i) => {
+        const cell = tr.querySelector('td:first-child');
+        if (cell) cell.textContent = i + 1;
+    });
+    lineCount = document.querySelectorAll('#lines-body tr').length;
+}
+
+document.querySelectorAll('#lines-body input').forEach(el => el.addEventListener('input', updateTotals));
+document.getElementById('tax-rate').addEventListener('input', updateTotals);
+document.getElementById('prestation-amount').addEventListener('input', updateTotals);
+updateTotals();
+</script>
