@@ -50,7 +50,7 @@ $pageTitle   = 'Projet — ' . htmlspecialchars($project['title']);
 $currentPage = 'projects';
 $topbarActions = '
   <a href="/expense/create.php?invoice_id=' . $project['invoice_id'] . '" class="btn btn-secondary">➕ Ajouter dépense</a>
-  <a href="/project/index.php" class="btn btn-secondary">← Retour</a>
+  <a href="/project/index.php" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Retour</a>
 ';
 
 require __DIR__ . '/../../templates/layout.php';
@@ -104,7 +104,7 @@ require __DIR__ . '/../../templates/layout.php';
             <textarea name="notes" rows="4"><?= htmlspecialchars($project['notes'] ?? '') ?></textarea>
           </div>
         </div>
-        <button type="submit" class="btn btn-primary">💾 Enregistrer</button>
+        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Enregistrer</button>
       </form>
     </div>
   </div>

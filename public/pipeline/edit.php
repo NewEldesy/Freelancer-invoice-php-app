@@ -51,7 +51,7 @@ $d = $record;
 $pageTitle   = 'Modifier — ' . htmlspecialchars($record['title']);
 $currentPage = 'pipeline';
 $topbarActions = '
-  <a href="/pipeline/index.php" class="btn btn-secondary">← Retour pipeline</a>
+  <a href="/pipeline/index.php" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Retour pipeline</a>
 ';
 
 require __DIR__ . '/../../templates/layout.php';
@@ -123,7 +123,7 @@ require __DIR__ . '/../../templates/layout.php';
       </div>
 
       <div style="display:flex;gap:8px">
-        <button type="submit" class="btn btn-primary">💾 Enregistrer</button>
+        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Enregistrer</button>
         <button onclick="deleteOpp()" class="btn btn-danger">🗑️ Supprimer</button>
       </div>
     </form>

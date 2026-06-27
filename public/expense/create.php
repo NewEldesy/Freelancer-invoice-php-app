@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$expenseLocked) {
 
 $pageTitle     = 'Nouvelles dépenses';
 $currentPage   = 'expenses';
-$topbarActions = '<a href="/expense/index.php" class="btn btn-secondary">← Retour</a>';
+$topbarActions = '<a href="/expense/index.php" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Retour</a>';
 
 require __DIR__ . '/../../templates/layout.php';
 ?>
@@ -179,7 +179,7 @@ require __DIR__ . '/../../templates/layout.php';
       </div>
 
       <div style="display:flex;gap:8px">
-        <button type="submit" class="btn btn-primary">💾 Enregistrer tout</button>
+        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Enregistrer tout</button>
         <a href="/expense/index.php" class="btn btn-secondary">Annuler</a>
       </div>
     </form>

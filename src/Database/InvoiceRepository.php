@@ -207,7 +207,16 @@ final class InvoiceRepository
     public function nextNumber(string $date = ''): string
     {
         $day = $date ?: date('Y-m-d');
-        $prefix = str_replace('-', '', $day); // 20260624
+        $datePrefix = str_replace('-', '', $day); // 20260624
+
+        // Use custom prefix from settings if defined, e.g. "FAC" → "FAC-20260624"
+        $customPrefix = $this->db->query(
+            "SELECT value FROM company_settings WHERE key = 'invoice_prefix'"
+        )->fetchColumn();
+
+        $prefix = ($customPrefix && $customPrefix !== '')
+            ? $customPrefix . '-' . $datePrefix
+            : $datePrefix;
 
         $stmt = $this->db->prepare(
             "SELECT COUNT(*) FROM invoices WHERE number LIKE ?"
@@ -216,6 +225,50 @@ final class InvoiceRepository
         $count = (int) $stmt->fetchColumn();
 
         return $prefix . '-' . ($count + 1);
+    }
+
+    /** Factures envoyées dont la date d'échéance est dépassée */
+    public function overdue(): array
+    {
+        return $this->db->query("
+            SELECT * FROM invoices
+            WHERE status = 'envoyée'
+              AND due_at IS NOT NULL AND due_at != ''
+              AND due_at < date('now','localtime')
+            ORDER BY due_at ASC
+        ")->fetchAll();
+    }
+
+    public function overdueStats(): array
+    {
+        $row = $this->db->query("
+            SELECT
+                COUNT(*) AS count,
+                COALESCE(SUM(total_net), 0) AS total
+            FROM invoices
+            WHERE status = 'envoyée'
+              AND due_at IS NOT NULL AND due_at != ''
+              AND due_at < date('now','localtime')
+        ")->fetch();
+        return ['count' => (int)$row['count'], 'total' => (int)$row['total']];
+    }
+
+    public function topClients(int $limit = 5): array
+    {
+        $stmt = $this->db->prepare("
+            SELECT
+                client_name,
+                COUNT(*) AS nb_invoices,
+                COALESCE(SUM(total_net), 0) AS ca
+            FROM invoices
+            WHERE client_name IS NOT NULL AND client_name != ''
+              AND status IN ('envoyée','payée')
+            GROUP BY client_name
+            ORDER BY ca DESC
+            LIMIT ?
+        ");
+        $stmt->execute([$limit]);
+        return $stmt->fetchAll();
     }
 
     public function delete(int $id): void

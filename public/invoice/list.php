@@ -13,9 +13,15 @@ $repo         = new InvoiceRepository();
 $filterStatus = $_GET['status'] ?? '';
 $allowed      = ['brouillon', 'envoyée', 'payée', 'annulée'];
 
-$all = ($filterStatus !== '' && in_array($filterStatus, $allowed, true))
-    ? $repo->allByStatus($filterStatus)
-    : $repo->all();
+if ($filterStatus === 'retard') {
+    $all = $repo->overdue();
+} elseif ($filterStatus !== '' && in_array($filterStatus, $allowed, true)) {
+    $all = $repo->allByStatus($filterStatus);
+} else {
+    $all = $repo->all();
+}
+
+$overdueStats = $repo->overdueStats();
 
 $statusConfig = [
     'brouillon' => ['label' => 'Brouillon', 'class' => 'badge-draft'],
@@ -24,36 +30,44 @@ $statusConfig = [
     'annulée'   => ['label' => 'Annulée',    'class' => 'badge-cancelled'],
 ];
 
-$filters = ['' => 'Toutes', 'brouillon' => 'Brouillons', 'envoyée' => 'Envoyées', 'payée' => 'Payées', 'annulée' => 'Annulées'];
+$filters = ['' => 'Toutes', 'brouillon' => 'Brouillons', 'envoyée' => 'Envoyées', 'payée' => 'Payées', 'annulée' => 'Annulées', 'retard' => '<i class="fa-solid fa-triangle-exclamation"></i> En retard'];
 
 $pageTitle   = 'Factures';
 $currentPage = 'list';
-$topbarActions = Auth::can('write') ? '<a href="/invoice/create.php" class="btn btn-primary">➕ Nouvelle facture</a>' : '';
+$topbarActions = Auth::can('write') ? '<a href="/invoice/create.php" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Nouvelle facture</a>' : '';
 
 require __DIR__ . '/../../templates/layout.php';
 ?>
+
+<?php if ($overdueStats['count'] > 0 && $filterStatus !== 'retard'): ?>
+<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:10px 16px;margin-bottom:14px;font-size:.82rem;color:#92400e;display:flex;justify-content:space-between;align-items:center">
+  <span><i class="fa-solid fa-triangle-exclamation"></i> <strong><?= $overdueStats['count'] ?> facture<?= $overdueStats['count'] > 1 ? 's' : '' ?> en retard</strong> — <?= number_format($overdueStats['total'], 0, ',', ' ') ?> FCFA à relancer</span>
+  <a href="?status=retard" style="font-size:.78rem;font-weight:600;color:#92400e;text-decoration:underline">Voir</a>
+</div>
+<?php endif; ?>
 
 <!-- Filtres -->
 <div style="display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap">
   <?php foreach ($filters as $val => $label):
     $active = $filterStatus === $val;
+    $isRetard = $val === 'retard';
   ?>
   <a href="?status=<?= urlencode($val) ?>"
      style="display:inline-flex;align-items:center;padding:5px 13px;border-radius:20px;font-size:.78rem;font-weight:600;text-decoration:none;border:1px solid;transition:all .15s;
        <?= $active
-         ? 'background:var(--navy);color:#fff;border-color:var(--navy);'
-         : 'background:var(--white);color:var(--muted);border-color:var(--border);' ?>"
-  ><?= $label ?></a>
+         ? ($isRetard ? 'background:#92400e;color:#fff;border-color:#92400e;' : 'background:var(--navy);color:#fff;border-color:var(--navy);')
+         : ($isRetard && $overdueStats['count'] > 0 ? 'background:#fff7ed;color:#92400e;border-color:#fed7aa;' : 'background:var(--white);color:var(--muted);border-color:var(--border);') ?>"
+  ><?= $label ?><?= ($isRetard && $overdueStats['count'] > 0) ? ' (' . $overdueStats['count'] . ')' : '' ?></a>
   <?php endforeach; ?>
 </div>
 
 <div class="card">
   <?php if (empty($all)): ?>
   <div class="empty-state">
-    <div class="empty-icon">🔍</div>
+    <div class="empty-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
     <h3>Aucune facture trouvée</h3>
     <p>Essayez un autre filtre ou créez une nouvelle facture.</p>
-    <a href="/invoice/create.php" class="btn btn-primary">➕ Nouvelle facture</a>
+    <a href="/invoice/create.php" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Nouvelle facture</a>
   </div>
   <?php else: ?>
   <div class="table-wrap">
@@ -72,14 +86,21 @@ require __DIR__ . '/../../templates/layout.php';
         </tr>
       </thead>
       <tbody>
-      <?php foreach ($all as $inv): ?>
-        <?php $s = $statusConfig[$inv['status']] ?? ['label' => $inv['status'], 'class' => 'badge-draft']; ?>
-        <tr>
+      <?php foreach ($all as $inv):
+        $s = $statusConfig[$inv['status']] ?? ['label' => $inv['status'], 'class' => 'badge-draft'];
+        $rowOverdue = $inv['status'] === 'envoyée'
+            && !empty($inv['due_at'])
+            && $inv['due_at'] < date('Y-m-d');
+        ?>
+        <tr <?= $rowOverdue ? 'style="background:#fff7ed"' : '' ?>>
           <td>
             <a href="/invoice/edit.php?id=<?= $inv['id'] ?>"
                style="font-weight:600;color:var(--navy);text-decoration:none;font-size:.83rem">
               <?= htmlspecialchars($inv['number']) ?>
             </a>
+            <?php if ($rowOverdue): ?>
+            <div style="font-size:.68rem;color:#b45309;font-weight:600;margin-top:2px"><i class="fa-solid fa-triangle-exclamation"></i> En retard</div>
+            <?php endif; ?>
           </td>
           <td>
             <span style="font-size:.73rem;color:var(--muted);background:var(--bg);padding:2px 7px;border-radius:4px;border:1px solid var(--border)">
@@ -109,16 +130,16 @@ require __DIR__ . '/../../templates/layout.php';
           <td>
             <div style="display:flex;gap:4px;justify-content:flex-end">
               <?php if (Auth::can('write')): ?>
-              <a href="/invoice/edit.php?id=<?= $inv['id'] ?>" class="btn btn-secondary btn-sm btn-icon" title="Modifier">✏️</a>
+              <a href="/invoice/edit.php?id=<?= $inv['id'] ?>" class="btn btn-secondary btn-sm btn-icon" title="Modifier"><i class="fa-solid fa-pen-to-square"></i></a>
               <?php endif; ?>
-              <a href="/invoice/pdf.php?id=<?= $inv['id'] ?>" class="btn btn-secondary btn-sm btn-icon" title="PDF" target="_blank">📄</a>
+              <a href="/invoice/pdf.php?id=<?= $inv['id'] ?>" class="btn btn-secondary btn-sm btn-icon" title="PDF" target="_blank"><i class="fa-solid fa-file-pdf"></i></a>
               <?php if (Auth::can('write')): ?>
               <form method="POST" action="/invoice/duplicate.php" style="display:inline">
                 <input type="hidden" name="id" value="<?= $inv['id'] ?>">
-                <button type="submit" class="btn btn-secondary btn-sm btn-icon" title="Dupliquer">⧉</button>
+                <button type="submit" class="btn btn-secondary btn-sm btn-icon" title="Dupliquer"><i class="fa-solid fa-clone"></i></button>
               </form>
               <button onclick="deleteInvoice(<?= $inv['id'] ?>, '<?= htmlspecialchars($inv['number']) ?>')"
-                class="btn btn-danger btn-sm btn-icon" title="Supprimer">🗑️</button>
+                class="btn btn-danger btn-sm btn-icon" title="Supprimer"><i class="fa-solid fa-trash"></i></button>
               <?php endif; ?>
             </div>
           </td>

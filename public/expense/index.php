@@ -26,7 +26,7 @@ $currentPage = 'expenses';
 $addUrl      = $filterInvoice > 0
     ? '/expense/create.php?invoice_id=' . $filterInvoice
     : '/expense/create.php';
-$topbarActions = Auth::can('write') ? '<a href="' . $addUrl . '" class="btn btn-primary">➕ Nouvelle dépense</a>' : '';
+$topbarActions = Auth::can('write') ? '<a href="' . $addUrl . '" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Nouvelle dépense</a>' : '';
 
 require __DIR__ . '/../../templates/layout.php';
 ?>
@@ -34,17 +34,17 @@ require __DIR__ . '/../../templates/layout.php';
 <!-- Stats globales -->
 <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px">
   <div class="stat-card navy">
-    <div class="stat-top"><div class="stat-label">CA Engagé</div><div class="stat-badge navy">📬</div></div>
+    <div class="stat-top"><div class="stat-label">CA Engagé</div><div class="stat-badge navy"><i class="fa-solid fa-envelope-open-text"></i></div></div>
     <div class="stat-value" style="font-size:1.2rem"><?= number_format($gStats['ca_engage'], 0, ',', ' ') ?></div>
     <div class="stat-sub">FCFA · envoyées + payées</div>
   </div>
   <div class="stat-card green">
-    <div class="stat-top"><div class="stat-label">CA Encaissé</div><div class="stat-badge green">💵</div></div>
+    <div class="stat-top"><div class="stat-label">CA Encaissé</div><div class="stat-badge green"><i class="fa-solid fa-money-bill-wave"></i></div></div>
     <div class="stat-value" style="font-size:1.2rem"><?= number_format($gStats['ca_encaisse'], 0, ',', ' ') ?></div>
     <div class="stat-sub">FCFA · factures payées</div>
   </div>
   <div class="stat-card red">
-    <div class="stat-top"><div class="stat-label">Total dépenses</div><div class="stat-badge red">💸</div></div>
+    <div class="stat-top"><div class="stat-label">Total dépenses</div><div class="stat-badge red"><i class="fa-solid fa-arrow-trend-down"></i></div></div>
     <div class="stat-value" style="font-size:1.2rem"><?= number_format($gStats['total_depenses'], 0, ',', ' ') ?></div>
     <div class="stat-sub">FCFA engagés</div>
   </div>
@@ -63,7 +63,7 @@ require __DIR__ . '/../../templates/layout.php';
 <!-- Barre de recherche -->
 <div style="margin-bottom:14px">
   <div style="position:relative;max-width:420px">
-    <span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted-light);font-size:14px">🔍</span>
+    <span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted-light);font-size:14px"><i class="fa-solid fa-magnifying-glass"></i></span>
     <input type="text" id="exp-search" placeholder="Rechercher une dépense, catégorie, facture…"
            style="width:100%;padding:8px 11px 8px 34px;border:1px solid var(--border);border-radius:8px;
                   font-size:.83rem;font-family:inherit;color:var(--text);background:var(--white);outline:none;
@@ -121,10 +121,10 @@ require __DIR__ . '/../../templates/layout.php';
 <div class="card">
   <?php if (empty($expenses)): ?>
   <div class="empty-state">
-    <div class="empty-icon">💸</div>
+    <div class="empty-icon"><i class="fa-solid fa-receipt"></i></div>
     <h3>Aucune dépense</h3>
     <p>Enregistrez vos coûts pour calculer votre bénéfice net par projet.</p>
-    <a href="<?= $addUrl ?>" class="btn btn-primary">➕ Nouvelle dépense</a>
+    <a href="<?= $addUrl ?>" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Nouvelle dépense</a>
   </div>
   <?php else: ?>
   <div class="table-wrap">
@@ -169,7 +169,7 @@ require __DIR__ . '/../../templates/layout.php';
             <input type="hidden" name="id" value="<?= $exp['id'] ?>">
             <input type="hidden" name="back" value="<?= htmlspecialchars($_SERVER['REQUEST_URI']) ?>">
             <button type="submit" class="btn btn-danger btn-sm btn-icon"
-                    onclick="return confirm('Supprimer cette dépense ?')" title="Supprimer">🗑️</button>
+                    onclick="return confirm('Supprimer cette dépense ?')" title="Supprimer"><i class="fa-solid fa-trash"></i></button>
           </form>
           <?php endif; ?>
         </td>

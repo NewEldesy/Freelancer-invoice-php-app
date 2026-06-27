@@ -45,6 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'default_tax_rate'    => trim($_POST['default_tax_rate']    ?? '5'),
             'default_tax_label'   => trim($_POST['default_tax_label']   ?? 'Prelevement 5%'),
             'prestation_label'    => trim($_POST['prestation_label']    ?? 'Frais de prestation'),
+            'invoice_prefix'      => preg_replace('/[^A-Z0-9\-_]/i', '', strtoupper(trim($_POST['invoice_prefix'] ?? ''))),
         ]);
         $flashSuccess = 'Paramètres sauvegardés.';
     }
@@ -78,8 +79,8 @@ $tab = $_GET['tab'] ?? 'company';
 
 <!-- Tabs -->
 <div class="settings-tabs">
-  <a href="/settings.php?tab=company"  class="settings-tab <?= $tab === 'company'  ? 'active' : '' ?>">🏢 Entreprise</a>
-  <a href="/settings.php?tab=license"  class="settings-tab <?= $tab === 'license'  ? 'active' : '' ?>">🔑 Licence</a>
+  <a href="/settings.php?tab=company"  class="settings-tab <?= $tab === 'company'  ? 'active' : '' ?>"><i class="fa-solid fa-building"></i> Entreprise</a>
+  <a href="/settings.php?tab=license"  class="settings-tab <?= $tab === 'license'  ? 'active' : '' ?>"><i class="fa-solid fa-key"></i> Licence</a>
 </div>
 
 <?php if ($flashSuccess): ?>
@@ -99,7 +100,7 @@ $tab = $_GET['tab'] ?? 'company';
     <form method="POST" enctype="multipart/form-data">
 
       <!-- ── Logo ── -->
-      <div class="section-title" style="margin-top:0">🖼️ Logo</div>
+      <div class="section-title" style="margin-top:0"><i class="fa-solid fa-image"></i> Logo</div>
       <?php if (!empty($s['issuer_logo_path']) && file_exists($s['issuer_logo_path'])): ?>
         <div style="margin-bottom:10px">
           <img src="/uploads/<?= basename($s['issuer_logo_path']) ?>"
@@ -113,7 +114,7 @@ $tab = $_GET['tab'] ?? 'company';
       </div>
 
       <!-- ── Identité ── -->
-      <div class="section-title">🏢 Identité de l'entreprise</div>
+      <div class="section-title"><i class="fa-solid fa-building"></i> Identité de l'entreprise</div>
       <div class="form-grid-2" style="margin-bottom:14px">
         <div class="field">
           <label>Nom de l'entreprise *</label>
@@ -140,7 +141,7 @@ $tab = $_GET['tab'] ?? 'company';
       </div>
 
       <!-- ── Signature ── -->
-      <div class="section-title">✍️ Signature par défaut</div>
+      <div class="section-title"><i class="fa-solid fa-signature"></i> Signature par défaut</div>
       <div class="form-grid-2">
         <div class="field">
           <label>Titre</label>
@@ -153,7 +154,7 @@ $tab = $_GET['tab'] ?? 'company';
       </div>
 
       <!-- ── Fiscalité ── -->
-      <div class="section-title">💰 Fiscalité par défaut</div>
+      <div class="section-title"><i class="fa-solid fa-percent"></i> Fiscalité par défaut</div>
       <div class="form-grid-2">
         <div class="field">
           <label>Taux de prélèvement (%)</label>
@@ -166,7 +167,7 @@ $tab = $_GET['tab'] ?? 'company';
       </div>
 
       <!-- ── Prestation ── -->
-      <div class="section-title">🔧 Ligne de prestation</div>
+      <div class="section-title"><i class="fa-solid fa-screwdriver-wrench"></i> Ligne de prestation</div>
       <div class="field">
         <label>Libellé de la ligne prestation</label>
         <input type="text" name="prestation_label"
@@ -177,15 +178,29 @@ $tab = $_GET['tab'] ?? 'company';
         </span>
       </div>
 
+      <!-- ── Numérotation ── -->
+      <div class="section-title"><i class="fa-solid fa-hashtag"></i> Numérotation des factures</div>
+      <div class="field">
+        <label>Préfixe personnalisé (optionnel)</label>
+        <input type="text" name="invoice_prefix"
+               value="<?= htmlspecialchars($s['invoice_prefix'] ?? '') ?>"
+               placeholder="Ex: FAC, INV, 2026..."
+               maxlength="20"
+               style="text-transform:uppercase">
+        <span style="font-size:.74rem;color:var(--muted);margin-top:3px">
+          Si défini : <strong>PREFIXE-YYYYMMDD-N</strong>. Vide = format par défaut <strong>YYYYMMDD-N</strong>.
+        </span>
+      </div>
+
       <!-- ── Pied de page ── -->
-      <div class="section-title">📝 Pied de page par défaut</div>
+      <div class="section-title"><i class="fa-solid fa-align-left"></i> Pied de page par défaut</div>
       <div class="field">
         <textarea name="footer_text" rows="4" placeholder="Informations légales, coordonnées bancaires..."><?= htmlspecialchars($s['footer_text'] ?? '') ?></textarea>
       </div>
 
       <div style="padding-top:20px;border-top:1px solid var(--border);margin-top:24px">
         <button type="submit" class="btn btn-primary" style="padding:11px 28px">
-          💾 Sauvegarder les paramètres
+          <i class="fa-solid fa-floppy-disk"></i> Sauvegarder les paramètres
         </button>
       </div>
 

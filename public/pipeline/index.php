@@ -17,8 +17,8 @@ $columns = [
     'prospect'     => ['label' => 'Prospect',      'color' => '#94a3b8', 'bg' => '#f1f5f9', 'icon' => '👤'],
     'devis_envoye' => ['label' => 'Devis envoyé',  'color' => '#3b82f6', 'bg' => '#dbeafe', 'icon' => '📨'],
     'negociation'  => ['label' => 'Négociation',   'color' => '#f59e0b', 'bg' => '#fef3c7', 'icon' => '🤝'],
-    'gagne'        => ['label' => 'Gagné',          'color' => '#10b981', 'bg' => '#d1fae5', 'icon' => '✅'],
-    'perdu'        => ['label' => 'Perdu',          'color' => '#ef4444', 'bg' => '#fee2e2', 'icon' => '❌'],
+    'gagne'        => ['label' => 'Gagné',          'color' => '#10b981', 'bg' => '#d1fae5', 'icon' => '<i class="fa-solid fa-circle-check"></i>'],
+    'perdu'        => ['label' => 'Perdu',          'color' => '#ef4444', 'bg' => '#fee2e2', 'icon' => '<i class="fa-solid fa-circle-xmark"></i>'],
 ];
 
 $byStatus = [];
@@ -31,7 +31,7 @@ foreach ($all as $opp) {
 
 $pageTitle   = 'Pipeline commercial';
 $currentPage = 'pipeline';
-$topbarActions = \App\Auth\Auth::can('write') ? '<a href="/pipeline/create.php" class="btn btn-primary">➕ Nouvelle opportunité</a>' : '';
+$topbarActions = \App\Auth\Auth::can('write') ? '<a href="/pipeline/create.php" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Nouvelle opportunité</a>' : '';
 
 require __DIR__ . '/../../templates/layout.php';
 ?>
@@ -69,7 +69,7 @@ require __DIR__ . '/../../templates/layout.php';
   <div class="stat-card navy">
     <div class="stat-top">
       <div class="stat-label">Pipeline total</div>
-      <div class="stat-badge navy">📊</div>
+      <div class="stat-badge navy"><i class="fa-solid fa-chart-line"></i></div>
     </div>
     <div class="stat-value"><?= $stats['total'] ?></div>
     <div class="stat-sub">opportunités actives</div>
@@ -77,7 +77,7 @@ require __DIR__ . '/../../templates/layout.php';
   <div class="stat-card gold">
     <div class="stat-top">
       <div class="stat-label">Valeur pipeline</div>
-      <div class="stat-badge gold">💼</div>
+      <div class="stat-badge gold"><i class="fa-solid fa-briefcase"></i></div>
     </div>
     <div class="stat-value" style="font-size:1.25rem"><?= number_format($stats['pipeline_value'], 0, ',', ' ') ?></div>
     <div class="stat-sub">FCFA estimés</div>
@@ -85,7 +85,7 @@ require __DIR__ . '/../../templates/layout.php';
   <div class="stat-card green">
     <div class="stat-top">
       <div class="stat-label">Valeur gagnée</div>
-      <div class="stat-badge green">🏆</div>
+      <div class="stat-badge green"><i class="fa-solid fa-trophy"></i></div>
     </div>
     <div class="stat-value" style="font-size:1.25rem"><?= number_format($stats['won_value'], 0, ',', ' ') ?></div>
     <div class="stat-sub">FCFA convertis</div>
@@ -134,17 +134,17 @@ require __DIR__ . '/../../templates/layout.php';
         <?php endif; ?>
         <?php if (\App\Auth\Auth::can('write')): ?>
         <div class="opp-actions">
-          <a href="/pipeline/edit.php?id=<?= $opp['id'] ?>" class="btn btn-secondary btn-sm btn-icon" title="Modifier">✏️</a>
+          <a href="/pipeline/edit.php?id=<?= $opp['id'] ?>" class="btn btn-secondary btn-sm btn-icon" title="Modifier"><i class="fa-solid fa-pen-to-square"></i></a>
           <?php if ($opp['status'] === 'gagne' && !$opp['invoice_id']): ?>
           <form method="POST" action="/pipeline/convert.php" style="display:inline">
             <input type="hidden" name="id" value="<?= $opp['id'] ?>">
-            <button type="submit" class="btn btn-success btn-sm" title="Convertir en facture">🧾 Facture</button>
+            <button type="submit" class="btn btn-success btn-sm" title="Convertir en facture"><i class="fa-solid fa-file-invoice"></i> Facture</button>
           </form>
           <?php elseif ($opp['invoice_id']): ?>
-          <a href="/invoice/edit.php?id=<?= $opp['invoice_id'] ?>" class="btn btn-secondary btn-sm" title="Voir la facture">🧾 Voir</a>
+          <a href="/invoice/edit.php?id=<?= $opp['invoice_id'] ?>" class="btn btn-secondary btn-sm" title="Voir la facture"><i class="fa-solid fa-eye"></i> Voir</a>
           <?php endif; ?>
           <button onclick="deleteOpp(<?= $opp['id'] ?>, '<?= htmlspecialchars(addslashes($opp['title'])) ?>')"
-                  class="btn btn-danger btn-sm btn-icon" title="Supprimer">🗑️</button>
+                  class="btn btn-danger btn-sm btn-icon" title="Supprimer"><i class="fa-solid fa-trash"></i></button>
         </div>
         <!-- Quick status change -->
         <div style="margin-top:8px">
@@ -156,7 +156,7 @@ require __DIR__ . '/../../templates/layout.php';
         </div>
         <?php elseif ($opp['invoice_id']): ?>
         <div class="opp-actions" style="margin-top:8px">
-          <a href="/invoice/edit.php?id=<?= $opp['invoice_id'] ?>" class="btn btn-secondary btn-sm">🧾 Voir facture</a>
+          <a href="/invoice/edit.php?id=<?= $opp['invoice_id'] ?>" class="btn btn-secondary btn-sm"><i class="fa-solid fa-eye"></i> Voir facture</a>
         </div>
         <?php endif; ?>
       </div>

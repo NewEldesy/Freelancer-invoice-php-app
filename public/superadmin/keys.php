@@ -89,7 +89,7 @@ require __DIR__ . '/../../templates/layout.php';
         <label style="font-size:.73rem;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Édition</label>
         <select name="edition" class="form-control" style="padding:8px 12px;border-radius:8px;border:1px solid var(--border);font-size:.83rem;min-width:130px">
           <option value="pro">⭐ Pro</option>
-          <option value="enterprise">🏢 Entreprise</option>
+          <option value="enterprise"><i class="fa-solid fa-building"></i> Entreprise</option>
         </select>
       </div>
       <div>
@@ -141,7 +141,7 @@ require __DIR__ . '/../../templates/layout.php';
       </td>
       <td>
         <span class="badge-edition <?= $k['edition'] === 'pro' ? 'badge-pro' : 'badge-ent' ?>">
-          <?= $k['edition'] === 'pro' ? '⭐ Pro' : '🏢 Entreprise' ?>
+          <?= $k['edition'] === 'pro' ? '⭐ Pro' : '<i class="fa-solid fa-building"></i> Entreprise' ?>
         </span>
       </td>
       <td><?= $periodLabel[$k['period']] ?? $k['period'] ?></td>

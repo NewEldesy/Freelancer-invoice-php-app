@@ -4,10 +4,14 @@
  * Expects: $formAction, $invoice (array|null), $lines (array), $errors (array)
  */
 use App\Database\SettingsRepository;
+use App\Database\ClientRepository;
+use App\Database\ServiceRepository;
 
 $inv      = $invoice ?? [];
 $e        = $errors  ?? [];
 $settings = (new SettingsRepository())->all();
+$clients  = (new ClientRepository())->allForSelect();
+$catalogue = (new ServiceRepository())->all();
 
 $today     = date('Y-m-d');
 $nextMonth = date('Y-m-d', strtotime('+1 month'));
@@ -119,20 +123,45 @@ if ($logoPath && file_exists($logoPath)):
 
 <!-- ── Client ── -->
 <div class="section-title">👤 Client — Envoyé à</div>
+<?php if (!empty($clients)): ?>
+<div class="field" style="margin-bottom:12px">
+    <label>Choisir depuis la base clients</label>
+    <select id="client-picker" onchange="pickClient(this)">
+        <option value="">— Sélectionner un client (optionnel) —</option>
+        <?php foreach ($clients as $c): ?>
+        <option value="<?= $c['id'] ?>"
+            data-name="<?= htmlspecialchars($c['name']) ?>"
+            data-address="<?= htmlspecialchars($c['address'] ?? '') ?>"
+            data-contact="<?= htmlspecialchars($c['contact'] ?? '') ?>">
+            <?= htmlspecialchars($c['name']) ?>
+        </option>
+        <?php endforeach; ?>
+    </select>
+</div>
+<?php endif; ?>
 <div class="form-grid-3">
     <div class="field">
         <label>Nom / Entreprise</label>
-        <input type="text" name="client_name" value="<?= $fv('client_name') ?>">
+        <input type="text" id="f-client-name" name="client_name" value="<?= $fv('client_name') ?>">
     </div>
     <div class="field">
         <label>Adresse</label>
-        <input type="text" name="client_address" value="<?= $fv('client_address') ?>">
+        <input type="text" id="f-client-address" name="client_address" value="<?= $fv('client_address') ?>">
     </div>
     <div class="field">
         <label>Contact</label>
-        <input type="text" name="client_contact" value="<?= $fv('client_contact') ?>">
+        <input type="text" id="f-client-contact" name="client_contact" value="<?= $fv('client_contact') ?>">
     </div>
 </div>
+<script>
+function pickClient(sel) {
+    const opt = sel.options[sel.selectedIndex];
+    if (!opt.value) return;
+    document.getElementById('f-client-name').value    = opt.dataset.name    || '';
+    document.getElementById('f-client-address').value = opt.dataset.address || '';
+    document.getElementById('f-client-contact').value = opt.dataset.contact || '';
+}
+</script>
 
 <!-- ── Lignes ── -->
 <div class="section-title">📦 Articles</div>
@@ -163,10 +192,71 @@ if ($logoPath && file_exists($logoPath)):
     <?php endforeach; ?>
     </tbody>
 </table>
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
 <button type="button" onclick="addLine()"
     style="background:none;border:1px dashed var(--gold);color:var(--gold);border-radius:6px;padding:6px 14px;cursor:pointer;font-size:.82rem;font-weight:600">
     ＋ Ajouter une ligne
 </button>
+<?php if (!empty($catalogue)): ?>
+<button type="button" onclick="document.getElementById('catalogue-modal').style.display='flex'"
+    style="background:none;border:1px dashed var(--navy);color:var(--navy);border-radius:6px;padding:6px 14px;cursor:pointer;font-size:.82rem;font-weight:600">
+    📦 Depuis le catalogue
+</button>
+<?php endif; ?>
+</div>
+
+<?php if (!empty($catalogue)): ?>
+<!-- Catalogue modal -->
+<div id="catalogue-modal"
+     style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center"
+     onclick="if(event.target===this)this.style.display='none'">
+  <div style="background:#fff;border-radius:12px;width:560px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+    <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <strong style="font-size:.95rem">📦 Catalogue de prestations</strong>
+      <button type="button" onclick="document.getElementById('catalogue-modal').style.display='none'"
+              style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--muted)">×</button>
+    </div>
+    <div style="overflow-y:auto;padding:12px 16px;flex:1">
+      <input type="text" id="cat-search" placeholder="Rechercher…"
+             oninput="filterCat(this.value)"
+             style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:.84rem;margin-bottom:12px;box-sizing:border-box">
+      <table style="width:100%;border-collapse:collapse;font-size:.83rem" id="cat-table">
+        <?php foreach ($catalogue as $svc): ?>
+        <tr class="cat-row" style="border-bottom:1px solid var(--border);cursor:pointer"
+            onclick="addFromCatalogue(<?= $svc['id'] ?>, <?= json_encode(htmlspecialchars($svc['description'])) ?>, <?= (int)$svc['unit_price'] ?>)"
+            onmouseenter="this.style.background='var(--bg)'" onmouseleave="this.style.background=''">
+          <td style="padding:10px 8px">
+            <div style="font-weight:600;color:var(--navy)"><?= htmlspecialchars($svc['name']) ?></div>
+            <div style="color:var(--muted);font-size:.77rem"><?= htmlspecialchars($svc['description']) ?></div>
+          </td>
+          <td style="padding:10px 8px;text-align:right;white-space:nowrap;font-weight:700">
+            <?= number_format((int)$svc['unit_price'], 0, ',', ' ') ?> FCFA
+          </td>
+        </tr>
+        <?php endforeach; ?>
+      </table>
+    </div>
+  </div>
+</div>
+<script>
+function addFromCatalogue(id, description, unitPrice) {
+    addLine();
+    const rows = document.querySelectorAll('#lines-body tr');
+    const last = rows[rows.length - 1];
+    last.querySelector('input[name="line_desc[]"]').value  = description;
+    last.querySelector('input[name="line_qty[]"]').value   = 1;
+    last.querySelector('input[name="line_price[]"]').value = unitPrice;
+    updateTotals();
+    document.getElementById('catalogue-modal').style.display = 'none';
+}
+function filterCat(q) {
+    q = q.toLowerCase();
+    document.querySelectorAll('.cat-row').forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+}
+</script>
+<?php endif; ?>
 
 <!-- ── Ligne Prestation (toujours en dernier) ── -->
 <div class="section-title" style="margin-top:22px">🔧 Frais de prestation

@@ -8,6 +8,7 @@ use App\Auth\Auth;
 Auth::requireManager();
 
 use App\Database\InvoiceRepository;
+use App\Database\PaymentRepository;
 use App\Services\RequestValidator;
 
 $repo = new InvoiceRepository();
@@ -45,6 +46,14 @@ if (isset($_GET['duplicated'])) {
 if (isset($_GET['from_pipeline'])) {
     $flashSuccess = 'Opportunité convertie en facture ' . htmlspecialchars($record['number']) . ' · complétez les lignes puis enregistrez.';
 }
+
+$payRepo   = new PaymentRepository();
+$payments  = $payRepo->allForInvoice($id);
+$totalPaid = $payRepo->totalForInvoice($id);
+
+if (isset($_GET['pay_added']))   $flashSuccess = 'Paiement enregistré.';
+if (isset($_GET['pay_deleted'])) $flashSuccess = 'Paiement supprimé.';
+if (isset($_GET['pay_error']))   $errors[]     = 'Montant invalide.';
 
 $lines = $repo->linesOf($id);
 if (empty($lines)) {
@@ -117,22 +126,135 @@ $formAction  = '/invoice/edit.php';
 $topbarActions = '
     <form method="POST" action="/invoice/duplicate.php" style="display:inline">
         <input type="hidden" name="id" value="' . $id . '">
-        <button type="submit" class="btn btn-secondary" title="Créer une nouvelle facture basée sur celle-ci">⧉ Dupliquer</button>
+        <button type="submit" class="btn btn-secondary" title="Créer une nouvelle facture basée sur celle-ci"><i class="fa-solid fa-clone"></i> Dupliquer</button>
     </form>
-    <a href="/invoice/pdf.php?id=' . $id . '" class="btn btn-secondary" target="_blank">📄 PDF</a>
-    <a href="/invoice/list.php" class="btn btn-secondary">← Retour</a>
+    <a href="/invoice/pdf.php?id=' . $id . '" class="btn btn-secondary" target="_blank"><i class="fa-solid fa-file-pdf"></i> PDF</a>
+    <a href="/invoice/list.php" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Retour</a>
 ';
 
 require __DIR__ . '/../../templates/layout.php';
 ?>
 
+<?php if ($flashSuccess): ?>
+<div class="alert" style="background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;border-radius:8px;padding:10px 14px;font-size:.83rem;margin-bottom:14px">
+  ✅ <?= htmlspecialchars($flashSuccess) ?>
+</div>
+<?php elseif (!empty($errors)): ?>
+<div class="alert alert-error" style="margin-bottom:14px">⚠ <?= implode('<br>⚠ ', array_map('htmlspecialchars', $errors)) ?></div>
+<?php endif; ?>
+
 <div class="card">
     <div class="card-body">
-        <?php if (!empty($errors)): ?>
-            <div class="alert alert-error">⚠ <?= implode('<br>⚠ ', array_map('htmlspecialchars', $errors)) ?></div>
-        <?php endif; ?>
         <?php require __DIR__ . '/../../templates/invoice_form.php'; ?>
     </div>
+</div>
+
+<?php
+$totalNet  = (int) $record['total_net'];
+$solde     = $totalNet - $totalPaid;
+$isPaid    = $record['status'] === 'payée';
+$isSent    = $record['status'] === 'envoyée';
+$isOverdue = $isSent && !empty($record['due_at']) && $record['due_at'] < date('Y-m-d');
+?>
+<!-- ── Section paiements ── -->
+<div class="card" style="margin-top:20px">
+  <div class="card-header" style="display:flex;justify-content:space-between;align-items:center">
+    <h2>💰 Paiements reçus</h2>
+    <?php if ($totalNet > 0): ?>
+    <div style="font-size:.82rem;color:var(--muted)">
+      Total facture : <strong><?= number_format($totalNet, 0, ',', ' ') ?> FCFA</strong>
+      · Encaissé : <strong style="color:var(--green)"><?= number_format($totalPaid, 0, ',', ' ') ?> FCFA</strong>
+      · Solde : <strong style="color:<?= $solde > 0 ? 'var(--red)' : 'var(--green)' ?>"><?= number_format($solde, 0, ',', ' ') ?> FCFA</strong>
+    </div>
+    <?php endif; ?>
+  </div>
+
+  <?php if ($isOverdue): ?>
+  <div style="padding:10px 20px;background:#fff7ed;border-bottom:1px solid #fed7aa">
+    <span style="font-size:.82rem;color:#92400e"><i class="fa-solid fa-triangle-exclamation"></i> <strong>Facture en retard</strong> — échéance dépassée depuis le <?= date('d/m/Y', strtotime($record['due_at'])) ?></span>
+  </div>
+  <?php endif; ?>
+
+  <!-- Barre de progression -->
+  <?php if ($totalNet > 0 && $totalPaid > 0): ?>
+  <div style="padding:12px 20px 0">
+    <?php $pct = min(100, round($totalPaid / $totalNet * 100)); ?>
+    <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin-bottom:5px">
+      <span>Progression du paiement</span><span><?= $pct ?>%</span>
+    </div>
+    <div style="height:6px;background:var(--border-soft);border-radius:99px;overflow:hidden;margin-bottom:14px">
+      <div style="height:100%;width:<?= $pct ?>%;background:<?= $pct >= 100 ? 'var(--green)' : '#f59e0b' ?>;border-radius:99px;transition:width .6s"></div>
+    </div>
+  </div>
+  <?php endif; ?>
+
+  <?php if (!empty($payments)): ?>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th style="text-align:right">Montant</th>
+          <th>Note</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+      <?php foreach ($payments as $p): ?>
+      <tr>
+        <td style="font-size:.82rem"><?= date('d/m/Y', strtotime($p['paid_at'])) ?></td>
+        <td style="text-align:right;font-weight:600"><?= number_format((int)$p['amount'], 0, ',', ' ') ?> <span style="font-size:.7rem;color:var(--muted);font-weight:400">FCFA</span></td>
+        <td style="font-size:.8rem;color:var(--muted)"><?= htmlspecialchars($p['note'] ?? '—') ?></td>
+        <td>
+          <?php if (Auth::can('write')): ?>
+          <form method="POST" action="/invoice/payment/delete.php" style="display:inline"
+                onsubmit="return confirm('Supprimer ce paiement ?')">
+            <input type="hidden" name="id" value="<?= $p['id'] ?>">
+            <input type="hidden" name="invoice_id" value="<?= $id ?>">
+            <button type="submit" class="btn btn-danger btn-sm btn-icon">🗑️</button>
+          </form>
+          <?php endif; ?>
+        </td>
+      </tr>
+      <?php endforeach; ?>
+      </tbody>
+    </table>
+  </div>
+  <?php elseif (!$isPaid): ?>
+  <div style="padding:20px;text-align:center;color:var(--muted);font-size:.82rem">Aucun paiement enregistré.</div>
+  <?php endif; ?>
+
+  <!-- Formulaire d'ajout -->
+  <?php if (Auth::can('write') && !$isPaid): ?>
+  <div style="padding:16px 20px;border-top:1px solid var(--border);background:var(--bg)">
+    <div style="font-size:.82rem;font-weight:600;margin-bottom:10px;color:var(--navy)">Enregistrer un paiement</div>
+    <form method="POST" action="/invoice/payment/add.php" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+      <input type="hidden" name="invoice_id" value="<?= $id ?>">
+      <div class="field" style="margin:0;flex:0 0 150px">
+        <label style="font-size:.75rem">Montant (FCFA) *</label>
+        <input type="number" name="amount" min="1"
+               value="<?= $solde > 0 ? $solde : '' ?>"
+               placeholder="<?= number_format($solde > 0 ? $solde : $totalNet, 0) ?>"
+               style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:.83rem" required>
+      </div>
+      <div class="field" style="margin:0;flex:0 0 145px">
+        <label style="font-size:.75rem">Date</label>
+        <input type="date" name="paid_at" value="<?= date('Y-m-d') ?>"
+               style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:.83rem">
+      </div>
+      <div class="field" style="margin:0;flex:1;min-width:160px">
+        <label style="font-size:.75rem">Note (optionnel)</label>
+        <input type="text" name="note" placeholder="Virement, chèque…"
+               style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:.83rem">
+      </div>
+      <button type="submit" class="btn btn-primary" style="padding:8px 16px;white-space:nowrap"><i class="fa-solid fa-check"></i> Enregistrer</button>
+    </form>
+  </div>
+  <?php elseif ($isPaid): ?>
+  <div style="padding:14px 20px;background:#f0fdf4;border-top:1px solid #bbf7d0;font-size:.82rem;color:#166534;text-align:center">
+    ✅ Facture entièrement payée
+  </div>
+  <?php endif; ?>
 </div>
 
 <?php require __DIR__ . '/../../templates/layout_end.php'; ?>

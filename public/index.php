@@ -17,23 +17,30 @@ $oppRepo   = new OpportunityRepository();
 $projRepo  = new ProjectRepository();
 $expRepo   = new ExpenseRepository();
 
-$stats      = $repo->stats();
-$oppStats   = $oppRepo->stats();
-$projStats  = $projRepo->stats();
-$finStats   = $expRepo->globalStats();
-$recent     = array_slice($repo->all(), 0, 6);
+$stats        = $repo->stats();
+$overdueStats = $repo->overdueStats();
+$topClients   = $repo->topClients(5);
+$oppStats     = $oppRepo->stats();
+$projStats    = $projRepo->stats();
+$finStats     = $expRepo->globalStats();
+$recent       = array_slice($repo->all(), 0, 6);
 
-/* Build chart data — last 7 days */
-$chartLabels = [];
-$chartData   = [];
-for ($i = 6; $i >= 0; $i--) {
-    $day   = date('Y-m-d', strtotime("-{$i} days"));
-    $label = date('d/m', strtotime($day));
-    $prefix = str_replace('-', '', $day);
-
-    $stmt = $repo->countByPrefix($prefix);
-    $chartLabels[] = $label;
-    $chartData[]   = $stmt;
+/* Build chart data — CA mensuel Jan→mois courant (année en cours) */
+$chartLabels   = [];
+$chartEngage   = [];
+$chartEncaisse = [];
+$currentYear   = (int) date('Y');
+$currentMonth  = (int) date('n');
+$monthlyData   = $repo->statsByMonth($currentYear);
+$monthlyMap    = [];
+foreach ($monthlyData as $m) {
+    $monthlyMap[(int)$m['month']] = $m;
+}
+for ($m = 1; $m <= $currentMonth; $m++) {
+    $row             = $monthlyMap[$m] ?? ['ca_engage' => 0, 'ca_encaisse' => 0];
+    $chartLabels[]   = date('M', mktime(0, 0, 0, $m, 1, $currentYear));
+    $chartEngage[]   = (int) $row['ca_engage'];
+    $chartEncaisse[] = (int) $row['ca_encaisse'];
 }
 
 $statusLabels = [
@@ -45,7 +52,7 @@ $statusLabels = [
 
 $pageTitle   = 'Tableau de bord';
 $currentPage = 'dashboard';
-$topbarActions = '<a href="/invoice/create.php" class="btn btn-primary">➕ Nouvelle facture</a>';
+$topbarActions = '<a href="/invoice/create.php" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Nouvelle facture</a>';
 
 require __DIR__ . '/../templates/layout.php';
 ?>
@@ -56,7 +63,7 @@ require __DIR__ . '/../templates/layout.php';
   <div class="stat-card navy">
     <div class="stat-top">
       <div class="stat-label">Total factures</div>
-      <div class="stat-badge navy">📄</div>
+      <div class="stat-badge navy"><i class="fa-solid fa-file-lines"></i></div>
     </div>
     <div class="stat-value"><?= $stats['total'] ?></div>
     <div class="stat-sub"><?= $stats['brouillon'] ?> brouillon<?= $stats['brouillon'] > 1 ? 's' : '' ?> · <?= $stats['envoyee'] ?> envoyée<?= $stats['envoyee'] > 1 ? 's' : '' ?></div>
@@ -64,7 +71,7 @@ require __DIR__ . '/../templates/layout.php';
   <div class="stat-card green">
     <div class="stat-top">
       <div class="stat-label">Payées</div>
-      <div class="stat-badge green">✅</div>
+      <div class="stat-badge green"><i class="fa-solid fa-circle-check"></i></div>
     </div>
     <div class="stat-value"><?= $stats['payee'] ?></div>
     <div class="stat-sub"><?= $stats['envoyee'] ?> en attente de règlement</div>
@@ -72,12 +79,23 @@ require __DIR__ . '/../templates/layout.php';
   <div class="stat-card red">
     <div class="stat-top">
       <div class="stat-label">Annulées</div>
-      <div class="stat-badge red">❌</div>
+      <div class="stat-badge red"><i class="fa-solid fa-circle-xmark"></i></div>
     </div>
     <div class="stat-value"><?= $stats['annulee'] ?></div>
     <div class="stat-sub">Exclues du chiffre d'affaires</div>
   </div>
 </div>
+
+<?php if ($overdueStats['count'] > 0): ?>
+<!-- Alerte retard -->
+<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:12px 18px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center">
+  <div>
+    <span style="font-size:.85rem;font-weight:700;color:#92400e"><i class="fa-solid fa-triangle-exclamation"></i> <?= $overdueStats['count'] ?> facture<?= $overdueStats['count'] > 1 ? 's' : '' ?> en retard</span>
+    <span style="font-size:.78rem;color:#b45309;margin-left:8px"><?= number_format($overdueStats['total'], 0, ',', ' ') ?> FCFA à relancer</span>
+  </div>
+  <a href="/invoice/list.php?status=retard" class="btn btn-secondary btn-sm" style="border-color:#fed7aa;color:#92400e;background:#fff7ed">Voir →</a>
+</div>
+<?php endif; ?>
 
 <!-- Ligne 2 : CA -->
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px">
@@ -88,7 +106,7 @@ require __DIR__ . '/../templates/layout.php';
         <div class="stat-label">CA Engagé</div>
         <div style="font-size:.7rem;color:var(--muted-light);margin-top:2px">Envoyées + Payées</div>
       </div>
-      <div class="stat-badge gold">📬</div>
+      <div class="stat-badge gold"><i class="fa-solid fa-envelope-open-text"></i></div>
     </div>
     <div class="stat-value" style="font-size:1.5rem"><?= number_format($stats['ca_engage'], 0, ',', ' ') ?></div>
     <div class="stat-sub">FCFA · ce qui vous est dû</div>
@@ -112,7 +130,7 @@ require __DIR__ . '/../templates/layout.php';
         <div class="stat-label">CA Encaissé</div>
         <div style="font-size:.7rem;color:var(--muted-light);margin-top:2px">Payées uniquement</div>
       </div>
-      <div class="stat-badge green">💵</div>
+      <div class="stat-badge green"><i class="fa-solid fa-money-bill-wave"></i></div>
     </div>
     <div class="stat-value" style="font-size:1.5rem"><?= number_format($stats['ca_encaisse'], 0, ',', ' ') ?></div>
     <div class="stat-sub">FCFA · effectivement reçu</div>
@@ -139,7 +157,7 @@ require __DIR__ . '/../templates/layout.php';
         <div class="stat-label">Pipeline</div>
         <div style="font-size:.7rem;color:var(--muted-light);margin-top:2px"><?= $oppStats['total'] ?> opportunités</div>
       </div>
-      <div class="stat-badge navy">🎯</div>
+      <div class="stat-badge navy"><i class="fa-solid fa-bullseye"></i></div>
     </div>
     <div class="stat-value" style="font-size:1.3rem"><?= number_format($oppStats['pipeline_value'], 0, ',', ' ') ?></div>
     <div class="stat-sub">FCFA potentiels · <?= $oppStats['conversion_rate'] ?>% conversion</div>
@@ -153,7 +171,7 @@ require __DIR__ . '/../templates/layout.php';
         <div class="stat-label">Exécution</div>
         <div style="font-size:.7rem;color:var(--muted-light);margin-top:2px"><?= $projStats['total'] ?> projets</div>
       </div>
-      <div class="stat-badge gold">🏗️</div>
+      <div class="stat-badge gold"><i class="fa-solid fa-helmet-safety"></i></div>
     </div>
     <div class="stat-value"><?= $projStats['en_cours'] ?></div>
     <div class="stat-sub">en cours · <?= $projStats['livre'] ?> livré<?= $projStats['livre'] > 1 ? 's' : '' ?> · <?= $projStats['valide'] ?> validé<?= $projStats['valide'] > 1 ? 's' : '' ?></div>
@@ -192,7 +210,7 @@ require __DIR__ . '/../templates/layout.php';
       <div class="empty-icon">🧾</div>
       <h3>Aucune facture</h3>
       <p>Créez votre première facture pour commencer.</p>
-      <a href="/invoice/create.php" class="btn btn-primary">➕ Nouvelle facture</a>
+      <a href="/invoice/create.php" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Nouvelle facture</a>
     </div>
     <?php else: ?>
     <div class="table-wrap">
@@ -245,29 +263,19 @@ require __DIR__ . '/../templates/layout.php';
   <!-- Colonne droite -->
   <div style="display:flex;flex-direction:column;gap:14px">
 
-    <!-- Mini graphique -->
-    <div class="card">
-      <div class="card-header">
-        <h2>Activité · 7 derniers jours</h2>
-      </div>
-      <div class="card-body" style="padding:16px">
-        <canvas id="activityChart" height="140"></canvas>
-      </div>
-    </div>
-
     <!-- Répartition statuts -->
     <div class="card">
       <div class="card-header"><h2>Répartition</h2></div>
       <div class="card-body" style="padding:14px 16px">
         <?php
         $statuses = [
-          'Brouillons' => [$stats['brouillon'], '#94a3b8', 'badge-draft'],
-          'Envoyées'   => [$stats['envoyee'],   '#3b82f6', 'badge-sent'],
-          'Payées'     => [$stats['payee'],      '#10b981', 'badge-paid'],
-          'Annulées'   => [$stats['annulee'],    '#ef4444', 'badge-cancelled'],
+          'Brouillons' => [$stats['brouillon'], '#94a3b8'],
+          'Envoyées'   => [$stats['envoyee'],   '#3b82f6'],
+          'Payées'     => [$stats['payee'],      '#10b981'],
+          'Annulées'   => [$stats['annulee'],    '#ef4444'],
         ];
         $total = max($stats['total'], 1);
-        foreach ($statuses as $label => [$count, $color, $cls]):
+        foreach ($statuses as $label => [$count, $color]):
           $pct = round($count / $total * 100);
         ?>
         <div style="margin-bottom:10px">
@@ -283,32 +291,81 @@ require __DIR__ . '/../templates/layout.php';
       </div>
     </div>
 
+    <!-- Top clients -->
+    <?php if (!empty($topClients)): ?>
+    <div class="card">
+      <div class="card-header"><h2>Top clients</h2></div>
+      <div class="card-body" style="padding:14px 16px">
+        <?php
+        $maxCa = max(max(array_column($topClients, 'ca')), 1);
+        foreach ($topClients as $c):
+          $pct = round($c['ca'] / $maxCa * 100);
+        ?>
+        <div style="margin-bottom:11px">
+          <div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:4px">
+            <span style="font-weight:600;color:var(--navy);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60%"><?= htmlspecialchars($c['client_name']) ?></span>
+            <span style="color:var(--muted);font-size:.73rem"><?= number_format((int)$c['ca'], 0, ',', ' ') ?> FCFA</span>
+          </div>
+          <div style="height:4px;background:var(--border-soft);border-radius:99px;overflow:hidden">
+            <div style="height:100%;width:<?= $pct ?>%;background:var(--gold);border-radius:99px"></div>
+          </div>
+        </div>
+        <?php endforeach; ?>
+      </div>
+    </div>
+    <?php endif; ?>
+
   </div><!-- /col droite -->
+</div>
+
+<!-- Graphique CA mensuel 12 mois -->
+<div class="card" style="margin-top:16px">
+  <div class="card-header"><h2>CA mensuel — <?= date('Y') ?></h2></div>
+  <div class="card-body" style="padding:16px">
+    <canvas id="monthlyChart" height="90"></canvas>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <script>
-const ctx = document.getElementById('activityChart').getContext('2d');
-new Chart(ctx, {
+new Chart(document.getElementById('monthlyChart').getContext('2d'), {
   type: 'bar',
   data: {
     labels: <?= json_encode($chartLabels) ?>,
-    datasets: [{
-      data: <?= json_encode($chartData) ?>,
-      backgroundColor: 'rgba(245,158,11,.15)',
-      borderColor: '#f59e0b',
-      borderWidth: 2,
-      borderRadius: 5,
-      hoverBackgroundColor: 'rgba(245,158,11,.3)',
-    }]
+    datasets: [
+      {
+        label: 'CA Engagé',
+        data: <?= json_encode($chartEngage) ?>,
+        backgroundColor: 'rgba(59,130,246,.18)',
+        borderColor: '#3b82f6',
+        borderWidth: 2,
+        borderRadius: 4,
+      },
+      {
+        label: 'CA Encaissé',
+        data: <?= json_encode($chartEncaisse) ?>,
+        backgroundColor: 'rgba(16,185,129,.22)',
+        borderColor: '#10b981',
+        borderWidth: 2,
+        borderRadius: 4,
+      }
+    ]
   },
   options: {
     responsive: true,
-    plugins: { legend: { display: false } },
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { position: 'top', labels: { font: { size: 11 }, boxWidth: 12 } },
+      tooltip: {
+        callbacks: {
+          label: ctx => ctx.dataset.label + ' : ' + ctx.parsed.y.toLocaleString('fr-FR') + ' FCFA'
+        }
+      }
+    },
     scales: {
       y: {
         beginAtZero: true,
-        ticks: { stepSize: 1, font: { size: 10 }, color: '#94a3b8' },
+        ticks: { font: { size: 10 }, color: '#94a3b8', callback: v => (v/1000).toLocaleString('fr-FR') + 'k' },
         grid: { color: '#f1f5f9' },
         border: { display: false }
       },

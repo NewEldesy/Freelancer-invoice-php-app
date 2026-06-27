@@ -167,10 +167,51 @@ final class Database
             );
         ");
 
+        /* ── Base clients ── */
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS clients (
+                id         INTEGER PRIMARY KEY AUTOINCREMENT,
+                name       TEXT    NOT NULL,
+                address    TEXT,
+                contact    TEXT,
+                email      TEXT,
+                phone      TEXT,
+                notes      TEXT,
+                created_at TEXT    NOT NULL DEFAULT (datetime('now','localtime')),
+                updated_at TEXT    NOT NULL DEFAULT (datetime('now','localtime'))
+            );
+        ");
+
+        /* ── Catalogue de prestations ── */
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS services (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                name        TEXT    NOT NULL,
+                description TEXT    NOT NULL,
+                unit_price  INTEGER NOT NULL DEFAULT 0,
+                category    TEXT    NOT NULL DEFAULT 'general',
+                created_at  TEXT    NOT NULL DEFAULT (datetime('now','localtime'))
+            );
+        ");
+
+        /* ── Paiements partiels ── */
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS payments (
+                id         INTEGER PRIMARY KEY AUTOINCREMENT,
+                invoice_id INTEGER NOT NULL REFERENCES invoices(id) ON DELETE CASCADE,
+                amount     INTEGER NOT NULL DEFAULT 0,
+                paid_at    TEXT    NOT NULL DEFAULT (date('now','localtime')),
+                note       TEXT,
+                created_at TEXT    NOT NULL DEFAULT (datetime('now','localtime'))
+            );
+        ");
+
         /* Safe column additions for existing databases */
         foreach ([
             "ALTER TABLE invoices ADD COLUMN prestation_label  TEXT    NOT NULL DEFAULT 'Frais de prestation'",
             "ALTER TABLE invoices ADD COLUMN prestation_amount INTEGER NOT NULL DEFAULT 0",
+            "ALTER TABLE invoices ADD COLUMN client_id         INTEGER",
+            "ALTER TABLE opportunities ADD COLUMN client_id    INTEGER",
         ] as $sql) {
             try { $pdo->exec($sql); } catch (\Exception) { /* column already exists */ }
         }

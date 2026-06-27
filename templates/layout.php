@@ -16,6 +16,7 @@ $_licenseIsFree  = \App\Services\LicenseService::isFree();
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><?= htmlspecialchars($pageTitle ?? 'Factures') ?> — Freelancer-invoice</title>
 <meta name="csrf-token" content="<?= htmlspecialchars(\App\Auth\Auth::csrfToken()) ?>">
+<link rel="stylesheet" href="/assets/fa/css/all.min.css">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
@@ -586,7 +587,7 @@ table.data-table tbody tr:hover td { background: #f8fafc; }
 <!-- ══ Sidebar ══ -->
 <aside class="sidebar">
   <a href="/index.php" class="sidebar-brand">
-    <div class="brand-icon">🧾</div>
+    <div class="brand-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
     <div class="brand-text">
       <div class="name">Freelancer-invoice</div>
       <div class="sub">Gestion des factures</div>
@@ -598,60 +599,66 @@ table.data-table tbody tr:hover td { background: #f8fafc; }
     <?php if ($_role !== 'admin'): ?>
     <div class="nav-section">Principal</div>
     <a href="/index.php" class="<?= ($currentPage ?? '') === 'dashboard' ? 'active' : '' ?>">
-      <span class="nav-icon">📊</span> Tableau de bord
+      <span class="nav-icon"><i class="fa-solid fa-chart-pie"></i></span> Tableau de bord
     </a>
     <a href="/invoice/list.php" class="<?= ($currentPage ?? '') === 'list' ? 'active' : '' ?>">
-      <span class="nav-icon">📋</span> Toutes les factures
+      <span class="nav-icon"><i class="fa-solid fa-file-invoice"></i></span> Toutes les factures
     </a>
 
     <div class="nav-section">Acquisition</div>
+    <a href="/client/index.php" class="<?= ($currentPage ?? '') === 'clients' ? 'active' : '' ?>">
+      <span class="nav-icon"><i class="fa-solid fa-users"></i></span> Clients
+    </a>
     <a href="/pipeline/index.php" class="<?= ($currentPage ?? '') === 'pipeline' ? 'active' : '' ?>">
-      <span class="nav-icon">🎯</span> Pipeline commercial
+      <span class="nav-icon"><i class="fa-solid fa-filter"></i></span> Pipeline commercial
     </a>
     <?php if ($_role === 'gestionnaire'): ?>
     <a href="/invoice/create.php" class="<?= ($currentPage ?? '') === 'create' ? 'active' : '' ?>">
-      <span class="nav-icon">➕</span> Nouvelle facture
+      <span class="nav-icon"><i class="fa-solid fa-plus"></i></span> Nouvelle facture
     </a>
     <?php endif; ?>
 
     <div class="nav-section">Exécution</div>
     <a href="/project/index.php" class="<?= ($currentPage ?? '') === 'projects' ? 'active' : '' ?>">
-      <span class="nav-icon">🏗️</span> Projets
+      <span class="nav-icon"><i class="fa-solid fa-diagram-project"></i></span> Projets
     </a>
 
     <div class="nav-section">Bénéfice</div>
     <a href="/expense/index.php" class="<?= ($currentPage ?? '') === 'expenses' ? 'active' : '' ?>">
-      <span class="nav-icon">💸</span> Dépenses
+      <span class="nav-icon"><i class="fa-solid fa-arrow-trend-down"></i></span> Dépenses
     </a>
     <a href="/accounting/index.php" class="<?= ($currentPage ?? '') === 'accounting' ? 'active' : '' ?>">
-      <span class="nav-icon">📒</span> Comptabilité
+      <span class="nav-icon"><i class="fa-solid fa-book-open"></i></span> Comptabilité
     </a>
 
     <?php if ($_role === 'gestionnaire'): ?>
     <div class="nav-section">Configuration</div>
+    <a href="/services/index.php" class="<?= ($currentPage ?? '') === 'services' ? 'active' : '' ?>">
+      <span class="nav-icon"><i class="fa-solid fa-box-open"></i></span> Catalogue prestations
+    </a>
     <a href="/settings.php" class="<?= ($currentPage ?? '') === 'settings' ? 'active' : '' ?>">
-      <span class="nav-icon">⚙️</span> Paramètres
+      <span class="nav-icon"><i class="fa-solid fa-gear"></i></span> Paramètres
     </a>
     <?php endif; ?>
 
     <?php else: ?>
     <div class="nav-section">Principal</div>
     <a href="/index.php" class="<?= ($currentPage ?? '') === 'dashboard' ? 'active' : '' ?>">
-      <span class="nav-icon">📊</span> Tableau de bord
+      <span class="nav-icon"><i class="fa-solid fa-chart-pie"></i></span> Tableau de bord
     </a>
     <?php endif; ?>
 
     <?php if ($_role === 'superadmin'): ?>
     <div class="nav-section">ISSU DEV</div>
     <a href="/superadmin/keys.php" class="<?= ($currentPage ?? '') === 'superadmin_keys' ? 'active' : '' ?>">
-      <span class="nav-icon">🔑</span> Clés de licence
+      <span class="nav-icon"><i class="fa-solid fa-key"></i></span> Clés de licence
     </a>
     <?php endif; ?>
 
     <?php if ($_role === 'admin'): ?>
     <div class="nav-section">Administration</div>
     <a href="/admin/users.php" class="<?= ($currentPage ?? '') === 'admin_users' ? 'active' : '' ?>">
-      <span class="nav-icon">👥</span> Utilisateurs
+      <span class="nav-icon"><i class="fa-solid fa-users-gear"></i></span> Utilisateurs
     </a>
     <?php endif; ?>
   </nav>
@@ -667,7 +674,7 @@ table.data-table tbody tr:hover td { background: #f8fafc; }
     ?>
     <!-- License badge -->
     <?php
-      $licBadgeText  = match($_licenseEdition) { 'pro' => '⭐ Pro', 'enterprise' => '🏢 Entreprise', default => '🔓 Gratuit' };
+      $licBadgeText  = match($_licenseEdition) { 'pro' => '<i class="fa-solid fa-star"></i> Pro', 'enterprise' => '<i class="fa-solid fa-building"></i> Entreprise', default => '<i class="fa-solid fa-lock-open"></i> Gratuit' };
       $licBadgeColor = match($_licenseEdition) { 'pro' => '#f59e0b', 'enterprise' => '#8b5cf6', default => '#64748b' };
     ?>
     <div style="margin-bottom:8px;padding:5px 10px;background:rgba(255,255,255,.04);border-radius:7px;border:1px solid rgba(255,255,255,.07);display:flex;align-items:center;justify-content:space-between">
@@ -685,7 +692,7 @@ table.data-table tbody tr:hover td { background: #f8fafc; }
          style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:7px;background:rgba(255,255,255,.06);color:#64748b;text-decoration:none;font-size:13px;transition:all .15s;flex-shrink:0"
          onmouseover="this.style.background='rgba(239,68,68,.15)';this.style.color='#f87171'"
          onmouseout="this.style.background='rgba(255,255,255,.06)';this.style.color='#64748b'"
-         title="Se déconnecter">🚪</a>
+         title="Se déconnecter"><i class="fa-solid fa-right-from-bracket"></i></a>
     </div>
     <?php else: ?>
     © ISSU DEV

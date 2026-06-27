@@ -83,7 +83,7 @@ Vanilla PHP 8.1+ with no framework. Entry points are individual PHP files under 
 
 `Database` — PDO singleton, SQLite, auto-migrates schema on first connection.
 
-Tables: `invoices`, `invoice_lines`, `opportunities`, `projects`, `expenses`, `users`, `license`, `license_keys`, `feature_usage`, `company_settings`.
+Tables: `invoices`, `invoice_lines`, `opportunities`, `projects`, `expenses`, `users`, `license`, `license_keys`, `feature_usage`, `company_settings`, `clients`, `services`.
 
 `InvoiceRepository`:
 - `all()` — all invoices ordered by `created_at DESC`
@@ -96,7 +96,11 @@ Tables: `invoices`, `invoice_lines`, `opportunities`, `projects`, `expenses`, `u
 
 `ExpenseRepository` — `globalStats()` returns `benefice_net = ca_engage - total_depenses`. `CATEGORIES` const used in PHP and JS templates. `allForInvoice()` LEFT JOINs invoices for `invoice_number` and `client_name`.
 
-`SettingsRepository` — key/value store in `company_settings`. Pre-fills issuer info on new invoices.
+`SettingsRepository` — key/value store in `company_settings`. Pre-fills issuer info on new invoices. New key: `invoice_prefix` (custom prefix for invoice numbering).
+
+`ClientRepository` — CRUD on `clients` table. `allForSelect()` returns slim rows for dropdowns. Used in `invoice_form.php` and `pipeline/create.php` to pre-fill client fields.
+
+`ServiceRepository` — CRUD on `services` table. `CATEGORIES` const for 7 categories. `allGrouped()` returns rows keyed by category. Used in `invoice_form.php` catalogue modal.
 
 ## Business pipeline (3 phases)
 
@@ -126,7 +130,7 @@ Status changed via `fetch()` POST. All status endpoints (`invoice/status.php`, `
 
 ## Invoice number format
 
-Auto-generated as `YYYYMMDD-N` (N increments per day). Readonly on create, editable on edit.
+Auto-generated as `YYYYMMDD-N` (N increments per day). If `invoice_prefix` is set in `company_settings`, format becomes `PREFIX-YYYYMMDD-N`. Readonly on create, editable on edit.
 
 ## PDF generation
 
@@ -144,10 +148,10 @@ Auto-generated as `YYYYMMDD-N` (N increments per day). Readonly on create, edita
 
 - **superadmin**: ISSU DEV section only → Clés de licence
 - **admin**: Dashboard + Administration (Utilisateurs)
-- **gestionnaire**: Dashboard, Factures, Acquisition (Pipeline), Exécution (Projets), Bénéfice (Dépenses), Configuration (Paramètres)
-- **utilisateur**: Same as gestionnaire minus "Nouvelle facture" and "Paramètres"
+- **gestionnaire**: Dashboard, Factures, Acquisition (Clients + Pipeline + Nouvelle facture), Exécution (Projets), Bénéfice (Dépenses + Comptabilité), Configuration (Catalogue prestations + Paramètres)
+- **utilisateur**: Same as gestionnaire minus "Nouvelle facture", "Catalogue prestations", and "Paramètres"
 
-`$currentPage` values: `dashboard`, `list`, `create`, `pipeline`, `projects`, `expenses`, `settings`, `admin_users`, `superadmin_keys`.
+`$currentPage` values: `dashboard`, `list`, `create`, `pipeline`, `projects`, `expenses`, `settings`, `admin_users`, `superadmin_keys`, `clients`, `services`.
 
 ## Security
 

@@ -93,17 +93,17 @@ $pageTitle   = 'Nouvelle facture';
 $currentPage = 'create';
 $formAction  = '/invoice/create.php';
 
-$topbarActions = '<a href="/invoice/list.php" class="btn btn-secondary">← Retour</a>';
+$topbarActions = '<a href="/invoice/list.php" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Retour</a>';
 
 require __DIR__ . '/../../templates/layout.php';
 
 if ($invoiceLocked): ?>
 <div class="alert" style="background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:10px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px">
   <div><strong>🔒 Limite atteinte — Plan gratuit</strong><br><span style="font-size:.82rem">Maximum <?= LicenseService::invoiceMax() ?> factures sur le plan gratuit.</span></div>
-  <a href="/activate.php" class="btn btn-primary" style="white-space:nowrap">⭐ Passer Pro</a>
+  <a href="/activate.php" class="btn btn-primary" style="white-space:nowrap"><i class="fa-solid fa-star"></i> Passer Pro</a>
 </div>
 <?php elseif (!empty($errors)): ?>
-<div class="alert alert-error">⚠ <?= implode('<br>⚠ ', array_map('htmlspecialchars', $errors)) ?></div>
+<div class="alert alert-error"><i class="fa-solid fa-triangle-exclamation"></i> <?= implode('<br>⚠ ', array_map('htmlspecialchars', $errors)) ?></div>
 <?php endif;
 ?>
 

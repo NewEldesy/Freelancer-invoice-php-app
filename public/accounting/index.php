@@ -66,8 +66,8 @@ $margeGlobal  = $totalCaEngage > 0 ? round($totalBenefice / $totalCaEngage * 100
 $pageTitle   = 'Comptabilité ' . $currentYear;
 $currentPage = 'accounting';
 $topbarActions = '
-  <a href="/accounting/report.php?year=' . $currentYear . '" class="btn btn-secondary">📋 Rapport annuel</a>
-  <a href="/accounting/export.php?type=monthly&year=' . $currentYear . '" class="btn btn-secondary">📊 Exporter Excel</a>
+  <a href="/accounting/report.php?year=' . $currentYear . '" class="btn btn-secondary"><i class="fa-solid fa-chart-bar"></i> Rapport annuel</a>
+  <a href="/accounting/export.php?type=monthly&year=' . $currentYear . '" class="btn btn-secondary"><i class="fa-solid fa-file-excel"></i> Exporter Excel</a>
   <button onclick="window.print()" class="btn btn-secondary" id="print-btn">🖨️ Imprimer / PDF</button>
 ';
 
@@ -168,17 +168,17 @@ require __DIR__ . '/../../templates/layout.php';
 <!-- Stat cards annuelles -->
 <div class="acc-grid">
   <div class="stat-card navy">
-    <div class="stat-top"><div class="stat-label">CA Engagé <?= $currentYear ?></div><div class="stat-badge navy">📬</div></div>
+    <div class="stat-top"><div class="stat-label">CA Engagé <?= $currentYear ?></div><div class="stat-badge navy"><i class="fa-solid fa-envelope-open-text"></i></div></div>
     <div class="stat-value" style="font-size:1.25rem"><?= number_format($totalCaEngage, 0, ',', ' ') ?></div>
     <div class="stat-sub">FCFA · <?= $totalNbEnvoyee + $totalNbPayee ?> factures actives</div>
   </div>
   <div class="stat-card green">
-    <div class="stat-top"><div class="stat-label">CA Encaissé <?= $currentYear ?></div><div class="stat-badge green">💵</div></div>
+    <div class="stat-top"><div class="stat-label">CA Encaissé <?= $currentYear ?></div><div class="stat-badge green"><i class="fa-solid fa-money-bill-wave"></i></div></div>
     <div class="stat-value" style="font-size:1.25rem"><?= number_format($totalCaEncaisse, 0, ',', ' ') ?></div>
     <div class="stat-sub">FCFA · <?= $totalNbPayee ?> factures payées</div>
   </div>
   <div class="stat-card red">
-    <div class="stat-top"><div class="stat-label">Total Dépenses</div><div class="stat-badge red">💸</div></div>
+    <div class="stat-top"><div class="stat-label">Total Dépenses</div><div class="stat-badge red"><i class="fa-solid fa-arrow-trend-down"></i></div></div>
     <div class="stat-value" style="font-size:1.25rem"><?= number_format($totalDepenses, 0, ',', ' ') ?></div>
     <div class="stat-sub">FCFA engagés sur l'année</div>
   </div>
@@ -266,8 +266,8 @@ require __DIR__ . '/../../templates/layout.php';
         </td>
         <td class="no-print" style="color:var(--muted);font-size:.78rem">
           <?php if ($m['nb_envoyee'] + $m['nb_payee'] > 0): ?>
-          <span title="Envoyées" style="margin-right:6px">📬 <?= $m['nb_envoyee'] ?></span>
-          <span title="Payées">✅ <?= $m['nb_payee'] ?></span>
+          <span title="Envoyées" style="margin-right:6px"><i class="fa-solid fa-envelope-open-text"></i> <?= $m['nb_envoyee'] ?></span>
+          <span title="Payées"><i class="fa-solid fa-circle-check"></i> <?= $m['nb_payee'] ?></span>
           <?php else: ?><span class="zero">—</span><?php endif; ?>
         </td>
       </tr>
@@ -286,7 +286,7 @@ require __DIR__ . '/../../templates/layout.php';
           </td>
           <td><span style="font-weight:700;color:<?= $margeGlobal >= 0 ? '#059669' : '#dc2626' ?>"><?= $margeGlobal ?>%</span></td>
           <td class="no-print" style="color:var(--muted);font-size:.78rem">
-            📬 <?= $totalNbEnvoyee ?> · ✅ <?= $totalNbPayee ?>
+            <i class="fa-solid fa-envelope-open-text"></i> <?= $totalNbEnvoyee ?> · <i class="fa-solid fa-circle-check"></i> <?= $totalNbPayee ?>
           </td>
         </tr>
       </tfoot>

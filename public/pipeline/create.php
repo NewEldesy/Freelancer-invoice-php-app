@@ -8,6 +8,7 @@ use App\Auth\Auth;
 Auth::requireManager();
 
 use App\Database\OpportunityRepository;
+use App\Database\ClientRepository;
 use App\Services\LicenseService;
 
 $repo   = new OpportunityRepository();
@@ -49,7 +50,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$pipelineLocked) {
 
 $pageTitle   = 'Nouvelle opportunité';
 $currentPage = 'pipeline';
-$topbarActions = '<a href="/pipeline/index.php" class="btn btn-secondary">← Retour</a>';
+$topbarActions = '<a href="/pipeline/index.php" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Retour</a>';
+$clients = (new ClientRepository())->allForSelect();
 
 require __DIR__ . '/../../templates/layout.php';
 ?>
@@ -103,18 +105,43 @@ require __DIR__ . '/../../templates/layout.php';
       </div>
 
       <div class="section-title">👤 Client prospect</div>
+      <?php if (!empty($clients)): ?>
+      <div class="field" style="margin-bottom:12px">
+        <label>Choisir depuis la base clients</label>
+        <select id="client-picker" onchange="pickClient(this)">
+          <option value="">— Sélectionner un client (optionnel) —</option>
+          <?php foreach ($clients as $c): ?>
+          <option value="<?= $c['id'] ?>"
+              data-name="<?= htmlspecialchars($c['name']) ?>"
+              data-address="<?= htmlspecialchars($c['address'] ?? '') ?>"
+              data-contact="<?= htmlspecialchars($c['contact'] ?? '') ?>">
+              <?= htmlspecialchars($c['name']) ?>
+          </option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <script>
+      function pickClient(sel) {
+          const opt = sel.options[sel.selectedIndex];
+          if (!opt.value) return;
+          document.getElementById('p-client-name').value    = opt.dataset.name    || '';
+          document.getElementById('p-client-address').value = opt.dataset.address || '';
+          document.getElementById('p-client-contact').value = opt.dataset.contact || '';
+      }
+      </script>
+      <?php endif; ?>
       <div class="form-grid-2" style="margin-bottom:16px">
         <div class="field">
           <label>Nom / Entreprise</label>
-          <input type="text" name="client_name" value="<?= htmlspecialchars($_POST['client_name'] ?? '') ?>">
+          <input type="text" id="p-client-name" name="client_name" value="<?= htmlspecialchars($_POST['client_name'] ?? '') ?>">
         </div>
         <div class="field">
           <label>Contact (téléphone / email)</label>
-          <input type="text" name="client_contact" value="<?= htmlspecialchars($_POST['client_contact'] ?? '') ?>">
+          <input type="text" id="p-client-contact" name="client_contact" value="<?= htmlspecialchars($_POST['client_contact'] ?? '') ?>">
         </div>
         <div class="field" style="grid-column:1/-1">
           <label>Adresse</label>
-          <input type="text" name="client_address" value="<?= htmlspecialchars($_POST['client_address'] ?? '') ?>">
+          <input type="text" id="p-client-address" name="client_address" value="<?= htmlspecialchars($_POST['client_address'] ?? '') ?>">
         </div>
       </div>
 
@@ -124,7 +151,7 @@ require __DIR__ . '/../../templates/layout.php';
       </div>
 
       <div style="display:flex;gap:8px">
-        <button type="submit" class="btn btn-primary">💾 Enregistrer</button>
+        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Enregistrer</button>
         <a href="/pipeline/index.php" class="btn btn-secondary">Annuler</a>
       </div>
     </form>

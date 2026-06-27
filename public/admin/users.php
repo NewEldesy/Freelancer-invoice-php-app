@@ -15,7 +15,7 @@ $me    = Auth::user();
 
 $pageTitle     = 'Gestion des utilisateurs';
 $currentPage   = 'admin_users';
-$topbarActions = '<a href="/admin/users/create.php" class="btn btn-primary">➕ Nouvel utilisateur</a>';
+$topbarActions = '<a href="/admin/users/create.php" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Nouvel utilisateur</a>';
 
 require __DIR__ . '/../../templates/layout.php';
 ?>

@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $pageTitle     = 'Nouvel utilisateur';
 $currentPage   = 'admin_users';
-$topbarActions = '<a href="/admin/users.php" class="btn btn-secondary">← Retour</a>';
+$topbarActions = '<a href="/admin/users.php" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Retour</a>';
 
 require __DIR__ . '/../../../templates/layout.php';
 ?>

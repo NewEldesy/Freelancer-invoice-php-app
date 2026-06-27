@@ -18,8 +18,8 @@ $stats   = $repo->stats();
 $statusConfig = [
     'non_commence' => ['label' => 'Non commencé', 'class' => 'badge-draft',     'icon' => '⏳'],
     'en_cours'     => ['label' => 'En cours',     'class' => 'badge-sent',      'icon' => '🔨'],
-    'livre'        => ['label' => 'Livré',         'class' => 'badge-paid',      'icon' => '📦'],
-    'valide'       => ['label' => 'Validé client', 'class' => 'badge-paid',      'icon' => '✅'],
+    'livre'        => ['label' => 'Livré',         'class' => 'badge-paid',      'icon' => '<i class="fa-solid fa-box-open"></i>'],
+    'valide'       => ['label' => 'Validé client', 'class' => 'badge-paid',      'icon' => '<i class="fa-solid fa-circle-check"></i>'],
 ];
 
 $filterStatus = $_GET['status'] ?? '';
@@ -41,22 +41,22 @@ require __DIR__ . '/../../templates/layout.php';
 <!-- Stats -->
 <div class="proj-stats">
   <div class="stat-card navy">
-    <div class="stat-top"><div class="stat-label">Total projets</div><div class="stat-badge navy">🏗️</div></div>
+    <div class="stat-top"><div class="stat-label">Total projets</div><div class="stat-badge navy"><i class="fa-solid fa-helmet-safety"></i></div></div>
     <div class="stat-value"><?= $stats['total'] ?></div>
     <div class="stat-sub">actifs</div>
   </div>
   <div class="stat-card gold">
-    <div class="stat-top"><div class="stat-label">En cours</div><div class="stat-badge gold">🔨</div></div>
+    <div class="stat-top"><div class="stat-label">En cours</div><div class="stat-badge gold"><i class="fa-solid fa-hammer"></i></div></div>
     <div class="stat-value"><?= $stats['en_cours'] ?></div>
     <div class="stat-sub"><?= $stats['non_commence'] ?> non commencé<?= $stats['non_commence'] > 1 ? 's' : '' ?></div>
   </div>
   <div class="stat-card green">
-    <div class="stat-top"><div class="stat-label">Livrés</div><div class="stat-badge green">📦</div></div>
+    <div class="stat-top"><div class="stat-label">Livrés</div><div class="stat-badge green"><i class="fa-solid fa-box-open"></i></div></div>
     <div class="stat-value"><?= $stats['livre'] ?></div>
     <div class="stat-sub">en attente validation</div>
   </div>
   <div class="stat-card green">
-    <div class="stat-top"><div class="stat-label">Validés</div><div class="stat-badge green">✅</div></div>
+    <div class="stat-top"><div class="stat-label">Validés</div><div class="stat-badge green"><i class="fa-solid fa-circle-check"></i></div></div>
     <div class="stat-value"><?= $stats['valide'] ?></div>
     <div class="stat-sub">clôturés</div>
   </div>
@@ -75,7 +75,7 @@ require __DIR__ . '/../../templates/layout.php';
 <div class="card">
   <?php if (empty($all)): ?>
   <div class="empty-state">
-    <div class="empty-icon">🏗️</div>
+    <div class="empty-icon"><i class="fa-solid fa-helmet-safety"></i></div>
     <h3>Aucun projet</h3>
     <p>Les projets sont créés automatiquement quand une facture passe au statut "Envoyée".</p>
   </div>
@@ -125,7 +125,7 @@ require __DIR__ . '/../../templates/layout.php';
           </td>
           <td>
             <select class="status-select" data-id="<?= $proj['id'] ?>">
-              <?php foreach (['non_commence'=>'⏳ Non commencé','en_cours'=>'🔨 En cours','livre'=>'📦 Livré','valide'=>'✅ Validé'] as $v => $l): ?>
+              <?php foreach (['non_commence'=>'Non commencé','en_cours'=>'En cours','livre'=>'Livré','valide'=>'Validé'] as $v => $l): ?>
               <option value="<?= $v ?>" <?= $proj['status'] === $v ? 'selected' : '' ?>><?= $l ?></option>
               <?php endforeach; ?>
             </select>
@@ -137,8 +137,8 @@ require __DIR__ . '/../../templates/layout.php';
           </td>
           <td>
             <div style="display:flex;gap:4px">
-              <a href="/project/edit.php?id=<?= $proj['id'] ?>" class="btn btn-secondary btn-sm btn-icon" title="Modifier">✏️</a>
-              <a href="/expense/index.php?invoice_id=<?= $proj['invoice_id'] ?>" class="btn btn-secondary btn-sm btn-icon" title="Dépenses">💰</a>
+              <a href="/project/edit.php?id=<?= $proj['id'] ?>" class="btn btn-secondary btn-sm btn-icon" title="Modifier"><i class="fa-solid fa-pen-to-square"></i></a>
+              <a href="/expense/index.php?invoice_id=<?= $proj['invoice_id'] ?>" class="btn btn-secondary btn-sm btn-icon" title="Dépenses"><i class="fa-solid fa-coins"></i></a>
             </div>
           </td>
         </tr>
