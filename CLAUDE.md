@@ -221,4 +221,4 @@ PDF/Excel/duplicate limits use persistent counters in `feature_usage` table (`ge
 
 ## App name
 
-**Invoices Project** by **ISSU DEV**. Footer: `© ISSU DEV`.
+**Freelancer-invoice** by **ISSU DEV**. Footer: `© ISSU DEV`.

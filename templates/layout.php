@@ -14,7 +14,7 @@ $_licenseIsFree  = \App\Services\LicenseService::isFree();
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title><?= htmlspecialchars($pageTitle ?? 'Factures') ?> — Invoices Project</title>
+<title><?= htmlspecialchars($pageTitle ?? 'Factures') ?> — Freelancer-invoice</title>
 <meta name="csrf-token" content="<?= htmlspecialchars(\App\Auth\Auth::csrfToken()) ?>">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -588,7 +588,7 @@ table.data-table tbody tr:hover td { background: #f8fafc; }
   <a href="/index.php" class="sidebar-brand">
     <div class="brand-icon">🧾</div>
     <div class="brand-text">
-      <div class="name">Invoices Project</div>
+      <div class="name">Freelancer-invoice</div>
       <div class="sub">Gestion des factures</div>
     </div>
   </a>

@@ -64,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Connexion — Invoices Project</title>
+<title>Connexion — Freelancer-invoice</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -92,7 +92,7 @@ h1 { font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
   <div class="logo">
     <div class="logo-icon">🧾</div>
     <div>
-      <div class="logo-name">Invoices Project</div>
+      <div class="logo-name">Freelancer-invoice</div>
       <div class="logo-sub">by ISSU DEV</div>
     </div>
   </div>
@@ -151,7 +151,7 @@ h1 { font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
     });
   </script>
 
-  <div class="foot">© ISSU DEV — Invoices Project</div>
+  <div class="foot">© ISSU DEV — Freelancer-invoice</div>
 </div>
 </body>
 </html>

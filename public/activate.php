@@ -45,7 +45,7 @@ $machineId = LicenseService::machineId();
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Activation — Invoices Project</title>
+<title>Activation — Freelancer-invoice</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -165,7 +165,7 @@ $machineId = LicenseService::machineId();
 <div class="wrapper">
   <div class="brand">
     <div class="brand-logo">📋</div>
-    <div class="brand-name">Invoices Project</div>
+    <div class="brand-name">Freelancer-invoice</div>
     <div class="brand-sub">© ISSU DEV</div>
   </div>
 
@@ -253,7 +253,7 @@ $machineId = LicenseService::machineId();
     </div>
   </div>
 
-  <div class="footer-note">Invoices Project · © ISSU DEV · Tous droits réservés</div>
+  <div class="footer-note">Freelancer-invoice · © ISSU DEV · Tous droits réservés</div>
 </div>
 
 </body>

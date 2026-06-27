@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Invoices Project — Générateur de clés de licence
+ * Freelancer-invoice — Générateur de clés de licence
  * Usage CLI :
  *
  *   php tools/keygen.php pro 3m

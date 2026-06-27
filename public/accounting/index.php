@@ -146,7 +146,7 @@ require __DIR__ . '/../../templates/layout.php';
   <div style="display:flex; justify-content:space-between; align-items:flex-end;">
     <div>
       <div style="font-size:18px; font-weight:800; color:#0f172a">Rapport comptable — <?= $currentYear ?></div>
-      <div style="font-size:11px; color:#64748b; margin-top:3px">Généré le <?= date('d/m/Y à H:i') ?> · Invoices Project</div>
+      <div style="font-size:11px; color:#64748b; margin-top:3px">Généré le <?= date('d/m/Y à H:i') ?> · Freelancer-invoice</div>
     </div>
     <div style="text-align:right; font-size:11px; color:#64748b">
       <div>CA Engagé : <strong><?= number_format($totalCaEngage, 0, ',', ' ') ?> FCFA</strong></div>

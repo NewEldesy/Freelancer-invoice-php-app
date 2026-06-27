@@ -8,7 +8,7 @@ use App\Database\Database;
 use PDO;
 
 /**
- * License system for Invoices Project.
+ * License system for Freelancer-invoice.
  *
  * Key format: BASE64_PAYLOAD.HMAC32
  *   payload = base64_encode(json({edition, expires, machine_id}))

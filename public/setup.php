@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Configuration initiale — Invoices Project</title>
+<title>Configuration initiale — Freelancer-invoice</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -110,7 +110,7 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; display: flex; ali
   <div class="logo">
     <div class="logo-icon">🧾</div>
     <div>
-      <div class="logo-name">Invoices Project</div>
+      <div class="logo-name">Freelancer-invoice</div>
       <div class="logo-sub">by ISSU DEV</div>
     </div>
   </div>
