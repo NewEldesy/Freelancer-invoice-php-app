@@ -68,7 +68,7 @@ $currentPage = 'accounting';
 $topbarActions = '
   <a href="/accounting/report.php?year=' . $currentYear . '" class="btn btn-secondary"><i class="fa-solid fa-chart-bar"></i> Rapport annuel</a>
   <a href="/accounting/export.php?type=monthly&year=' . $currentYear . '" class="btn btn-secondary"><i class="fa-solid fa-file-excel"></i> Exporter Excel</a>
-  <button onclick="window.print()" class="btn btn-secondary" id="print-btn">🖨️ Imprimer / PDF</button>
+  <button onclick="window.print()" class="btn btn-secondary" id="print-btn"><i class="fa-solid fa-print"></i> Imprimer / PDF</button>
 ';
 
 require __DIR__ . '/../../templates/layout.php';
@@ -185,7 +185,7 @@ require __DIR__ . '/../../templates/layout.php';
   <div class="stat-card <?= $totalBenefice >= 0 ? 'green' : 'red' ?>">
     <div class="stat-top">
       <div class="stat-label">Bénéfice net</div>
-      <div class="stat-badge <?= $totalBenefice >= 0 ? 'green' : 'red' ?>">📈</div>
+      <div class="stat-badge <?= $totalBenefice >= 0 ? 'green' : 'red' ?>"><i class="fa-solid <?= $totalBenefice >= 0 ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down' ?>"></i></div>
     </div>
     <div class="stat-value" style="font-size:1.25rem;color:<?= $totalBenefice >= 0 ? 'var(--green)' : 'var(--red)' ?>">
       <?= number_format($totalBenefice, 0, ',', ' ') ?>
@@ -294,7 +294,7 @@ require __DIR__ . '/../../templates/layout.php';
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script src="/assets/js/chart.umd.min.js"></script>
 <script>
 const labels  = <?= json_encode(array_column($months, 'label')) ?>;
 const engage  = <?= json_encode(array_values(array_column($months, 'ca_engage'))) ?>;

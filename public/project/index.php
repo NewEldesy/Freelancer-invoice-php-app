@@ -16,8 +16,8 @@ $all     = $repo->all();
 $stats   = $repo->stats();
 
 $statusConfig = [
-    'non_commence' => ['label' => 'Non commencé', 'class' => 'badge-draft',     'icon' => '⏳'],
-    'en_cours'     => ['label' => 'En cours',     'class' => 'badge-sent',      'icon' => '🔨'],
+    'non_commence' => ['label' => 'Non commencé', 'class' => 'badge-draft',     'icon' => '<i class="fa-solid fa-hourglass-half"></i>'],
+    'en_cours'     => ['label' => 'En cours',     'class' => 'badge-sent',      'icon' => '<i class="fa-solid fa-hammer"></i>'],
     'livre'        => ['label' => 'Livré',         'class' => 'badge-paid',      'icon' => '<i class="fa-solid fa-box-open"></i>'],
     'valide'       => ['label' => 'Validé client', 'class' => 'badge-paid',      'icon' => '<i class="fa-solid fa-circle-check"></i>'],
 ];

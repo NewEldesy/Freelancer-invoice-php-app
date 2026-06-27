@@ -61,15 +61,15 @@ require __DIR__ . '/../../templates/layout.php';
   <div class="card-header"><h2>Modifier l'opportunité</h2></div>
   <div class="card-body">
     <?php if (!empty($errors)): ?>
-    <div class="alert alert-error">⚠ <?= implode('<br>⚠ ', array_map('htmlspecialchars', $errors)) ?></div>
+    <div class="alert alert-error"><i class="fa-solid fa-triangle-exclamation"></i> <?= implode('<br><i class="fa-solid fa-triangle-exclamation"></i> ', array_map('htmlspecialchars', $errors)) ?></div>
     <?php endif; ?>
 
     <?php if ($d['invoice_id']): ?>
-    <div class="alert alert-success">✓ Opportunité convertie — <a href="/invoice/edit.php?id=<?= $d['invoice_id'] ?>" style="font-weight:600">Voir la facture</a></div>
+    <div class="alert alert-success"><i class="fa-solid fa-circle-check"></i> Opportunité convertie — <a href="/invoice/edit.php?id=<?= $d['invoice_id'] ?>" style="font-weight:600">Voir la facture</a></div>
     <?php endif; ?>
 
     <form method="POST">
-      <div class="section-title">🎯 Opportunité</div>
+      <div class="section-title"><i class="fa-solid fa-bullseye"></i> Opportunité</div>
       <div class="form-grid-2" style="margin-bottom:16px">
         <div class="field" style="grid-column:1/-1">
           <label>Titre *</label>
@@ -101,7 +101,7 @@ require __DIR__ . '/../../templates/layout.php';
         </div>
       </div>
 
-      <div class="section-title">👤 Client prospect</div>
+      <div class="section-title"><i class="fa-solid fa-user"></i> Client prospect</div>
       <div class="form-grid-2" style="margin-bottom:16px">
         <div class="field">
           <label>Nom / Entreprise</label>
@@ -117,21 +117,21 @@ require __DIR__ . '/../../templates/layout.php';
         </div>
       </div>
 
-      <div class="section-title">📝 Notes internes</div>
+      <div class="section-title"><i class="fa-solid fa-note-sticky"></i> Notes internes</div>
       <div class="field" style="margin-bottom:20px">
         <textarea name="notes" rows="3"><?= htmlspecialchars($d['notes'] ?? '') ?></textarea>
       </div>
 
       <div style="display:flex;gap:8px">
         <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Enregistrer</button>
-        <button onclick="deleteOpp()" class="btn btn-danger">🗑️ Supprimer</button>
+        <button onclick="deleteOpp()" class="btn btn-danger"><i class="fa-solid fa-trash"></i> Supprimer</button>
       </div>
     </form>
 
     <?php if (!$d['invoice_id']): ?>
     <form method="POST" action="/pipeline/convert.php" style="margin-top:12px">
       <input type="hidden" name="id" value="<?= $id ?>">
-      <button type="submit" class="btn btn-success">🧾 Convertir en facture</button>
+      <button type="submit" class="btn btn-success"><i class="fa-solid fa-file-invoice"></i> Convertir en facture</button>
     </form>
     <?php endif; ?>
   </div>

@@ -30,7 +30,7 @@ require __DIR__ . '/../../templates/layout.php';
 
 <?php if (empty($grouped)): ?>
 <div class="card" style="padding:48px;text-align:center;color:var(--muted)">
-  <div style="font-size:2rem;margin-bottom:12px">📦</div>
+  <div style="font-size:2rem;margin-bottom:12px"><i class="fa-solid fa-box-open"></i></div>
   <div style="font-weight:600;margin-bottom:6px">Aucune prestation dans le catalogue</div>
   <?php if (Auth::can('write')): ?>
   <a href="/services/create.php" class="btn btn-primary" style="margin-top:10px"><i class="fa-solid fa-plus"></i> Ajouter une prestation</a>

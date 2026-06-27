@@ -14,9 +14,9 @@ $all   = $repo->all();
 $stats = $repo->stats();
 
 $columns = [
-    'prospect'     => ['label' => 'Prospect',      'color' => '#94a3b8', 'bg' => '#f1f5f9', 'icon' => '👤'],
-    'devis_envoye' => ['label' => 'Devis envoyé',  'color' => '#3b82f6', 'bg' => '#dbeafe', 'icon' => '📨'],
-    'negociation'  => ['label' => 'Négociation',   'color' => '#f59e0b', 'bg' => '#fef3c7', 'icon' => '🤝'],
+    'prospect'     => ['label' => 'Prospect',      'color' => '#94a3b8', 'bg' => '#f1f5f9', 'icon' => '<i class="fa-solid fa-user"></i>'],
+    'devis_envoye' => ['label' => 'Devis envoyé',  'color' => '#3b82f6', 'bg' => '#dbeafe', 'icon' => '<i class="fa-solid fa-envelope"></i>'],
+    'negociation'  => ['label' => 'Négociation',   'color' => '#f59e0b', 'bg' => '#fef3c7', 'icon' => '<i class="fa-solid fa-handshake"></i>'],
     'gagne'        => ['label' => 'Gagné',          'color' => '#10b981', 'bg' => '#d1fae5', 'icon' => '<i class="fa-solid fa-circle-check"></i>'],
     'perdu'        => ['label' => 'Perdu',          'color' => '#ef4444', 'bg' => '#fee2e2', 'icon' => '<i class="fa-solid fa-circle-xmark"></i>'],
 ];
@@ -93,7 +93,7 @@ require __DIR__ . '/../../templates/layout.php';
   <div class="stat-card <?= $stats['conversion_rate'] >= 50 ? 'green' : 'gold' ?>">
     <div class="stat-top">
       <div class="stat-label">Taux conversion</div>
-      <div class="stat-badge <?= $stats['conversion_rate'] >= 50 ? 'green' : 'gold' ?>">🎯</div>
+      <div class="stat-badge <?= $stats['conversion_rate'] >= 50 ? 'green' : 'gold' ?>"><i class="fa-solid fa-bullseye"></i></div>
     </div>
     <div class="stat-value"><?= $stats['conversion_rate'] ?>%</div>
     <div class="stat-sub"><?= $stats['gagne'] ?> gagné<?= $stats['gagne'] > 1 ? 's' : '' ?> / <?= $stats['gagne'] + $stats['perdu'] ?> clôturés</div>
@@ -124,12 +124,12 @@ require __DIR__ . '/../../templates/layout.php';
       <div class="opp-card">
         <div class="opp-title"><?= htmlspecialchars($opp['title']) ?></div>
         <?php if ($opp['client_name']): ?>
-        <div class="opp-client">👤 <?= htmlspecialchars($opp['client_name']) ?></div>
+        <div class="opp-client"><i class="fa-solid fa-user"></i> <?= htmlspecialchars($opp['client_name']) ?></div>
         <?php endif; ?>
         <div class="opp-amount"><?= number_format((int)$opp['estimated_amount'], 0, ',', ' ') ?> FCFA</div>
         <?php if ($opp['expected_close']): ?>
         <div style="font-size:.68rem;color:var(--muted-light);margin-top:3px">
-          📅 <?= date('d/m/Y', strtotime($opp['expected_close'])) ?>
+          <i class="fa-solid fa-calendar-days"></i> <?= date('d/m/Y', strtotime($opp['expected_close'])) ?>
         </div>
         <?php endif; ?>
         <?php if (\App\Auth\Auth::can('write')): ?>

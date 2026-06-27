@@ -97,13 +97,13 @@ require __DIR__ . '/../../templates/layout.php';
     <?php if ($expenseLocked): ?>
     <div class="alert" style="background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:10px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px">
       <div>
-        <strong>🔒 Limite atteinte — Plan gratuit</strong><br>
+        <strong><i class="fa-solid fa-lock"></i> Limite atteinte — Plan gratuit</strong><br>
         <span style="font-size:.82rem">Vous avez atteint la limite de <strong><?= $expenseMax ?> dépenses</strong> du plan gratuit.</span>
       </div>
-      <a href="/activate.php" class="btn btn-primary" style="white-space:nowrap;flex-shrink:0">⭐ Passer Pro</a>
+      <a href="/activate.php" class="btn btn-primary" style="white-space:nowrap;flex-shrink:0"><i class="fa-solid fa-star"></i> Passer Pro</a>
     </div>
     <?php elseif (!empty($errors)): ?>
-    <div class="alert alert-error">⚠ <?= implode('<br>⚠ ', array_map('htmlspecialchars', $errors)) ?></div>
+    <div class="alert alert-error"><i class="fa-solid fa-triangle-exclamation"></i> <?= implode('<br><i class="fa-solid fa-triangle-exclamation"></i> ', array_map('htmlspecialchars', $errors)) ?></div>
     <?php endif; ?>
 
     <form method="POST" id="exp-form">
@@ -171,7 +171,7 @@ require __DIR__ . '/../../templates/layout.php';
 
       <!-- Barre totaux + actions -->
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px">
-        <button type="button" id="add-row" class="btn btn-secondary">➕ Ajouter une ligne</button>
+        <button type="button" id="add-row" class="btn btn-secondary"><i class="fa-solid fa-plus"></i> Ajouter une ligne</button>
         <div class="total-bar">
           <span style="color:var(--muted)">Total :</span>
           <span id="grand-total" style="font-size:1rem;font-weight:700;color:var(--navy)">0 FCFA</span>

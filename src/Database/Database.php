@@ -212,6 +212,7 @@ final class Database
             "ALTER TABLE invoices ADD COLUMN prestation_amount INTEGER NOT NULL DEFAULT 0",
             "ALTER TABLE invoices ADD COLUMN client_id         INTEGER",
             "ALTER TABLE opportunities ADD COLUMN client_id    INTEGER",
+            "ALTER TABLE invoices ADD COLUMN origin_id         INTEGER",
         ] as $sql) {
             try { $pdo->exec($sql); } catch (\Exception) { /* column already exists */ }
         }

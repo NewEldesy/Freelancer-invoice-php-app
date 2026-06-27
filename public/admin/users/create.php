@@ -59,7 +59,7 @@ require __DIR__ . '/../../../templates/layout.php';
   <div class="card-header"><h2>Créer un utilisateur</h2></div>
   <div class="card-body">
     <?php if (!empty($errors)): ?>
-    <div class="alert alert-error">⚠ <?= implode('<br>⚠ ', array_map('htmlspecialchars', $errors)) ?></div>
+    <div class="alert alert-error"><i class="fa-solid fa-triangle-exclamation"></i> <?= implode('<br><i class="fa-solid fa-triangle-exclamation"></i> ', array_map('htmlspecialchars', $errors)) ?></div>
     <?php endif; ?>
 
     <form method="POST">
@@ -93,7 +93,7 @@ require __DIR__ . '/../../../templates/layout.php';
         </div>
       </div>
       <div style="display:flex;gap:8px">
-        <button type="submit" class="btn btn-primary">💾 Créer l'utilisateur</button>
+        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Créer l'utilisateur</button>
         <a href="/admin/users.php" class="btn btn-secondary">Annuler</a>
       </div>
     </form>

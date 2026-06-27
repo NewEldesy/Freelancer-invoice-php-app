@@ -46,7 +46,7 @@ require __DIR__ . '/../../templates/layout.php';
   <div class="card-body">
 
     <?php if (!empty($errors)): ?>
-    <div class="alert alert-error">⚠ <?= implode('<br>⚠ ', array_map('htmlspecialchars', $errors)) ?></div>
+    <div class="alert alert-error"><i class="fa-solid fa-triangle-exclamation"></i> <?= implode('<br><i class="fa-solid fa-triangle-exclamation"></i> ', array_map('htmlspecialchars', $errors)) ?></div>
     <?php endif; ?>
 
     <form method="POST">

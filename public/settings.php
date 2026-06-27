@@ -64,6 +64,16 @@ require __DIR__ . '/../templates/layout.php';
 <?php
 // Tab from URL
 $tab = $_GET['tab'] ?? 'company';
+
+if (isset($_GET['restore_ok']))    $flashSuccess = 'Base de données restaurée avec succès. Un backup de sécurité a été créé.';
+if (isset($_GET['restore_error'])) {
+    $restoreMessages = [
+        'no_file'      => 'Aucun fichier reçu ou erreur d\'upload.',
+        'invalid_file' => 'Fichier invalide. Seuls les fichiers .sqlite sont acceptés.',
+        'write_failed' => 'Échec de l\'écriture de la base de données.',
+    ];
+    $flashError = $restoreMessages[$_GET['restore_error']] ?? 'Erreur inconnue lors de la restauration.';
+}
 ?>
 
 <style>
@@ -81,14 +91,15 @@ $tab = $_GET['tab'] ?? 'company';
 <div class="settings-tabs">
   <a href="/settings.php?tab=company"  class="settings-tab <?= $tab === 'company'  ? 'active' : '' ?>"><i class="fa-solid fa-building"></i> Entreprise</a>
   <a href="/settings.php?tab=license"  class="settings-tab <?= $tab === 'license'  ? 'active' : '' ?>"><i class="fa-solid fa-key"></i> Licence</a>
+  <a href="/settings.php?tab=backup"   class="settings-tab <?= $tab === 'backup'   ? 'active' : '' ?>"><i class="fa-solid fa-database"></i> Sauvegarde</a>
 </div>
 
 <?php if ($flashSuccess): ?>
 <div class="alert" style="background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;border-radius:10px;padding:12px 16px;margin-bottom:16px">
-  ✅ <?= htmlspecialchars($flashSuccess) ?>
+  <i class="fa-solid fa-circle-check"></i> <?= htmlspecialchars($flashSuccess) ?>
 </div>
 <?php elseif ($flashError): ?>
-<div class="alert alert-error" style="margin-bottom:16px">⚠️ <?= htmlspecialchars($flashError) ?></div>
+<div class="alert alert-error" style="margin-bottom:16px"><i class="fa-solid fa-triangle-exclamation"></i> <?= htmlspecialchars($flashError) ?></div>
 <?php endif; ?>
 
 <!-- ══ COMPANY TAB ══ -->
@@ -227,9 +238,9 @@ $tab = $_GET['tab'] ?? 'company';
   };
   $editionIcon = match($lic['edition']) {
       'pro'        => '⭐',
-      'enterprise' => '🏢',
-      'free'       => '🔓',
-      default      => '❌',
+      'enterprise' => '<i class="fa-solid fa-building"></i>',
+      'free'       => '<i class="fa-solid fa-lock-open"></i>',
+      default      => '<i class="fa-solid fa-circle-xmark"></i>',
   };
 
   // Free plan usage counts
@@ -387,10 +398,57 @@ $tab = $_GET['tab'] ?? 'company';
         </div>
       </div>
       <a href="/activate.php" class="btn btn-primary" style="white-space:nowrap;flex-shrink:0">
-        🔑 <?= LicenseService::isFree() ? 'Activer Pro →' : 'Changer de clé →' ?>
+        <i class="fa-solid fa-key"></i> <?= LicenseService::isFree() ? 'Activer Pro →' : 'Changer de clé →' ?>
       </a>
     </div>
   </div>
+
+</div>
+<?php endif; ?>
+
+<?php if ($tab === 'backup'): ?>
+<div>
+
+<div class="card" style="margin-bottom:16px">
+  <div style="padding:18px 24px">
+    <div style="font-size:.88rem;font-weight:700;color:var(--navy);margin-bottom:6px">
+      <i class="fa-solid fa-download"></i> Télécharger la sauvegarde
+    </div>
+    <div style="font-size:.8rem;color:var(--muted);margin-bottom:16px">
+      Exporte l'intégralité de la base de données (factures, clients, paiements, paramètres…) dans un fichier <code>.sqlite</code>.
+    </div>
+    <a href="/settings/backup.php" class="btn btn-primary">
+      <i class="fa-solid fa-download"></i> Télécharger la base de données
+    </a>
+  </div>
+</div>
+
+<div class="card">
+  <div style="padding:18px 24px">
+    <div style="font-size:.88rem;font-weight:700;color:var(--navy);margin-bottom:6px">
+      <i class="fa-solid fa-upload"></i> Restaurer une sauvegarde
+    </div>
+    <div style="font-size:.8rem;color:var(--muted);margin-bottom:4px">
+      Remplace la base de données par un fichier de sauvegarde précédent.
+    </div>
+    <div class="alert" style="background:#fff7ed;border:1px solid #fed7aa;color:#92400e;border-radius:8px;padding:10px 14px;font-size:.78rem;margin-bottom:16px">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <strong>Attention</strong> — cette action est irréversible. Toutes les données actuelles seront remplacées.
+      Un backup automatique de sécurité est créé avant la restauration (<code>storage/invoices-pre-restore-*.sqlite</code>).
+    </div>
+    <form method="POST" action="/settings/restore.php" enctype="multipart/form-data" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
+      <div class="field" style="margin:0;flex:1;min-width:240px">
+        <label style="font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Fichier de sauvegarde (.sqlite)</label>
+        <input type="file" name="backup" accept=".sqlite" required
+               style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:.83rem;background:var(--white)">
+      </div>
+      <button type="submit" class="btn btn-danger"
+              onclick="return confirm('Restaurer cette sauvegarde ? Toutes les données actuelles seront remplacées.')">
+        <i class="fa-solid fa-rotate-left"></i> Restaurer
+      </button>
+    </form>
+  </div>
+</div>
 
 </div>
 <?php endif; ?>

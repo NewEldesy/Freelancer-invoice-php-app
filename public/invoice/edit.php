@@ -46,8 +46,14 @@ if (isset($_GET['duplicated'])) {
 if (isset($_GET['from_pipeline'])) {
     $flashSuccess = 'Opportunité convertie en facture ' . htmlspecialchars($record['number']) . ' · complétez les lignes puis enregistrez.';
 }
+if (isset($_GET['from_devis'])) {
+    $flashSuccess = 'Devis converti en facture ' . htmlspecialchars($record['number']) . ' · vérifiez les lignes puis enregistrez.';
+}
+if (isset($_GET['avoir_created'])) $flashSuccess = 'Avoir créé avec succès.';
+if (isset($_GET['avoir_deleted'])) $flashSuccess = 'Avoir supprimé.';
 
-$payRepo   = new PaymentRepository();
+$avoirs  = $repo->findAvoirs($id);
+$payRepo = new PaymentRepository();
 $payments  = $payRepo->allForInvoice($id);
 $totalPaid = $payRepo->totalForInvoice($id);
 
@@ -137,10 +143,10 @@ require __DIR__ . '/../../templates/layout.php';
 
 <?php if ($flashSuccess): ?>
 <div class="alert" style="background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;border-radius:8px;padding:10px 14px;font-size:.83rem;margin-bottom:14px">
-  ✅ <?= htmlspecialchars($flashSuccess) ?>
+  <i class="fa-solid fa-circle-check"></i> <?= htmlspecialchars($flashSuccess) ?>
 </div>
 <?php elseif (!empty($errors)): ?>
-<div class="alert alert-error" style="margin-bottom:14px">⚠ <?= implode('<br>⚠ ', array_map('htmlspecialchars', $errors)) ?></div>
+<div class="alert alert-error" style="margin-bottom:14px"><i class="fa-solid fa-triangle-exclamation"></i> <?= implode('<br><i class="fa-solid fa-triangle-exclamation"></i> ', array_map('htmlspecialchars', $errors)) ?></div>
 <?php endif; ?>
 
 <div class="card">
@@ -159,7 +165,7 @@ $isOverdue = $isSent && !empty($record['due_at']) && $record['due_at'] < date('Y
 <!-- ── Section paiements ── -->
 <div class="card" style="margin-top:20px">
   <div class="card-header" style="display:flex;justify-content:space-between;align-items:center">
-    <h2>💰 Paiements reçus</h2>
+    <h2><i class="fa-solid fa-coins"></i> Paiements reçus</h2>
     <?php if ($totalNet > 0): ?>
     <div style="font-size:.82rem;color:var(--muted)">
       Total facture : <strong><?= number_format($totalNet, 0, ',', ' ') ?> FCFA</strong>
@@ -211,7 +217,7 @@ $isOverdue = $isSent && !empty($record['due_at']) && $record['due_at'] < date('Y
                 onsubmit="return confirm('Supprimer ce paiement ?')">
             <input type="hidden" name="id" value="<?= $p['id'] ?>">
             <input type="hidden" name="invoice_id" value="<?= $id ?>">
-            <button type="submit" class="btn btn-danger btn-sm btn-icon">🗑️</button>
+            <button type="submit" class="btn btn-danger btn-sm btn-icon"><i class="fa-solid fa-trash"></i></button>
           </form>
           <?php endif; ?>
         </td>
@@ -252,7 +258,71 @@ $isOverdue = $isSent && !empty($record['due_at']) && $record['due_at'] < date('Y
   </div>
   <?php elseif ($isPaid): ?>
   <div style="padding:14px 20px;background:#f0fdf4;border-top:1px solid #bbf7d0;font-size:.82rem;color:#166534;text-align:center">
-    ✅ Facture entièrement payée
+    <i class="fa-solid fa-circle-check"></i> Facture entièrement payée
+  </div>
+  <?php endif; ?>
+</div>
+
+<!-- Section Avoirs -->
+<div class="card" style="margin-top:20px">
+  <div style="padding:14px 20px;border-bottom:1px solid var(--border-soft);display:flex;justify-content:space-between;align-items:center">
+    <div style="font-weight:700;color:var(--navy);font-size:.88rem">
+      <i class="fa-solid fa-rotate-left"></i> Avoirs liés
+    </div>
+    <?php if (Auth::can('write')): ?>
+    <a href="/avoir/create.php?invoice_id=<?= $id ?>" class="btn btn-secondary btn-sm">
+      <i class="fa-solid fa-plus"></i> Créer un avoir
+    </a>
+    <?php endif; ?>
+  </div>
+  <?php if (empty($avoirs)): ?>
+  <div style="padding:20px;text-align:center;color:var(--muted);font-size:.82rem">Aucun avoir pour cette facture.</div>
+  <?php else: ?>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>N° Avoir</th>
+          <th>Émission</th>
+          <th style="text-align:right">Montant</th>
+          <th>Statut</th>
+          <th style="text-align:right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+      <?php foreach ($avoirs as $av): ?>
+      <tr>
+        <td style="font-weight:600;font-size:.83rem;color:var(--navy)"><?= htmlspecialchars($av['number']) ?></td>
+        <td style="font-size:.8rem;color:var(--muted)"><?= $av['issued_at'] ? date('d/m/Y', strtotime($av['issued_at'])) : '—' ?></td>
+        <td style="text-align:right;font-weight:600;font-size:.84rem">
+          <?= number_format((int)$av['total_net'], 0, ',', ' ') ?>
+          <span style="font-size:.7rem;color:var(--muted);font-weight:400">FCFA</span>
+        </td>
+        <td>
+          <span class="badge <?= $av['status'] === 'émis' ? 'badge-paid' : 'badge-draft' ?>">
+            <?= htmlspecialchars(ucfirst($av['status'])) ?>
+          </span>
+        </td>
+        <td style="text-align:right">
+          <div style="display:flex;gap:4px;justify-content:flex-end">
+            <a href="/avoir/pdf.php?id=<?= $av['id'] ?>" class="btn btn-secondary btn-sm btn-icon" title="PDF" target="_blank">
+              <i class="fa-solid fa-file-pdf"></i>
+            </a>
+            <?php if (Auth::can('write')): ?>
+            <form method="POST" action="/avoir/delete.php" style="display:inline"
+                  onsubmit="return confirm('Supprimer cet avoir ?')">
+              <input type="hidden" name="id" value="<?= $av['id'] ?>">
+              <button type="submit" class="btn btn-danger btn-sm btn-icon" title="Supprimer">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </form>
+            <?php endif; ?>
+          </div>
+        </td>
+      </tr>
+      <?php endforeach; ?>
+      </tbody>
+    </table>
   </div>
   <?php endif; ?>
 </div>

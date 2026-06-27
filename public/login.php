@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Connexion — Freelancer-invoice</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('/assets/fonts/inter.css');
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Inter', sans-serif; background: #f8fafc; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
 .box { background: #fff; border-radius: 14px; border: 1px solid #e2e8f0; box-shadow: 0 4px 24px rgba(0,0,0,.07); padding: 40px; width: 100%; max-width: 400px; }
@@ -90,7 +90,7 @@ h1 { font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
 <body>
 <div class="box">
   <div class="logo">
-    <div class="logo-icon">🧾</div>
+    <div class="logo-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
     <div>
       <div class="logo-name">Freelancer-invoice</div>
       <div class="logo-sub">by ISSU DEV</div>
@@ -107,7 +107,7 @@ h1 { font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
   <div class="alert-success">✓ Vous avez été déconnecté.</div>
   <?php endif; ?>
   <?php if ($error): ?>
-  <div class="alert-error">⚠ <?= htmlspecialchars($error) ?></div>
+  <div class="alert-error"><i class="fa-solid fa-triangle-exclamation"></i> <?= htmlspecialchars($error) ?></div>
   <?php endif; ?>
 
   <!--

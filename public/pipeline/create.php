@@ -62,17 +62,17 @@ require __DIR__ . '/../../templates/layout.php';
     <?php if ($pipelineLocked): ?>
     <div class="alert" style="background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:10px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px">
       <div>
-        <strong>🔒 Limite atteinte — Plan gratuit</strong><br>
+        <strong><i class="fa-solid fa-lock"></i> Limite atteinte — Plan gratuit</strong><br>
         <span style="font-size:.82rem">Vous avez atteint la limite de <strong><?= $pipelineMax ?> opportunités</strong> du plan gratuit.</span>
       </div>
-      <a href="/activate.php" class="btn btn-primary" style="white-space:nowrap;flex-shrink:0">⭐ Passer Pro</a>
+      <a href="/activate.php" class="btn btn-primary" style="white-space:nowrap;flex-shrink:0"><i class="fa-solid fa-star"></i> Passer Pro</a>
     </div>
     <?php elseif (!empty($errors)): ?>
-    <div class="alert alert-error">⚠ <?= implode('<br>⚠ ', array_map('htmlspecialchars', $errors)) ?></div>
+    <div class="alert alert-error"><i class="fa-solid fa-triangle-exclamation"></i> <?= implode('<br><i class="fa-solid fa-triangle-exclamation"></i> ', array_map('htmlspecialchars', $errors)) ?></div>
     <?php endif; ?>
 
     <form method="POST" <?= $pipelineLocked ? 'style="opacity:.4;pointer-events:none"' : '' ?>>
-      <div class="section-title">🎯 Opportunité</div>
+      <div class="section-title"><i class="fa-solid fa-bullseye"></i> Opportunité</div>
       <div class="form-grid-2" style="margin-bottom:16px">
         <div class="field" style="grid-column:1/-1">
           <label>Titre *</label>
@@ -104,7 +104,7 @@ require __DIR__ . '/../../templates/layout.php';
         </div>
       </div>
 
-      <div class="section-title">👤 Client prospect</div>
+      <div class="section-title"><i class="fa-solid fa-user"></i> Client prospect</div>
       <?php if (!empty($clients)): ?>
       <div class="field" style="margin-bottom:12px">
         <label>Choisir depuis la base clients</label>
@@ -145,7 +145,7 @@ require __DIR__ . '/../../templates/layout.php';
         </div>
       </div>
 
-      <div class="section-title">📝 Notes internes</div>
+      <div class="section-title"><i class="fa-solid fa-note-sticky"></i> Notes internes</div>
       <div class="field" style="margin-bottom:20px">
         <textarea name="notes" rows="3" placeholder="Remarques, points d'attention, suite à donner…"><?= htmlspecialchars($_POST['notes'] ?? '') ?></textarea>
       </div>

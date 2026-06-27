@@ -9,27 +9,23 @@ Auth::requireManager();
 
 use App\Database\InvoiceRepository;
 use App\Services\RequestValidator;
-use App\Services\LicenseService;
 
 $repo    = new InvoiceRepository();
 $errors  = [];
-$invoice = ['number' => $repo->nextNumber()];
-
-$invoiceLocked = !LicenseService::canAdd('invoice', $repo->count());
-if ($invoiceLocked && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    $errors[] = 'Limite du plan gratuit atteinte (' . LicenseService::invoiceMax() . ' factures max). Activez une licence Pro pour continuer.';
-}
-$lines   = [
-    ['description' => '', 'quantity' => 1, 'unit_price' => 0],
+$invoice = [
+    'number' => $repo->nextQuoteNumber(),
+    'type'   => 'DEVIS',
+    'status' => 'brouillon',
 ];
+$lines   = [['description' => '', 'quantity' => 1, 'unit_price' => 0]];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    [$postData, $logoPath] = processInvoicePost();
+    [$postData, $logoPath] = processDevisPost();
 
     $validator = new RequestValidator();
     if ($validator->validate($postData)) {
-        $id   = $repo->create($postData);
-        header('Location: /invoice/edit.php?id=' . $id . '&created=1');
+        $id = $repo->create($postData);
+        header('Location: /devis/edit.php?id=' . $id . '&created=1');
         exit;
     }
 
@@ -38,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $lines   = $postData['lines'] ?? $lines;
 }
 
-function processInvoicePost(): array
+function processDevisPost(): array
 {
     $logoPath = '';
     if (!empty($_FILES['logo']['tmp_name'])) {
@@ -62,7 +58,7 @@ function processInvoicePost(): array
 
     return [[
         'number'          => trim($_POST['number']          ?? ''),
-        'type'            => $_POST['type']                 ?? 'FACTURE PROFORMA',
+        'type'            => 'DEVIS',
         'status'          => $_POST['status']               ?? 'brouillon',
         'subject'         => trim($_POST['subject']         ?? ''),
         'issued_at'       => $_POST['issued_at']            ?? '',
@@ -89,28 +85,13 @@ function processInvoicePost(): array
     ], $logoPath];
 }
 
-$pageTitle   = 'Nouvelle facture';
-$currentPage = 'create';
-$formAction  = '/invoice/create.php';
-
-$topbarActions = '<a href="/invoice/list.php" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Retour</a>';
+$pageTitle     = 'Nouveau devis';
+$currentPage   = 'devis';
+$formAction    = '/devis/create.php';
+$lockedType    = 'DEVIS';
+$devisStatuses = true;
+$topbarActions = '<a href="/devis/index.php" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Retour</a>';
 
 require __DIR__ . '/../../templates/layout.php';
-
-if ($invoiceLocked): ?>
-<div class="alert" style="background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:10px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px">
-  <div><strong><i class="fa-solid fa-lock"></i> Limite atteinte — Plan gratuit</strong><br><span style="font-size:.82rem">Maximum <?= LicenseService::invoiceMax() ?> factures sur le plan gratuit.</span></div>
-  <a href="/activate.php" class="btn btn-primary" style="white-space:nowrap"><i class="fa-solid fa-star"></i> Passer Pro</a>
-</div>
-<?php elseif (!empty($errors)): ?>
-<div class="alert alert-error"><i class="fa-solid fa-triangle-exclamation"></i> <?= implode('<br><i class="fa-solid fa-triangle-exclamation"></i> ', array_map('htmlspecialchars', $errors)) ?></div>
-<?php endif;
-?>
-
-<div class="card">
-    <div class="card-body">
-        <?php require __DIR__ . '/../../templates/invoice_form.php'; ?>
-    </div>
-</div>
-
-<?php require __DIR__ . '/../../templates/layout_end.php'; ?>
+require __DIR__ . '/../../templates/invoice_form.php';
+require __DIR__ . '/../../templates/layout_end.php';

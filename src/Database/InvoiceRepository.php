@@ -60,12 +60,12 @@ final class InvoiceRepository
         $row = $this->db->query("
             SELECT
                 COUNT(*)                                      AS total,
-                SUM(status = 'brouillon')                     AS brouillon,
-                SUM(status = 'envoyée')                       AS envoyee,
-                SUM(status = 'payée')                         AS payee,
-                SUM(status = 'annulée')                       AS annulee,
-                COALESCE(SUM(CASE WHEN status IN ('envoyée','payée') THEN total_net ELSE 0 END), 0) AS ca_engage,
-                COALESCE(SUM(CASE WHEN status = 'payée'              THEN total_net ELSE 0 END), 0) AS ca_encaisse
+                SUM(status = 'brouillon' AND type NOT IN ('DEVIS','AVOIR')) AS brouillon,
+                SUM(status = 'envoyée'   AND type NOT IN ('DEVIS','AVOIR')) AS envoyee,
+                SUM(status = 'payée'     AND type NOT IN ('DEVIS','AVOIR')) AS payee,
+                SUM(status = 'annulée'   AND type NOT IN ('DEVIS','AVOIR')) AS annulee,
+                COALESCE(SUM(CASE WHEN status IN ('envoyée','payée') AND type NOT IN ('DEVIS','AVOIR') THEN total_net ELSE 0 END), 0) AS ca_engage,
+                COALESCE(SUM(CASE WHEN status = 'payée'              AND type NOT IN ('DEVIS','AVOIR') THEN total_net ELSE 0 END), 0) AS ca_encaisse
             FROM invoices
         ")->fetch();
 
@@ -151,13 +151,13 @@ final class InvoiceRepository
                  issuer_name, issuer_address, issuer_phone, issuer_email, issuer_ifu, issuer_logo_path,
                  client_name, client_address, client_contact,
                  tax_rate, tax_label, signatory_title, signatory_name, footer_text,
-                 prestation_label, prestation_amount, total_ht, total_net)
+                 prestation_label, prestation_amount, total_ht, total_net, origin_id)
             VALUES
                 (:number, :type, :status, :subject, :issued_at, :due_at,
                  :issuer_name, :issuer_address, :issuer_phone, :issuer_email, :issuer_ifu, :issuer_logo_path,
                  :client_name, :client_address, :client_contact,
                  :tax_rate, :tax_label, :signatory_title, :signatory_name, :footer_text,
-                 :prestation_label, :prestation_amount, :total_ht, :total_net)
+                 :prestation_label, :prestation_amount, :total_ht, :total_net, :origin_id)
         ");
         $stmt->execute($this->extractFields($data));
         $id = (int) $this->db->lastInsertId();
@@ -276,6 +276,83 @@ final class InvoiceRepository
         $this->db->prepare("DELETE FROM invoices WHERE id = ?")->execute([$id]);
     }
 
+    public function nextQuoteNumber(string $date = ''): string
+    {
+        $day    = $date ?: date('Y-m-d');
+        $prefix = 'DEV-' . str_replace('-', '', $day);
+        $stmt   = $this->db->prepare("SELECT COUNT(*) FROM invoices WHERE number LIKE ? AND type = 'DEVIS'");
+        $stmt->execute([$prefix . '-%']);
+        return $prefix . '-' . ((int) $stmt->fetchColumn() + 1);
+    }
+
+    public function allDevis(): array
+    {
+        return $this->db
+            ->query("SELECT * FROM invoices WHERE type = 'DEVIS' ORDER BY created_at DESC")
+            ->fetchAll();
+    }
+
+    public function allDevisByStatus(string $status): array
+    {
+        $stmt = $this->db->prepare("SELECT * FROM invoices WHERE type = 'DEVIS' AND status = ? ORDER BY created_at DESC");
+        $stmt->execute([$status]);
+        return $stmt->fetchAll();
+    }
+
+    /** Avoirs liés à une facture */
+    public function findAvoirs(int $invoiceId): array
+    {
+        $stmt = $this->db->prepare(
+            "SELECT * FROM invoices WHERE origin_id = ? AND type = 'AVOIR' ORDER BY created_at DESC"
+        );
+        $stmt->execute([$invoiceId]);
+        return $stmt->fetchAll();
+    }
+
+    /** Facture issue de la conversion d'un devis */
+    public function findConvertedInvoice(int $devisId): ?array
+    {
+        $stmt = $this->db->prepare(
+            "SELECT * FROM invoices WHERE origin_id = ? AND type NOT IN ('DEVIS','AVOIR') LIMIT 1"
+        );
+        $stmt->execute([$devisId]);
+        $row = $stmt->fetch();
+        return $row ?: null;
+    }
+
+    /**
+     * Batch lookup: returns a map of devisId → converted invoice row.
+     * Use instead of calling findConvertedInvoice() in a loop.
+     * @param int[] $devisIds
+     * @return array<int, array<string, mixed>>
+     */
+    public function convertedInvoicesByDevisIds(array $devisIds): array
+    {
+        if (empty($devisIds)) {
+            return [];
+        }
+        $placeholders = implode(',', array_fill(0, count($devisIds), '?'));
+        $stmt = $this->db->prepare(
+            "SELECT * FROM invoices
+             WHERE origin_id IN ($placeholders) AND type NOT IN ('DEVIS','AVOIR')"
+        );
+        $stmt->execute($devisIds);
+        $map = [];
+        foreach ($stmt->fetchAll() as $row) {
+            $map[(int) $row['origin_id']] = $row;
+        }
+        return $map;
+    }
+
+    /** Devis dont ce document est l'original (pour avoir) */
+    public function findOrigin(int $originId): ?array
+    {
+        $stmt = $this->db->prepare("SELECT * FROM invoices WHERE id = ?");
+        $stmt->execute([$originId]);
+        $row = $stmt->fetch();
+        return $row ?: null;
+    }
+
     /** @param array<string, mixed> $data
      *  @return array<string, mixed> */
     private function extractFields(array $data): array
@@ -305,6 +382,7 @@ final class InvoiceRepository
             ':prestation_amount'  => (int) ($data['prestation_amount'] ?? 0),
             ':total_ht'           => (int) ($data['total_ht']  ?? 0),
             ':total_net'          => (int) ($data['total_net'] ?? 0),
+            ':origin_id'          => isset($data['origin_id']) ? (int) $data['origin_id'] : null,
         ];
     }
 

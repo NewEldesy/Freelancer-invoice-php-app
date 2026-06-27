@@ -32,7 +32,7 @@ $prestationAmount = (int) ($inv['prestation_amount'] ?? 0);
 <?php endif; ?>
 
 <!-- ── Entreprise ── -->
-<div class="section-title" style="margin-top:0">🏢 Votre entreprise</div>
+<div class="section-title" style="margin-top:0"><i class="fa-solid fa-building"></i> Votre entreprise</div>
 
 <?php
 $logoPath = $inv['issuer_logo_path'] ?? $settings['issuer_logo_path'] ?? '';
@@ -79,15 +79,20 @@ if ($logoPath && file_exists($logoPath)):
 </div>
 
 <!-- ── Facture ── -->
-<div class="section-title">🧾 Informations de la facture</div>
+<div class="section-title"><i class="fa-solid fa-file-invoice"></i> Informations de la facture</div>
 <div class="form-grid-3">
     <div class="field">
         <label>Type</label>
+        <?php if (!empty($lockedType)): ?>
+        <input type="hidden" name="type" value="<?= htmlspecialchars($lockedType) ?>">
+        <input type="text" value="<?= htmlspecialchars($lockedType) ?>" readonly style="background:#f5f5f5;color:var(--muted);cursor:default">
+        <?php else: ?>
         <select name="type">
-            <?php foreach (['FACTURE PROFORMA','FACTURE','DEVIS'] as $t): ?>
+            <?php foreach (['FACTURE PROFORMA','FACTURE','DEVIS','AVOIR'] as $t): ?>
             <option value="<?= $t ?>" <?= ($inv['type'] ?? 'FACTURE PROFORMA') === $t ? 'selected' : '' ?>><?= $t ?></option>
             <?php endforeach; ?>
         </select>
+        <?php endif; ?>
     </div>
     <div class="field">
         <label>N° Facture</label>
@@ -100,7 +105,13 @@ if ($logoPath && file_exists($logoPath)):
     <div class="field">
         <label>Statut</label>
         <select name="status">
-            <?php foreach (['brouillon'=>'Brouillon','envoyée'=>'Envoyée','payée'=>'Payée','annulée'=>'Annulée'] as $val => $lbl): ?>
+            <?php
+            $statusOpts = $devisStatuses ?? false
+                ? ['brouillon'=>'Brouillon','envoyé'=>'Envoyé','accepté'=>'Accepté','refusé'=>'Refusé']
+                : ($avoirStatuses ?? false
+                    ? ['brouillon'=>'Brouillon','émis'=>'Émis']
+                    : ['brouillon'=>'Brouillon','envoyée'=>'Envoyée','payée'=>'Payée','annulée'=>'Annulée']);
+            foreach ($statusOpts as $val => $lbl): ?>
             <option value="<?= $val ?>" <?= ($inv['status'] ?? 'brouillon') === $val ? 'selected' : '' ?>><?= $lbl ?></option>
             <?php endforeach; ?>
         </select>
@@ -122,7 +133,7 @@ if ($logoPath && file_exists($logoPath)):
 </div>
 
 <!-- ── Client ── -->
-<div class="section-title">👤 Client — Envoyé à</div>
+<div class="section-title"><i class="fa-solid fa-user"></i> Client — Envoyé à</div>
 <?php if (!empty($clients)): ?>
 <div class="field" style="margin-bottom:12px">
     <label>Choisir depuis la base clients</label>
@@ -164,7 +175,7 @@ function pickClient(sel) {
 </script>
 
 <!-- ── Lignes ── -->
-<div class="section-title">📦 Articles</div>
+<div class="section-title"><i class="fa-solid fa-list"></i> Articles</div>
 <table class="lines-tbl" style="margin-bottom:10px">
     <thead>
         <tr>
@@ -200,7 +211,7 @@ function pickClient(sel) {
 <?php if (!empty($catalogue)): ?>
 <button type="button" onclick="document.getElementById('catalogue-modal').style.display='flex'"
     style="background:none;border:1px dashed var(--navy);color:var(--navy);border-radius:6px;padding:6px 14px;cursor:pointer;font-size:.82rem;font-weight:600">
-    📦 Depuis le catalogue
+    <i class="fa-solid fa-box-open"></i> Depuis le catalogue
 </button>
 <?php endif; ?>
 </div>
@@ -212,7 +223,7 @@ function pickClient(sel) {
      onclick="if(event.target===this)this.style.display='none'">
   <div style="background:#fff;border-radius:12px;width:560px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)">
     <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
-      <strong style="font-size:.95rem">📦 Catalogue de prestations</strong>
+      <strong style="font-size:.95rem"><i class="fa-solid fa-box-open"></i> Catalogue de prestations</strong>
       <button type="button" onclick="document.getElementById('catalogue-modal').style.display='none'"
               style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--muted)">×</button>
     </div>
@@ -259,7 +270,7 @@ function filterCat(q) {
 <?php endif; ?>
 
 <!-- ── Ligne Prestation (toujours en dernier) ── -->
-<div class="section-title" style="margin-top:22px">🔧 Frais de prestation
+<div class="section-title" style="margin-top:22px"><i class="fa-solid fa-screwdriver-wrench"></i> Frais de prestation
     <span style="font-size:.7rem;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;margin-left:6px">
         — apparaît en dernière position dans la facture
     </span>
@@ -304,7 +315,7 @@ function filterCat(q) {
 </div>
 
 <!-- ── Signature ── -->
-<div class="section-title">✍️ Signature</div>
+<div class="section-title"><i class="fa-solid fa-signature"></i> Signature</div>
 <div class="form-grid-2">
     <div class="field">
         <label>Titre</label>
@@ -317,7 +328,7 @@ function filterCat(q) {
 </div>
 
 <!-- ── Pied de page ── -->
-<div class="section-title">📝 Pied de page</div>
+<div class="section-title"><i class="fa-solid fa-align-left"></i> Pied de page</div>
 <div class="field">
     <textarea name="footer_text" rows="3"><?= $fv('footer_text') ?></textarea>
     <span style="font-size:.72rem;color:var(--muted);margin-top:2px">
@@ -332,7 +343,7 @@ function filterCat(q) {
 <!-- Actions -->
 <div style="display:flex;gap:10px;margin-top:28px;padding-top:20px;border-top:1px solid var(--border)">
     <button type="submit" class="btn btn-primary" style="flex:1;justify-content:center;padding:12px">
-        💾 Enregistrer la facture
+        <i class="fa-solid fa-floppy-disk"></i> Enregistrer la facture
     </button>
     <a href="/invoice/list.php" class="btn btn-secondary" style="justify-content:center;padding:12px 20px">
         Annuler

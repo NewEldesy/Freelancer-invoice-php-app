@@ -60,16 +60,16 @@ require __DIR__ . '/../../templates/layout.php';
 
 <?php if ($flash): ?>
 <div class="alert" style="background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;border-radius:10px;padding:12px 16px;margin-bottom:16px">
-  ✅ <?= htmlspecialchars($flash) ?>
+  <i class="fa-solid fa-circle-check"></i> <?= htmlspecialchars($flash) ?>
 </div>
 <?php endif; ?>
 
 <!-- Stats -->
 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px">
   <?php foreach ([
-    ['Total clés', $stats['total'], 'var(--navy)', '🔑'],
-    ['Disponibles', $stats['available'], '#059669', '✅'],
-    ['Utilisées', $stats['used'], '#dc2626', '📌'],
+    ['Total clés', $stats['total'], 'var(--navy)', '<i class="fa-solid fa-key"></i>'],
+    ['Disponibles', $stats['available'], '#059669', '<i class="fa-solid fa-circle-check"></i>'],
+    ['Utilisées', $stats['used'], '#dc2626', '<i class="fa-solid fa-thumbtack"></i>'],
   ] as [$label, $val, $color, $icon]): ?>
   <div class="card" style="padding:18px 22px">
     <div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:700;margin-bottom:6px"><?= $icon ?> <?= $label ?></div>
@@ -81,7 +81,7 @@ require __DIR__ . '/../../templates/layout.php';
 <!-- Generate form -->
 <div class="card" style="margin-bottom:20px">
   <div style="padding:14px 20px;border-bottom:1px solid var(--border-soft);font-weight:700;color:var(--navy);font-size:.88rem">
-    ➕ Générer une nouvelle clé
+    <i class="fa-solid fa-plus"></i> Générer une nouvelle clé
   </div>
   <div style="padding:18px 20px">
     <form method="POST" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
@@ -103,7 +103,7 @@ require __DIR__ . '/../../templates/layout.php';
         </select>
       </div>
       <button type="submit" name="generate" value="1" class="btn btn-primary" style="padding:9px 20px">
-        🔑 Générer
+        <i class="fa-solid fa-key"></i> Générer
       </button>
     </form>
   </div>
@@ -141,7 +141,7 @@ require __DIR__ . '/../../templates/layout.php';
       </td>
       <td>
         <span class="badge-edition <?= $k['edition'] === 'pro' ? 'badge-pro' : 'badge-ent' ?>">
-          <?= $k['edition'] === 'pro' ? '⭐ Pro' : '<i class="fa-solid fa-building"></i> Entreprise' ?>
+          <?= $k['edition'] === 'pro' ? '<i class="fa-solid fa-star"></i> Pro' : '<i class="fa-solid fa-building"></i> Entreprise' ?>
         </span>
       </td>
       <td><?= $periodLabel[$k['period']] ?? $k['period'] ?></td>
@@ -156,9 +156,9 @@ require __DIR__ . '/../../templates/layout.php';
       </td>
       <td>
         <?php if ($k['used']): ?>
-        <span class="badge-used">📌 Utilisée</span>
+        <span class="badge-used"><i class="fa-solid fa-thumbtack"></i> Utilisée</span>
         <?php else: ?>
-        <span class="badge-free">✅ Disponible</span>
+        <span class="badge-free"><i class="fa-solid fa-circle-check"></i> Disponible</span>
         <?php endif; ?>
       </td>
       <td style="font-size:.65rem;font-family:monospace;color:var(--muted)">
@@ -178,7 +178,7 @@ require __DIR__ . '/../../templates/layout.php';
 </div>
 
 <div id="copy-toast" style="display:none;position:fixed;bottom:24px;right:24px;background:#0f172a;color:#fff;padding:10px 18px;border-radius:9px;font-size:.82rem;font-weight:600;z-index:9999">
-  📋 Clé copiée !
+  <i class="fa-solid fa-check"></i> Clé copiée !
 </div>
 
 <script>

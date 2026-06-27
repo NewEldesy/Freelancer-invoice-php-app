@@ -51,7 +51,7 @@ require __DIR__ . '/../../templates/layout.php';
   <div class="stat-card <?= $gStats['benefice_net'] >= 0 ? 'green' : 'red' ?>">
     <div class="stat-top">
       <div class="stat-label">Bénéfice net</div>
-      <div class="stat-badge <?= $gStats['benefice_net'] >= 0 ? 'green' : 'red' ?>">📈</div>
+      <div class="stat-badge <?= $gStats['benefice_net'] >= 0 ? 'green' : 'red' ?>"><i class="fa-solid <?= $gStats['benefice_net'] >= 0 ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down' ?>"></i></div>
     </div>
     <div class="stat-value" style="font-size:1.2rem;color:<?= $gStats['benefice_net'] >= 0 ? 'var(--green)' : 'var(--red)' ?>">
       <?= number_format($gStats['benefice_net'], 0, ',', ' ') ?>

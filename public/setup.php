@@ -76,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Configuration initiale — Freelancer-invoice</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('/assets/fonts/inter.css');
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Inter', sans-serif; background: #f8fafc; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; }
 .box { background: #fff; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 24px rgba(0,0,0,.07); padding: 36px 40px; width: 100%; max-width: 560px; }
@@ -108,22 +108,22 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; display: flex; ali
 <body>
 <div class="box">
   <div class="logo">
-    <div class="logo-icon">🧾</div>
+    <div class="logo-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
     <div>
       <div class="logo-name">Freelancer-invoice</div>
       <div class="logo-sub">by ISSU DEV</div>
     </div>
   </div>
-  <span class="badge">⚙️ Configuration initiale</span>
+  <span class="badge"><i class="fa-solid fa-gear"></i> Configuration initiale</span>
 
   <?php if (!empty($errors)): ?>
-  <div class="alert">⚠ <?= implode('<br>⚠ ', array_map('htmlspecialchars', $errors)) ?></div>
+  <div class="alert"><i class="fa-solid fa-triangle-exclamation"></i> <?= implode('<br><i class="fa-solid fa-triangle-exclamation"></i> ', array_map('htmlspecialchars', $errors)) ?></div>
   <?php endif; ?>
 
   <form method="POST">
 
     <!-- Superadmin -->
-    <div class="section-label">🔑 Compte ISSU DEV (superadmin)</div>
+    <div class="section-label"><i class="fa-solid fa-key"></i> Compte ISSU DEV (superadmin)</div>
     <p style="font-size:.75rem;color:#64748b;margin-bottom:14px">
       Ce compte gère les clés de licence. Gardez ces identifiants confidentiels.
     </p>
@@ -149,7 +149,7 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; display: flex; ali
     <hr class="divider">
 
     <!-- Admin client -->
-    <div class="section-label gold">👤 Compte administrateur client</div>
+    <div class="section-label gold"><i class="fa-solid fa-user"></i> Compte administrateur client</div>
     <p style="font-size:.75rem;color:#64748b;margin-bottom:14px">
       Ce compte gère les utilisateurs de l'application (gestionnaires, utilisateurs).
     </p>
@@ -173,13 +173,13 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; display: flex; ali
     </div>
 
     <div class="keygen-preview">
-      <strong>✅ Clés générées automatiquement à l'initialisation :</strong>
+      <strong><i class="fa-solid fa-circle-check"></i> Clés générées automatiquement à l'initialisation :</strong>
       5 clés Pro (3m · 6m · 1y · 2y · permanent) &nbsp;+&nbsp;
       10 clés Entreprise (2× par période).<br>
       Plan <strong>Gratuit</strong> activé par défaut.
     </div>
 
-    <button type="submit" class="btn">🚀 Initialiser l'application</button>
+    <button type="submit" class="btn"><i class="fa-solid fa-rocket"></i> Initialiser l'application</button>
   </form>
 </div>
 </body>

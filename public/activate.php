@@ -164,7 +164,7 @@ $machineId = LicenseService::machineId();
 
 <div class="wrapper">
   <div class="brand">
-    <div class="brand-logo">📋</div>
+    <div class="brand-logo"><i class="fa-solid fa-file-invoice-dollar"></i></div>
     <div class="brand-name">Freelancer-invoice</div>
     <div class="brand-sub">© ISSU DEV</div>
   </div>
@@ -172,7 +172,7 @@ $machineId = LicenseService::machineId();
   <div class="card">
     <div class="card-header">
       <?php if ($expired): ?>
-      <h1>🔴 Votre licence a expiré</h1>
+      <h1><i class="fa-solid fa-circle-xmark" style="color:#ef4444"></i> Votre licence a expiré</h1>
       <p>Renouvelez votre abonnement ou continuez en version gratuite.</p>
       <?php else: ?>
       <h1>Activation du logiciel</h1>
@@ -182,7 +182,7 @@ $machineId = LicenseService::machineId();
     <div class="card-body">
 
       <?php if ($error): ?>
-      <div class="alert-error">⚠️ <?= htmlspecialchars($error) ?></div>
+      <div class="alert-error"><i class="fa-solid fa-triangle-exclamation"></i> <?= htmlspecialchars($error) ?></div>
       <?php endif; ?>
 
       <!-- Plans -->

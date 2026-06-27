@@ -49,7 +49,7 @@ $marge    = (int)$project['total_net'] - $totalExp;
 $pageTitle   = 'Projet — ' . htmlspecialchars($project['title']);
 $currentPage = 'projects';
 $topbarActions = '
-  <a href="/expense/create.php?invoice_id=' . $project['invoice_id'] . '" class="btn btn-secondary">➕ Ajouter dépense</a>
+  <a href="/expense/create.php?invoice_id=' . $project['invoice_id'] . '" class="btn btn-secondary"><i class="fa-solid fa-plus"></i> Ajouter dépense</a>
   <a href="/project/index.php" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Retour</a>
 ';
 
@@ -63,7 +63,7 @@ require __DIR__ . '/../../templates/layout.php';
     <div class="card-header"><h2>Détails du projet</h2></div>
     <div class="card-body">
       <?php if (!empty($errors)): ?>
-      <div class="alert alert-error">⚠ <?= implode('<br>', array_map('htmlspecialchars', $errors)) ?></div>
+      <div class="alert alert-error"><i class="fa-solid fa-triangle-exclamation"></i> <?= implode('<br><i class="fa-solid fa-triangle-exclamation"></i> ', array_map('htmlspecialchars', $errors)) ?></div>
       <?php endif; ?>
 
       <div style="margin-bottom:14px;padding:12px 16px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
@@ -85,7 +85,7 @@ require __DIR__ . '/../../templates/layout.php';
           <div class="field">
             <label>Statut</label>
             <select name="status">
-              <?php foreach (['non_commence'=>'⏳ Non commencé','en_cours'=>'🔨 En cours','livre'=>'📦 Livré','valide'=>'✅ Validé client'] as $v => $l): ?>
+              <?php foreach (['non_commence'=>'Non commencé','en_cours'=>'En cours','livre'=>'Livré','valide'=>'Validé client'] as $v => $l): ?>
               <option value="<?= $v ?>" <?= $project['status'] === $v ? 'selected' : '' ?>><?= $l ?></option>
               <?php endforeach; ?>
             </select>
@@ -138,7 +138,7 @@ require __DIR__ . '/../../templates/layout.php';
         <?php endif; ?>
         <a href="/expense/create.php?invoice_id=<?= $project['invoice_id'] ?>"
            class="btn btn-secondary" style="width:100%;margin-top:12px;justify-content:center">
-          ➕ Ajouter une dépense
+          <i class="fa-solid fa-plus"></i> Ajouter une dépense
         </a>
       </div>
     </div>
@@ -160,7 +160,7 @@ require __DIR__ . '/../../templates/layout.php';
               <input type="hidden" name="id" value="<?= $exp['id'] ?>">
               <input type="hidden" name="back" value="/project/edit.php?id=<?= $id ?>">
               <button type="submit" class="btn btn-danger btn-sm btn-icon"
-                      onclick="return confirm('Supprimer cette dépense ?')" title="Supprimer">🗑️</button>
+                      onclick="return confirm('Supprimer cette dépense ?')" title="Supprimer"><i class="fa-solid fa-trash"></i></button>
             </form>
           </div>
         </div>

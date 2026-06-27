@@ -18,7 +18,7 @@ $_licenseIsFree  = \App\Services\LicenseService::isFree();
 <meta name="csrf-token" content="<?= htmlspecialchars(\App\Auth\Auth::csrfToken()) ?>">
 <link rel="stylesheet" href="/assets/fa/css/all.min.css">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('/assets/fonts/inter.css');
 
 :root {
   --navy:       #0f172a;
@@ -602,7 +602,10 @@ table.data-table tbody tr:hover td { background: #f8fafc; }
       <span class="nav-icon"><i class="fa-solid fa-chart-pie"></i></span> Tableau de bord
     </a>
     <a href="/invoice/list.php" class="<?= ($currentPage ?? '') === 'list' ? 'active' : '' ?>">
-      <span class="nav-icon"><i class="fa-solid fa-file-invoice"></i></span> Toutes les factures
+      <span class="nav-icon"><i class="fa-solid fa-file-invoice"></i></span> Factures
+    </a>
+    <a href="/devis/index.php" class="<?= ($currentPage ?? '') === 'devis' ? 'active' : '' ?>">
+      <span class="nav-icon"><i class="fa-solid fa-file-circle-question"></i></span> Devis
     </a>
 
     <div class="nav-section">Acquisition</div>
@@ -615,6 +618,9 @@ table.data-table tbody tr:hover td { background: #f8fafc; }
     <?php if ($_role === 'gestionnaire'): ?>
     <a href="/invoice/create.php" class="<?= ($currentPage ?? '') === 'create' ? 'active' : '' ?>">
       <span class="nav-icon"><i class="fa-solid fa-plus"></i></span> Nouvelle facture
+    </a>
+    <a href="/devis/create.php" class="<?= ($currentPage ?? '') === 'devis_create' ? 'active' : '' ?>">
+      <span class="nav-icon"><i class="fa-solid fa-file-pen"></i></span> Nouveau devis
     </a>
     <?php endif; ?>
 
@@ -713,8 +719,8 @@ table.data-table tbody tr:hover td { background: #f8fafc; }
 
   <div class="content">
     <?php if (isset($flashSuccess)): ?>
-      <div class="alert alert-success">✓ <?= htmlspecialchars($flashSuccess) ?></div>
+      <div class="alert alert-success"><i class="fa-solid fa-circle-check"></i> <?= htmlspecialchars($flashSuccess) ?></div>
     <?php endif; ?>
     <?php if (isset($flashError)): ?>
-      <div class="alert alert-error">⚠ <?= htmlspecialchars($flashError) ?></div>
+      <div class="alert alert-error"><i class="fa-solid fa-triangle-exclamation"></i> <?= htmlspecialchars($flashError) ?></div>
     <?php endif; ?>

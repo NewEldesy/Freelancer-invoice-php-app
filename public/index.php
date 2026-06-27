@@ -137,7 +137,7 @@ require __DIR__ . '/../templates/layout.php';
     <?php if ($stats['ca_engage'] > 0 && $stats['ca_engage'] > $stats['ca_encaisse']): ?>
     <?php $reste = $stats['ca_engage'] - $stats['ca_encaisse']; ?>
     <div style="margin-top:10px;padding:6px 10px;background:rgba(239,68,68,.07);border-radius:6px;font-size:.72rem;color:#b91c1c">
-      ⏳ <?= number_format($reste, 0, ',', ' ') ?> FCFA en attente d'encaissement
+      <i class="fa-solid fa-hourglass-half"></i> <?= number_format($reste, 0, ',', ' ') ?> FCFA en attente d'encaissement
     </div>
     <?php elseif ($stats['ca_encaisse'] > 0 && $stats['ca_encaisse'] === $stats['ca_engage']): ?>
     <div style="margin-top:10px;padding:6px 10px;background:rgba(16,185,129,.08);border-radius:6px;font-size:.72rem;color:#065f46">
@@ -185,7 +185,7 @@ require __DIR__ . '/../templates/layout.php';
         <div class="stat-label">Bénéfice net</div>
         <div style="font-size:.7rem;color:var(--muted-light);margin-top:2px">CA encaissé − Dépenses</div>
       </div>
-      <div class="stat-badge <?= $finStats['benefice_net'] >= 0 ? 'green' : 'red' ?>">📈</div>
+      <div class="stat-badge <?= $finStats['benefice_net'] >= 0 ? 'green' : 'red' ?>"><i class="fa-solid <?= $finStats['benefice_net'] >= 0 ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down' ?>"></i></div>
     </div>
     <div class="stat-value" style="font-size:1.3rem;color:<?= $finStats['benefice_net'] >= 0 ? 'var(--green)' : 'var(--red)' ?>">
       <?= number_format($finStats['benefice_net'], 0, ',', ' ') ?>
@@ -207,7 +207,7 @@ require __DIR__ . '/../templates/layout.php';
 
     <?php if (empty($recent)): ?>
     <div class="empty-state">
-      <div class="empty-icon">🧾</div>
+      <div class="empty-icon"><i class="fa-solid fa-file-invoice"></i></div>
       <h3>Aucune facture</h3>
       <p>Créez votre première facture pour commencer.</p>
       <a href="/invoice/create.php" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Nouvelle facture</a>
@@ -244,11 +244,11 @@ require __DIR__ . '/../templates/layout.php';
             <td><span class="badge <?= $s['class'] ?>"><?= $s['label'] ?></span></td>
             <td>
               <div style="display:flex;gap:4px">
-                <a href="/invoice/edit.php?id=<?= $inv['id'] ?>" class="btn btn-secondary btn-sm btn-icon" title="Modifier">✏️</a>
-                <a href="/invoice/pdf.php?id=<?= $inv['id'] ?>" class="btn btn-secondary btn-sm btn-icon" title="PDF" target="_blank">📄</a>
+                <a href="/invoice/edit.php?id=<?= $inv['id'] ?>" class="btn btn-secondary btn-sm btn-icon" title="Modifier"><i class="fa-solid fa-pen-to-square"></i></a>
+                <a href="/invoice/pdf.php?id=<?= $inv['id'] ?>" class="btn btn-secondary btn-sm btn-icon" title="PDF" target="_blank"><i class="fa-solid fa-file-pdf"></i></a>
                 <form method="POST" action="/invoice/duplicate.php" style="display:inline">
                   <input type="hidden" name="id" value="<?= $inv['id'] ?>">
-                  <button type="submit" class="btn btn-secondary btn-sm btn-icon" title="Dupliquer">⧉</button>
+                  <button type="submit" class="btn btn-secondary btn-sm btn-icon" title="Dupliquer"><i class="fa-solid fa-clone"></i></button>
                 </form>
               </div>
             </td>
@@ -326,7 +326,7 @@ require __DIR__ . '/../templates/layout.php';
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script src="/assets/js/chart.umd.min.js"></script>
 <script>
 new Chart(document.getElementById('monthlyChart').getContext('2d'), {
   type: 'bar',

@@ -92,9 +92,9 @@ $MONTHS_FR = [
 $pageTitle   = 'Rapport annuel ' . $currentYear;
 $currentPage = 'accounting';
 $topbarActions = '
-  <a href="/accounting/index.php?year=' . $currentYear . '" class="btn btn-secondary">📊 Vue mensuelle</a>
-  <a href="/accounting/export.php?type=annual&year=' . $currentYear . '" class="btn btn-secondary">📊 Exporter Excel</a>
-  <button onclick="window.print()" class="btn btn-secondary" id="print-btn">🖨️ Imprimer / PDF</button>
+  <a href="/accounting/index.php?year=' . $currentYear . '" class="btn btn-secondary"><i class="fa-solid fa-chart-bar"></i> Vue mensuelle</a>
+  <a href="/accounting/export.php?type=annual&year=' . $currentYear . '" class="btn btn-secondary"><i class="fa-solid fa-file-excel"></i> Exporter Excel</a>
+  <button onclick="window.print()" class="btn btn-secondary" id="print-btn"><i class="fa-solid fa-print"></i> Imprimer / PDF</button>
 ';
 
 require __DIR__ . '/../../templates/layout.php';

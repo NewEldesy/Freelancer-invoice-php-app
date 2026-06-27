@@ -63,7 +63,7 @@ require __DIR__ . '/../../templates/layout.php';
             <input type="hidden" name="id" value="<?= $user['id'] ?>">
             <button type="submit" class="btn btn-danger btn-sm btn-icon"
                     onclick="return confirm('Supprimer <?= htmlspecialchars(addslashes($user['username'])) ?> ?')"
-                    title="Supprimer">🗑️</button>
+                    title="Supprimer"><i class="fa-solid fa-trash"></i></button>
           </form>
           <?php else: ?>
           <span style="font-size:.72rem;color:var(--muted-light)">—</span>
