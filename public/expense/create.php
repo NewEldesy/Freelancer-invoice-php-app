@@ -10,6 +10,7 @@ Auth::requireManager();
 use App\Database\ExpenseRepository;
 use App\Database\InvoiceRepository;
 use App\Services\LicenseService;
+use App\Services\ActivityLogger;
 
 $expRepo  = new ExpenseRepository();
 $invRepo  = new InvoiceRepository();
@@ -50,6 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$expenseLocked) {
     if ($saved === 0) {
         $errors[] = 'Ajoutez au moins une dépense avec une description et un montant valide.';
     } else {
+        ActivityLogger::log('expense.create', 'Ajout ' . $saved . ' dépense(s)');
         $back = $invoiceId
             ? '/expense/index.php?invoice_id=' . $invoiceId
             : '/expense/index.php';

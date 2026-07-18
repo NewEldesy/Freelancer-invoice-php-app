@@ -20,6 +20,8 @@ final class Database
             self::$instance = new PDO('sqlite:' . $path);
             self::$instance->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             self::$instance->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+            // WAL améliore les lectures concurrentes sans bloquer pendant les écritures
+            self::$instance->exec('PRAGMA journal_mode = WAL;');
             self::$instance->exec('PRAGMA foreign_keys = ON;');
             self::migrate(self::$instance);
         }
@@ -206,6 +208,57 @@ final class Database
             );
         ");
 
+        /* ── Factures récurrentes ── */
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS recurring_templates (
+                id               INTEGER PRIMARY KEY AUTOINCREMENT,
+                label            TEXT    NOT NULL,
+                client_name      TEXT    NOT NULL,
+                client_address   TEXT,
+                client_contact   TEXT,
+                client_whatsapp  TEXT,
+                subject          TEXT,
+                type             TEXT    NOT NULL DEFAULT 'FACTURE PROFORMA',
+                tax_rate         REAL    NOT NULL DEFAULT 5,
+                tax_label        TEXT    NOT NULL DEFAULT 'Prelevement 5%',
+                prestation_label TEXT    NOT NULL DEFAULT 'Frais de prestation',
+                prestation_amount INTEGER NOT NULL DEFAULT 0,
+                lines            TEXT    NOT NULL DEFAULT '[]',
+                interval_type    TEXT    NOT NULL DEFAULT 'mensuel',
+                next_due_at      TEXT    NOT NULL,
+                last_generated_at TEXT,
+                active           INTEGER NOT NULL DEFAULT 1,
+                created_at       TEXT    NOT NULL DEFAULT (datetime('now','localtime')),
+                updated_at       TEXT    NOT NULL DEFAULT (datetime('now','localtime'))
+            );
+        ");
+
+        /* ── Paramètres entreprise ── */
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS company_settings (
+                key   TEXT PRIMARY KEY,
+                value TEXT NOT NULL DEFAULT ''
+            );
+        ");
+
+        /* ── Journal d'activité ── */
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS activity_logs (
+                id         INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id    INTEGER,
+                username   TEXT    NOT NULL,
+                role       TEXT    NOT NULL DEFAULT '',
+                action     TEXT    NOT NULL,
+                label      TEXT    NOT NULL,
+                ip         TEXT,
+                created_at TEXT    NOT NULL DEFAULT (datetime('now','localtime'))
+            );
+        ");
+        $pdo->exec("
+            CREATE INDEX IF NOT EXISTS idx_logs_created_at ON activity_logs (created_at);
+            CREATE INDEX IF NOT EXISTS idx_logs_user_id    ON activity_logs (user_id);
+        ");
+
         /* Safe column additions for existing databases */
         foreach ([
             "ALTER TABLE invoices ADD COLUMN prestation_label  TEXT    NOT NULL DEFAULT 'Frais de prestation'",
@@ -213,8 +266,106 @@ final class Database
             "ALTER TABLE invoices ADD COLUMN client_id         INTEGER",
             "ALTER TABLE opportunities ADD COLUMN client_id    INTEGER",
             "ALTER TABLE invoices ADD COLUMN origin_id         INTEGER",
+            "ALTER TABLE invoices ADD COLUMN client_whatsapp   TEXT",
+            "ALTER TABLE clients  ADD COLUMN whatsapp          TEXT",
+            "ALTER TABLE users    ADD COLUMN first_name        TEXT NOT NULL DEFAULT ''",
+            "ALTER TABLE users    ADD COLUMN last_name         TEXT NOT NULL DEFAULT ''",
+            "ALTER TABLE users    ADD COLUMN phone             TEXT NOT NULL DEFAULT ''",
+            "ALTER TABLE users    ADD COLUMN avatar            TEXT",
         ] as $sql) {
             try { $pdo->exec($sql); } catch (\Exception) { /* column already exists */ }
         }
+
+        /* ── Index secondaires ──────────────────────────────────────────────────────
+         * CREATE INDEX IF NOT EXISTS est idempotent : coût nul si l'index existe déjà.
+         * Chaque index cible un pattern de requête fréquent identifié dans les repos.
+         * ─────────────────────────────────────────────────────────────────────────── */
+        $pdo->exec("
+            -- invoices : filtre par status (allByStatus, stats, overdue, topClients)
+            CREATE INDEX IF NOT EXISTS idx_invoices_status
+                ON invoices (status);
+
+            -- invoices : filtre par type (allDevis, allDevisByStatus, search)
+            CREATE INDEX IF NOT EXISTS idx_invoices_type
+                ON invoices (type);
+
+            -- invoices : tri principal de toutes les listes
+            CREATE INDEX IF NOT EXISTS idx_invoices_created_at
+                ON invoices (created_at DESC);
+
+            -- invoices : overdue() — filtre composé status + due_at
+            CREATE INDEX IF NOT EXISTS idx_invoices_status_due_at
+                ON invoices (status, due_at);
+
+            -- invoices : findAvoirs() et convertedInvoicesByDevisIds() — clé étrangère logique
+            CREATE INDEX IF NOT EXISTS idx_invoices_origin_id
+                ON invoices (origin_id);
+
+            -- invoices : statsByMonth() — filtre + group sur issued_at
+            CREATE INDEX IF NOT EXISTS idx_invoices_issued_at
+                ON invoices (issued_at);
+
+            -- invoices : nextNumber() / countByPrefix() — LIKE 'PREFIX-%'
+            CREATE INDEX IF NOT EXISTS idx_invoices_number
+                ON invoices (number);
+
+            -- invoice_lines : linesOf() — lookup FK + tri sort_order
+            CREATE INDEX IF NOT EXISTS idx_invoice_lines_invoice_id
+                ON invoice_lines (invoice_id, sort_order);
+
+            -- payments : allForInvoice() / totalForInvoice()
+            CREATE INDEX IF NOT EXISTS idx_payments_invoice_id
+                ON payments (invoice_id);
+
+            -- expenses : allForInvoice() / globalStats()
+            CREATE INDEX IF NOT EXISTS idx_expenses_invoice_id
+                ON expenses (invoice_id);
+
+            -- expenses : globalStats() filtre par status via JOIN invoices
+            CREATE INDEX IF NOT EXISTS idx_expenses_date
+                ON expenses (date);
+
+            -- recurring_templates : dueNow() — filtre composé active + next_due_at
+            CREATE INDEX IF NOT EXISTS idx_recurring_active_due
+                ON recurring_templates (active, next_due_at);
+
+            -- opportunities : filtre par status (pipeline)
+            CREATE INDEX IF NOT EXISTS idx_opportunities_status
+                ON opportunities (status);
+
+            -- projects : findByInvoice()
+            CREATE INDEX IF NOT EXISTS idx_projects_invoice_id
+                ON projects (invoice_id);
+
+            -- projects : all() ORDER BY + stats() filtre par status
+            CREATE INDEX IF NOT EXISTS idx_projects_status
+                ON projects (status);
+            CREATE INDEX IF NOT EXISTS idx_projects_created_at
+                ON projects (created_at DESC);
+
+            -- expenses : all() ORDER BY date DESC, created_at DESC
+            CREATE INDEX IF NOT EXISTS idx_expenses_date_created
+                ON expenses (date DESC, created_at DESC);
+
+            -- expenses : globalStats() / statsByMonth() GROUP BY category
+            CREATE INDEX IF NOT EXISTS idx_expenses_category
+                ON expenses (category);
+
+            -- opportunities : all() ORDER BY created_at DESC
+            CREATE INDEX IF NOT EXISTS idx_opportunities_created_at
+                ON opportunities (created_at DESC);
+
+            -- opportunities : stats() JOIN invoices ON i.id = o.invoice_id
+            CREATE INDEX IF NOT EXISTS idx_opportunities_invoice_id
+                ON opportunities (invoice_id);
+
+            -- clients : all() / allForSelect() ORDER BY name ASC
+            CREATE INDEX IF NOT EXISTS idx_clients_name
+                ON clients (name ASC);
+
+            -- services : all() ORDER BY category ASC, name ASC
+            CREATE INDEX IF NOT EXISTS idx_services_category_name
+                ON services (category ASC, name ASC);
+        ");
     }
 }

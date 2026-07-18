@@ -1,6 +1,18 @@
 <?php
 \App\Auth\Auth::start();
 
+// Setup guard — if no users exist the DB is blank (new install or renamed file)
+$_currentPage = $_SERVER['PHP_SELF'] ?? '';
+if (!str_ends_with($_currentPage, '/setup.php') && !str_ends_with($_currentPage, '/login.php')) {
+    $userCount = (int) \App\Database\Database::connection()
+        ->query("SELECT COUNT(*) FROM users")
+        ->fetchColumn();
+    if ($userCount === 0) {
+        header('Location: /setup.php');
+        exit;
+    }
+}
+
 // License check — skip on the activation page itself
 if (!str_ends_with($_SERVER['PHP_SELF'] ?? '', '/activate.php')) {
     \App\Services\LicenseService::requireValid();
@@ -596,7 +608,7 @@ table.data-table tbody tr:hover td { background: #f8fafc; }
 
   <?php $_role = \App\Auth\Auth::role(); ?>
   <nav>
-    <?php if ($_role !== 'admin'): ?>
+    <?php if (in_array($_role, ['gestionnaire', 'utilisateur'])): ?>
     <div class="nav-section">Principal</div>
     <a href="/index.php" class="<?= ($currentPage ?? '') === 'dashboard' ? 'active' : '' ?>">
       <span class="nav-icon"><i class="fa-solid fa-chart-pie"></i></span> Tableau de bord
@@ -615,14 +627,6 @@ table.data-table tbody tr:hover td { background: #f8fafc; }
     <a href="/pipeline/index.php" class="<?= ($currentPage ?? '') === 'pipeline' ? 'active' : '' ?>">
       <span class="nav-icon"><i class="fa-solid fa-filter"></i></span> Pipeline commercial
     </a>
-    <?php if ($_role === 'gestionnaire'): ?>
-    <a href="/invoice/create.php" class="<?= ($currentPage ?? '') === 'create' ? 'active' : '' ?>">
-      <span class="nav-icon"><i class="fa-solid fa-plus"></i></span> Nouvelle facture
-    </a>
-    <a href="/devis/create.php" class="<?= ($currentPage ?? '') === 'devis_create' ? 'active' : '' ?>">
-      <span class="nav-icon"><i class="fa-solid fa-file-pen"></i></span> Nouveau devis
-    </a>
-    <?php endif; ?>
 
     <div class="nav-section">Exécution</div>
     <a href="/project/index.php" class="<?= ($currentPage ?? '') === 'projects' ? 'active' : '' ?>">
@@ -638,16 +642,18 @@ table.data-table tbody tr:hover td { background: #f8fafc; }
     </a>
 
     <?php if ($_role === 'gestionnaire'): ?>
+    <div class="nav-section">Automatisation</div>
+    <a href="/recurring/index.php" class="<?= ($currentPage ?? '') === 'recurring' ? 'active' : '' ?>">
+      <span class="nav-icon"><i class="fa-solid fa-arrows-rotate"></i></span> Récurrentes
+    </a>
+
     <div class="nav-section">Configuration</div>
     <a href="/services/index.php" class="<?= ($currentPage ?? '') === 'services' ? 'active' : '' ?>">
       <span class="nav-icon"><i class="fa-solid fa-box-open"></i></span> Catalogue prestations
     </a>
-    <a href="/settings.php" class="<?= ($currentPage ?? '') === 'settings' ? 'active' : '' ?>">
-      <span class="nav-icon"><i class="fa-solid fa-gear"></i></span> Paramètres
-    </a>
     <?php endif; ?>
 
-    <?php else: ?>
+    <?php elseif ($_role === 'admin'): ?>
     <div class="nav-section">Principal</div>
     <a href="/index.php" class="<?= ($currentPage ?? '') === 'dashboard' ? 'active' : '' ?>">
       <span class="nav-icon"><i class="fa-solid fa-chart-pie"></i></span> Tableau de bord
@@ -665,6 +671,13 @@ table.data-table tbody tr:hover td { background: #f8fafc; }
     <div class="nav-section">Administration</div>
     <a href="/admin/users.php" class="<?= ($currentPage ?? '') === 'admin_users' ? 'active' : '' ?>">
       <span class="nav-icon"><i class="fa-solid fa-users-gear"></i></span> Utilisateurs
+    </a>
+    <a href="/admin/logs.php" class="<?= ($currentPage ?? '') === 'admin_logs' ? 'active' : '' ?>">
+      <span class="nav-icon"><i class="fa-solid fa-clipboard-list"></i></span> Journal d'activité
+    </a>
+    <div class="nav-section">Configuration</div>
+    <a href="/settings.php" class="<?= ($currentPage ?? '') === 'settings' ? 'active' : '' ?>">
+      <span class="nav-icon"><i class="fa-solid fa-gear"></i></span> Paramètres
     </a>
     <?php endif; ?>
   </nav>
@@ -690,15 +703,40 @@ table.data-table tbody tr:hover td { background: #f8fafc; }
       <?php endif; ?>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
-      <div>
-        <div style="color:#e2e8f0;font-size:.78rem;font-weight:600"><?= htmlspecialchars($authUser['username']) ?></div>
-        <div style="font-size:.68rem;margin-top:2px;font-weight:500;color:<?= $roleColor ?>"><?= $roleLabel ?></div>
+      <a href="/profile.php" style="display:flex;align-items:center;gap:9px;flex:1;text-decoration:none;min-width:0" title="Mon profil">
+        <?php
+          $avatarPath = $authUser['avatar'] ?? null;
+          $avatarFile = $avatarPath ? (__DIR__ . '/../public' . $avatarPath) : null;
+        ?>
+        <?php if ($avatarPath && $avatarFile && file_exists($avatarFile)): ?>
+          <img src="<?= htmlspecialchars($avatarPath) ?>?v=<?= filemtime($avatarFile) ?>"
+               style="width:30px;height:30px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.15);flex-shrink:0" alt="">
+        <?php else: ?>
+          <div style="width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#e2e8f0;flex-shrink:0">
+            <?= strtoupper(substr($authUser['username'], 0, 1)) ?>
+          </div>
+        <?php endif; ?>
+        <div style="min-width:0">
+          <div style="color:#e2e8f0;font-size:.78rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+            <?= htmlspecialchars($authUser['username']) ?>
+          </div>
+          <div style="font-size:.68rem;margin-top:2px;font-weight:500;color:<?= $roleColor ?>"><?= $roleLabel ?></div>
+        </div>
+      </a>
+      <div style="display:flex;gap:5px;flex-shrink:0">
+        <a href="/profile.php" title="Mon profil"
+           style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:7px;background:rgba(255,255,255,.06);color:#64748b;text-decoration:none;font-size:13px;transition:all .15s"
+           onmouseover="this.style.background='rgba(255,255,255,.12)';this.style.color='#e2e8f0'"
+           onmouseout="this.style.background='rgba(255,255,255,.06)';this.style.color='#64748b'">
+          <i class="fa-solid fa-user-pen"></i>
+        </a>
+        <a href="/logout.php" title="Se déconnecter"
+           style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:7px;background:rgba(255,255,255,.06);color:#64748b;text-decoration:none;font-size:13px;transition:all .15s"
+           onmouseover="this.style.background='rgba(239,68,68,.15)';this.style.color='#f87171'"
+           onmouseout="this.style.background='rgba(255,255,255,.06)';this.style.color='#64748b'">
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </a>
       </div>
-      <a href="/logout.php" title="Déconnexion"
-         style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:7px;background:rgba(255,255,255,.06);color:#64748b;text-decoration:none;font-size:13px;transition:all .15s;flex-shrink:0"
-         onmouseover="this.style.background='rgba(239,68,68,.15)';this.style.color='#f87171'"
-         onmouseout="this.style.background='rgba(255,255,255,.06)';this.style.color='#64748b'"
-         title="Se déconnecter"><i class="fa-solid fa-right-from-bracket"></i></a>
     </div>
     <?php else: ?>
     © ISSU DEV
@@ -712,6 +750,13 @@ table.data-table tbody tr:hover td { background: #f8fafc; }
     <div class="topbar-left">
       <h1><?= htmlspecialchars($pageTitle ?? '') ?></h1>
     </div>
+    <form method="GET" action="/search.php" style="display:flex;align-items:center;gap:0;flex:1;max-width:320px;margin:0 20px">
+      <input type="text" name="q" value="<?= htmlspecialchars($_GET['q'] ?? '') ?>" placeholder="Rechercher…"
+             style="flex:1;padding:6px 12px;border:1px solid var(--border);border-radius:8px 0 0 8px;font-size:.8rem;font-family:inherit;outline:none;height:32px">
+      <button type="submit" style="padding:0 10px;height:32px;background:var(--navy);color:#fff;border:none;border-radius:0 8px 8px 0;cursor:pointer;font-size:13px">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </button>
+    </form>
     <div class="actions">
       <?php if (isset($topbarActions)) echo $topbarActions; ?>
     </div>

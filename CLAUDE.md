@@ -50,6 +50,69 @@ Vanilla PHP 8.1+ with no framework. Entry points are individual PHP files under 
 - `total_ht` and `total_net` are computed in JavaScript on the invoice form and sent as hidden fields. The PHP backend trusts these values (they are recalculated from lines on PDF generation via `InvoiceDTO`).
 - The **prestation line** is stored separately on the `invoices` table (`prestation_label`, `prestation_amount`), not in `invoice_lines`. It is injected as the last entry only at PDF generation time.
 - `Database::migrate()` runs on every request (cheap — uses `CREATE TABLE IF NOT EXISTS`). Adding new columns requires a safe `ALTER TABLE … ADD COLUMN` block in the `foreach` at the bottom of `migrate()`.
+- **`extractFields()` / `create()` / `update()` must stay in sync.** Every key returned by `extractFields()` must have a matching placeholder in both the INSERT and the UPDATE SQL. Adding a field to `extractFields()` without adding it to `update()`'s SET clause causes `PDOException: column index out of range`.
+
+## Form fields — use `.field` class
+
+Always wrap form inputs with the `.field` class defined in `layout.php`. This gives consistent border, focus ring (gold), padding, and font. Never use `class="form-control"` or raw inline styles on inputs — that class is not defined and will produce unstyled browser-default fields.
+
+```html
+<div class="field">
+  <label>Label text</label>
+  <input type="text" name="foo" value="...">
+  <span class="hint">Optional helper text</span>  <!-- .hint = small muted text -->
+</div>
+```
+
+Use `class="form-grid-2"` for a two-column responsive grid of `.field` blocks (already defined in the layout CSS).
+
+## Flash messages (PRG pattern)
+
+Pages that handle POST actions use the Post-Redirect-Get pattern to avoid duplicate submissions. Flash messages are stored in `$_SESSION` before the redirect and read+cleared on GET:
+
+```php
+// In the POST handler:
+$_SESSION['_mypage_success'] = 'Action réalisée.';
+header('Location: /mypage.php'); exit;
+
+// At the top of GET rendering:
+$flashSuccess = '';
+if (!empty($_SESSION['_mypage_success'])) {
+    $flashSuccess = $_SESSION['_mypage_success'];
+    unset($_SESSION['_mypage_success']);
+}
+```
+
+**Critical:** never pre-initialize `$flashSuccess = ''` before checking — the `isset()` in `layout.php` uses that variable to conditionally render the alert banner. An empty pre-initialized string triggers an empty banner on every page load.
+
+## Auto-dismiss alerts
+
+`templates/layout_end.php` includes JS that auto-dismisses `.alert`, `.alert-success`, and `.alert-error` elements after 4 seconds (fade + height collapse + `el.remove()`). This only runs on pages that include `layout_end.php`.
+
+Standalone pages (`login.php`, `activate.php`) don't include `layout_end.php` — they must include the same dismiss snippet inline before `</body>`:
+
+```js
+document.querySelectorAll('.alert-error, .alert-success').forEach(el => {
+  setTimeout(() => {
+    el.style.transition = 'opacity .4s ease, max-height .4s ease, margin .4s ease, padding .4s ease';
+    el.style.opacity = '0'; el.style.maxHeight = '0';
+    el.style.margin = '0'; el.style.padding = '0'; el.style.overflow = 'hidden';
+    setTimeout(() => el.remove(), 420);
+  }, 4000);
+});
+```
+
+## onclick attributes with JSON strings
+
+When passing PHP strings into `onclick` via `json_encode`, always apply `htmlspecialchars()` **after** `json_encode()`, not before:
+
+```php
+// ✅ correct — HTML-encodes the surrounding JSON quotes so the attribute stays valid
+onclick="fn(<?= htmlspecialchars(json_encode($value), ENT_QUOTES) ?>)"
+
+// ❌ wrong — json_encode wraps in double quotes which breaks the HTML attribute
+onclick="fn(<?= json_encode(htmlspecialchars($value)) ?>)"
+```
 
 ## Authentication & roles
 
@@ -58,7 +121,7 @@ Vanilla PHP 8.1+ with no framework. Entry points are individual PHP files under 
 | Guard | Who can access |
 |-------|---------------|
 | `Auth::requireSuperAdmin()` | `superadmin` only |
-| `Auth::requireAdmin()` | `admin` only |
+| `Auth::requireAdmin()` | `admin` only (also used by `settings.php`, `settings/backup.php`, `settings/restore.php`) |
 | `Auth::requireBusiness()` | `gestionnaire` + `utilisateur` (blocks `admin` and `superadmin`) |
 | `Auth::requireManager()` | `gestionnaire` only (write operations) |
 
@@ -78,7 +141,7 @@ Vanilla PHP 8.1+ with no framework. Entry points are individual PHP files under 
 - `Auth::can('superadmin')` → `superadmin` only
 - `Auth::isSuperAdmin()`, `Auth::isAdmin()`, `Auth::isManager()`, `Auth::isViewer()` — boolean helpers
 - `Auth::role()` → raw role string
-- `Auth::user()` → `['id', 'username', 'email', 'role']` from session
+- `Auth::user()` → `['id', 'username', 'email', 'role', 'avatar']` from session (`avatar` is a URL path like `/uploads/avatars/avatar_1.jpg`, or `null`)
 
 **Session security:** `Auth::logout()` clears `$_SESSION`, deletes the session cookie (`setcookie(..., time()-3600)`), then calls `session_destroy()`. Never call `session_start()` directly — always go through `Auth::start()`.
 
@@ -88,7 +151,7 @@ Vanilla PHP 8.1+ with no framework. Entry points are individual PHP files under 
 
 `Database` — PDO singleton, SQLite, auto-migrates schema on first connection.
 
-Tables: `invoices`, `invoice_lines`, `opportunities`, `projects`, `expenses`, `users`, `license`, `license_keys`, `feature_usage`, `company_settings`, `clients`, `services`, `payments`.
+Tables: `invoices`, `invoice_lines`, `opportunities`, `projects`, `expenses`, `users`, `license`, `license_keys`, `feature_usage`, `company_settings`, `clients`, `services`, `payments`, `recurring_templates`.
 
 `InvoiceRepository`:
 - `all()` — all rows from `invoices` (all types) ordered by `created_at DESC`
@@ -102,7 +165,7 @@ Tables: `invoices`, `invoice_lines`, `opportunities`, `projects`, `expenses`, `u
 
 `OpportunityRepository` — `stats()` JOINs invoices; uses `COALESCE(i.total_net, o.estimated_amount)` for won value.
 
-`ProjectRepository` — `findByInvoice(int $invoiceId)` prevents duplicate auto-creation when invoice status → `envoyée`.
+`ProjectRepository` — `findByInvoice(int $invoiceId)` prevents duplicate auto-creation when invoice status → `envoyée`. Auto-creation is triggered from **both** `invoice/status.php` (Kanban AJAX) and `invoice/edit.php` (form save).
 
 `ExpenseRepository` — `globalStats()` returns `benefice_net = ca_engage - total_depenses`. `CATEGORIES` const used in PHP and JS templates. `allForInvoice()` LEFT JOINs invoices for `invoice_number` and `client_name`.
 
@@ -113,6 +176,10 @@ Tables: `invoices`, `invoice_lines`, `opportunities`, `projects`, `expenses`, `u
 `ServiceRepository` — CRUD on `services` table. `CATEGORIES` const for 7 categories. `allGrouped()` returns rows keyed by category.
 
 `PaymentRepository` — partial payments on invoices. `allForInvoice(int $id)`, `totalForInvoice(int $id): int`, `add()`, `delete()`, `find()`. After adding a payment, `invoice/payment/add.php` re-queries the total and auto-marks the invoice `payée` if `totalPaid >= total_net`. `payments` table has `ON DELETE CASCADE` on `invoice_id`.
+
+`RecurringRepository` — CRUD on `recurring_templates`. `dueNow()` returns active templates whose `next_due_at <= today`. `markGenerated(int $id, string $nextDueAt)` advances the schedule. `nextDate(string $from, string $interval): string` is a static helper that returns the next date given an interval (`hebdomadaire` / `mensuel` / `trimestriel` / `annuel`). Lines stored as JSON in the `lines` TEXT column.
+
+`SearchRepository` — `search(string $q): array` returns 4 groups (`invoices`, `devis`, `clients`, `expenses`), each capped at 10–20 rows. Used exclusively by `public/search.php`.
 
 ## Document types (`invoices.type`)
 
@@ -143,8 +210,9 @@ All document types live in the `invoices` table. The `type` column distinguishes
 Opportunity (pipeline)
     ↓ pipeline/convert.php  →  pre-fills invoice; marks opp as won; idempotent
 Invoice [brouillon]
-    ↓ invoice/status.php → envoyée
-Project [en_cours]  (auto-created on first envoyée, title = subject or client_name)
+    ↓ invoice/status.php → envoyée   (Kanban AJAX)
+    ↓ invoice/edit.php   → envoyée   (edit form — same logic)
+Project [en_cours]  (auto-created on first envoyée via either path, title = subject or client_name)
     + Expenses → expense/create.php
     → bénéfice net = CA engagé − total dépenses
 
@@ -210,10 +278,10 @@ PDF endpoints by type:
 
 - **superadmin**: ISSU DEV section only → Clés de licence
 - **admin**: Dashboard + Administration (Utilisateurs)
-- **gestionnaire**: Dashboard, Factures, Devis, Acquisition (Clients + Pipeline + Nouvelle facture + Nouveau devis), Exécution (Projets), Bénéfice (Dépenses + Comptabilité), Configuration (Catalogue prestations + Paramètres)
-- **utilisateur**: Same as gestionnaire minus "Nouvelle facture", "Nouveau devis", "Catalogue prestations", and "Paramètres"
+- **gestionnaire**: Dashboard, Factures, Devis, Acquisition (Clients + Pipeline), Exécution (Projets), Bénéfice (Dépenses + Comptabilité), Automatisation (Récurrentes), Configuration (Catalogue prestations)
+- **utilisateur**: Same as gestionnaire minus "Récurrentes" and "Catalogue prestations"
 
-`$currentPage` values: `dashboard`, `list`, `devis`, `devis_create`, `create`, `pipeline`, `projects`, `expenses`, `settings`, `admin_users`, `superadmin_keys`, `clients`, `services`.
+`$currentPage` values: `dashboard`, `list`, `devis`, `devis_create`, `create`, `pipeline`, `projects`, `expenses`, `settings`, `admin_users`, `superadmin_keys`, `clients`, `services`, `recurring`, `search`.
 
 ## Security
 
@@ -230,6 +298,23 @@ Pages without a layout (action-only endpoints) must call `Auth::verifyCsrf()` ex
 
 ### File uploads
 Logo uploads validate both extension AND real MIME type via `finfo` (see `invoice/edit.php`). Saved filename is always `.png`. `public/uploads/.htaccess` blocks PHP execution. Apply the same MIME check to any new upload endpoint — `invoice/create.php` and `settings.php` currently validate extension only (known gap).
+
+### Null check before delete + log
+When logging a delete action, always fetch the record first and guard on `$record !== null` before calling `delete()` and `ActivityLogger::log()`. Calling `$record['field']` on null generates a PHP Warning:
+
+```php
+// ✅ correct
+$record = $repo->find($id);
+if ($record !== null) {
+    $repo->delete($id);
+    ActivityLogger::log('x.delete', 'Suppression : ' . $record['name']);
+}
+
+// ❌ wrong — $record may be null on double-submit or race
+$record = $repo->find($id);
+$repo->delete($id);
+ActivityLogger::log('x.delete', 'Suppression : ' . ($record['name'] ?? $id));
+```
 
 Restore uploads validate SQLite magic bytes before overwriting the DB.
 
@@ -297,9 +382,68 @@ All static assets must be served from `public/assets/`. Do not introduce CDN lin
 | Inter font v20 | `public/assets/fonts/inter.css` + 7 woff2 files |
 | Chart.js 4 UMD | `public/assets/js/chart.umd.min.js` |
 
-**Icon system:** Font Awesome `<i class="fa-solid fa-*"></i>` everywhere. Never reintroduce emoji as UI icons. The `<link>` for FA is in `templates/layout.php`; `login.php` and `setup.php` have their own inline `<style>` and don't use the layout, so add the FA link there too if icons are needed.
+**Icon system:** Font Awesome `<i class="fa-solid fa-*"></i>` everywhere. Never reintroduce emoji as UI icons. The `<link>` for FA is in `templates/layout.php`; `login.php`, `setup.php`, and **any other standalone page** (e.g. `logs_print.php`) don't include the layout, so add the local FA `<link>` in their `<head>` if icons are used:
+
+```html
+<link rel="stylesheet" href="/assets/fa/css/all.min.css">
+```
+
+Do not use CDN links for FA — all assets are local (`public/assets/fa/`).
 
 Intentional text characters kept as-is (not FA icons): `✓` (U+2713) in CSS `content:`, plan tables, inline "all paid" messages; `✕` (U+2715) on remove-line buttons in `invoice_form.php` and `expense/create.php`.
+
+## Recherche globale
+
+Barre de recherche dans la topbar (toutes les pages) → `GET /search.php?q=...`. Recherche en SQL `LIKE %q%` sur les factures, devis, clients et dépenses. Minimum 2 caractères côté UI (pas de guard serveur). La page `expense/index.php` conserve aussi une recherche JS locale intégrée dans la card du tableau pour filtrer dans le contexte courant (filtre par facture inclus).
+
+## Factures récurrentes
+
+Table `recurring_templates` — modèles avec intervalles `hebdomadaire` / `mensuel` / `trimestriel` / `annuel`. Les lignes sont stockées en JSON dans la colonne `lines TEXT`.
+
+**Auto-génération :** à chaque chargement du dashboard (`public/index.php`), si l'utilisateur est `gestionnaire`, `RecurringRepository::dueNow()` est appelé et toutes les factures dues sont créées silencieusement via `InvoiceRepository::create()`. Un flash `$_SESSION['recurring_generated']` est affiché une fois puis supprimé.
+
+**Pages :** `public/recurring/index.php` · `create.php` · `edit.php` · `generate.php` (POST, génère manuellement) · `toggle.php` (pause/reprise) · `delete.php`.
+
+## Activity logging
+
+`src/Services/ActivityLogger.php` — static logger. Call `ActivityLogger::log(string $action, string $label)` immediately **before** the redirect that follows a successful write operation. It reads the authenticated user from `$_SESSION` automatically and silently swallows any DB error so a log failure never crashes the page.
+
+```php
+use App\Services\ActivityLogger;
+
+// inside a POST handler, just before header('Location: ...')
+ActivityLogger::log('invoice.create', 'Création facture #' . $number);
+```
+
+**Action naming convention:** `{category}.{verb}` — e.g. `invoice.create`, `client.delete`, `auth.login`. Categories in use: `auth`, `invoice`, `devis`, `client`, `user`, `expense`, `settings`.
+
+**Admin UI:** `public/admin/logs.php` (filterable list — today / this week / this month / custom range + user + category) and `public/admin/logs_print.php` (printable A4 landscape with summary stats). Both are restricted to `admin` role via `Auth::requireAdmin()`. The sidebar link appears under Administration for admins (`currentPage = 'admin_logs'`).
+
+**Table:** `activity_logs` — columns `user_id`, `username`, `role`, `action`, `label`, `ip`, `created_at`. Indexed on `created_at` and `user_id`. Created automatically by `Database::migrate()`. IP is recorded from `REMOTE_ADDR` only — never `HTTP_X_FORWARDED_FOR` (client-spoofable).
+
+**Currently instrumented:** login, logout, invoice create/delete/status/duplicate, devis create/delete, client create/edit/delete, expense create, user create/delete, DB restore.
+
+## User profile
+
+`public/profile.php` — accessible to all authenticated roles. Two tabs: `?tab=info` (name, email, phone, avatar) and `?tab=password`.
+
+- **Avatar:** uploaded to `public/uploads/avatars/avatar_{id}.{ext}`, stored in DB as `/uploads/avatars/avatar_{id}.jpg`. Path is kept in sync in `$_SESSION['auth_user']['avatar']` on upload/delete — no DB query needed per page. When reading avatar from `__DIR__` in `profile.php`, the correct path is `__DIR__ . $user['avatar']` (since `__DIR__` = `public/`).
+- **Users table columns:** `first_name`, `last_name`, `phone`, `avatar` were added via safe migrations in `Database::migrate()`. `UserRepository::create()` accepts these as optional parameters.
+- **Sidebar avatar:** `templates/layout.php` reads avatar from `$_SESSION['auth_user']['avatar']` — never queries the DB. The file-exists check uses `__DIR__ . '/../public' . $avatarPath`.
+
+## Admin — user deletion protection
+
+`public/admin/users/delete.php` and `public/admin/users.php` both protect superadmin accounts from deletion:
+- The delete button is hidden in the UI for any user with `role === 'superadmin'` (replaced by a lock icon)
+- `delete.php` re-fetches the target user and aborts if `role === 'superadmin'` — UI bypass is blocked server-side
+
+## License certificate printing
+
+`public/superadmin/keys_print.php` — accepts `?ids=1,2,3` (comma-separated key IDs), fetches them via parameterized query, and renders a print-ready 2-column grid of certificate cards. Each card has a dark gradient header, edition badge, key in monospace, and machine/expiry details. A single "Comment activer" table is shown at the bottom. Uses `print-color-adjust: exact` to preserve background colors in print/PDF.
+
+## WhatsApp
+
+Champ `client_whatsapp` sur `invoices` et `clients` (format international sans `+`, ex : `22961000000`). Le formulaire de facture (`invoice_form.php`) l'affiche et le `pickClient()` JS le remplit automatiquement depuis la sélection client. Sur `invoice/edit.php`, si le champ est renseigné, un bouton "Relancer" vert apparaît dans la topbar — il ouvre `https://wa.me/{numéro}?text={message_pré_rempli}` avec numéro de facture, montant et mention d'échéance dépassée si applicable.
 
 ## App name
 

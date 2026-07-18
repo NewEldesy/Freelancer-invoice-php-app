@@ -10,6 +10,7 @@ Auth::requireManager();
 use App\Database\InvoiceRepository;
 use App\Services\RequestValidator;
 use App\Services\LicenseService;
+use App\Services\ActivityLogger;
 
 $repo    = new InvoiceRepository();
 $errors  = [];
@@ -29,6 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $validator = new RequestValidator();
     if ($validator->validate($postData)) {
         $id   = $repo->create($postData);
+        ActivityLogger::log('invoice.create', 'Création facture #' . ($postData['number'] ?? ''));
         header('Location: /invoice/edit.php?id=' . $id . '&created=1');
         exit;
     }

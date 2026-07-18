@@ -9,6 +9,7 @@ Auth::requireManager();
 
 use App\Database\InvoiceRepository;
 use App\Database\PaymentRepository;
+use App\Database\ProjectRepository;
 use App\Services\RequestValidator;
 
 $repo = new InvoiceRepository();
@@ -29,7 +30,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $validator = new RequestValidator();
     if ($validator->validate($postData)) {
         $repo->update($id, $postData);
-        $record       = $repo->find($id);
+        $record = $repo->find($id);
+
+        if (($postData['status'] ?? '') === 'envoyée') {
+            $projRepo = new ProjectRepository();
+            if ($projRepo->findByInvoice($id) === null) {
+                $title = ($record['subject'] ?: $record['client_name'] ?: 'Projet ' . $record['number']);
+                $projRepo->create($id, $title);
+            }
+        }
+
         $flashSuccess = 'Facture mise à jour avec succès.';
     } else {
         $errors  = $validator->errors();
@@ -49,8 +59,9 @@ if (isset($_GET['from_pipeline'])) {
 if (isset($_GET['from_devis'])) {
     $flashSuccess = 'Devis converti en facture ' . htmlspecialchars($record['number']) . ' · vérifiez les lignes puis enregistrez.';
 }
-if (isset($_GET['avoir_created'])) $flashSuccess = 'Avoir créé avec succès.';
-if (isset($_GET['avoir_deleted'])) $flashSuccess = 'Avoir supprimé.';
+if (isset($_GET['avoir_created']))  $flashSuccess = 'Avoir créé avec succès.';
+if (isset($_GET['avoir_deleted']))  $flashSuccess = 'Avoir supprimé.';
+if (isset($_GET['from_recurring'])) $flashSuccess = 'Facture récurrente générée — vérifiez les détails et enregistrez.';
 
 $avoirs  = $repo->findAvoirs($id);
 $payRepo = new PaymentRepository();
@@ -111,6 +122,7 @@ function processInvoicePost(string $existingLogo): array
         'client_name'     => trim($_POST['client_name']     ?? ''),
         'client_address'  => trim($_POST['client_address']  ?? ''),
         'client_contact'  => trim($_POST['client_contact']  ?? ''),
+        'client_whatsapp' => trim($_POST['client_whatsapp'] ?? ''),
         'tax_rate'        => (float) ($_POST['tax_rate']    ?? 5),
         'tax_label'       => trim($_POST['tax_label']       ?? 'Prelevement 5%'),
         'signatory_title' => trim($_POST['signatory_title'] ?? ''),
@@ -129,11 +141,24 @@ $pageTitle   = 'Modifier — ' . htmlspecialchars($record['number']);
 $currentPage = 'list';
 $formAction  = '/invoice/edit.php';
 
+// WhatsApp relance link
+$_waNumber  = preg_replace('/\D/', '', $record['client_whatsapp'] ?? '');
+$_waMsg     = rawurlencode(
+    'Bonjour, je vous contacte concernant la facture ' . $record['number']
+    . ' d\'un montant de ' . number_format((int)$record['total_net'], 0, ',', ' ') . ' FCFA'
+    . ((!empty($record['due_at']) && $record['due_at'] < date('Y-m-d')) ? ', dont l\'échéance du ' . $record['due_at'] . ' est dépassée' : '')
+    . '. Merci de bien vouloir régulariser. Cordialement.'
+);
+$_waBtn = $_waNumber
+    ? '<a href="https://wa.me/' . $_waNumber . '?text=' . $_waMsg . '" target="_blank" class="btn btn-secondary" title="Relancer via WhatsApp" style="color:#25d366;border-color:#25d366"><i class="fa-brands fa-whatsapp"></i> Relancer</a>'
+    : '';
+
 $topbarActions = '
     <form method="POST" action="/invoice/duplicate.php" style="display:inline">
         <input type="hidden" name="id" value="' . $id . '">
         <button type="submit" class="btn btn-secondary" title="Créer une nouvelle facture basée sur celle-ci"><i class="fa-solid fa-clone"></i> Dupliquer</button>
     </form>
+    ' . $_waBtn . '
     <a href="/invoice/pdf.php?id=' . $id . '" class="btn btn-secondary" target="_blank"><i class="fa-solid fa-file-pdf"></i> PDF</a>
     <a href="/invoice/list.php" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Retour</a>
 ';

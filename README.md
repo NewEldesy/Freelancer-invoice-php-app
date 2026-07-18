@@ -1,96 +1,128 @@
 # Freelancer-invoice
 
-Application de gestion commerciale pour freelances et PME — suivi du pipeline, facturation, exécution de projets, rentabilité et reporting comptable.
+Application de gestion commerciale pour freelances et PME — pipeline commercial, facturation, suivi de projets, dépenses, rentabilité et reporting comptable.
 
-## Démarrage rapide
+Développé par **ISSU DEV**.
 
-**Prérequis :** XAMPP (PHP 8.1+) installé sur Windows.
-
-```bat
-# Installer les dépendances
-C:\xampp\php\php.exe C:\composer\composer.phar install
-
-# Démarrer le serveur de développement
-C:\xampp\php\php.exe -S localhost:8080 -t public
-```
-
-1. Ouvrir [http://localhost:8080/setup.php](http://localhost:8080/setup.php) — créer le premier compte administrateur
-2. Se connecter sur [http://localhost:8080/login.php](http://localhost:8080/login.php)
-3. L'administrateur crée ensuite les comptes **Gestionnaire** et **Utilisateur** depuis Administration → Utilisateurs
-
-La base de données SQLite est créée automatiquement au premier accès — aucune configuration supplémentaire n'est nécessaire.
-
-## Gestion des accès
-
-L'application dispose d'un système de connexion avec 3 rôles distincts :
-
-| Rôle | Droits |
-|------|--------|
-| **Administrateur** | Gestion des comptes utilisateurs uniquement. N'a pas accès aux données métier. |
-| **Gestionnaire** | Accès complet : création, modification, suppression sur toutes les fonctionnalités. |
-| **Utilisateur** | Lecture seule — consultation de toutes les pages sans modification. |
+---
 
 ## Fonctionnalités
 
-### Pipeline commercial
-Suivi des opportunités du prospect à la signature en 5 étapes : Prospect → Devis envoyé → Négociation → Gagné / Perdu. Conversion en facture en un clic avec pré-remplissage automatique des données client.
+| Module | Description |
+|--------|-------------|
+| **Pipeline** | Suivi opportunités en 5 étapes, conversion en facture en un clic |
+| **Facturation** | Factures Proforma, Devis, Avoirs, export PDF, duplication |
+| **Projets** | Création automatique à l'envoi d'une facture, suivi d'avancement |
+| **Dépenses** | Saisie multi-lignes par projet, calcul marge nette |
+| **Comptabilité** | Vue mensuelle + rapport annuel N vs N-1, export CSV |
+| **Clients** | Carnet d'adresses lié aux factures et opportunités |
+| **Licences** | Système de clés Pro / Entreprise avec activation par machine |
+| **Journal** | Traçabilité complète des actions utilisateurs (admin uniquement) |
 
-### Facturation
-Génération de Factures Proforma, Devis et Factures avec export PDF. Numérotation automatique par date (`YYYYMMDD-N`). Duplication de factures existantes. Suivi CA par statut :
-- **CA Engagé** — factures Envoyées + Payées
-- **CA Encaissé** — factures Payées uniquement
+---
 
-### Suivi de projet
-Un projet est créé automatiquement quand une facture passe au statut "Envoyée". Suivi de l'avancement : Non commencé → En cours → Livré → Validé client.
+## Prérequis
 
-### Dépenses & Rentabilité
-Saisie multi-lignes des coûts par projet (Matériaux, Main d'œuvre, Transport, Autre). Calcul automatique de la marge nette par projet et globale.
+- PHP 8.1+ avec extensions : `pdo_sqlite`, `fileinfo`, `mbstring`
+- Composer
+- Aucune base de données à installer — SQLite auto-généré au premier démarrage
+
+---
+
+## Démarrage rapide
+
+```bat
+# 1. Installer les dépendances
+composer install
+
+# 2. Démarrer le serveur
+php -S localhost:8080 -t public
+
+# Sur Windows : double-cliquer sur start.bat
+```
+
+3. Ouvrir **http://localhost:8080/setup.php** — créer le compte administrateur  
+4. Se connecter sur **http://localhost:8080/login.php**  
+5. Administration → Utilisateurs pour créer les comptes métier (gestionnaire / utilisateur)
+
+> La base `storage/invoices.sqlite` est créée automatiquement — aucune configuration supplémentaire.
+
+---
+
+## Rôles
+
+| Rôle | Accès |
+|------|-------|
+| **Super Admin** | Gestion des licences uniquement (compte ISSU DEV) |
+| **Administrateur** | Gestion des utilisateurs + consultation du journal d'activité |
+| **Gestionnaire** | Accès complet : création, modification, suppression sur tout le métier |
+| **Utilisateur** | Lecture seule — consultation sans modification |
+
+---
+
+## Configuration entreprise
+
+Paramètres → renseigner le nom, l'adresse, le logo, la TVA et le pied de page. Ces informations pré-remplissent automatiquement chaque nouvelle facture. Cette section est réservée aux gestionnaires.
+
+### Licence
+
+Sans clé : plan gratuit avec limites (10 factures, 5 dépenses, 15 exports PDF…).  
+Avec clé **Pro** ou **Entreprise** : fonctionnalités illimitées.
+
+Les clés sont générées par le Super Admin depuis l'interface, ou en ligne de commande :
+
+```bat
+php tools/keygen.php pro 1y
+php tools/keygen.php enterprise permanent <machine_id>
+```
+
+### Sauvegarde
+
+Paramètres → Sauvegarde : export et restauration de la base SQLite en un clic (gestionnaire uniquement).
+
+---
+
+## Structure du projet
 
 ```
-Bénéfice net = CA Engagé − Total Dépenses
-```
-
-### Comptabilité
-Deux vues de reporting accessibles depuis le menu **Comptabilité** :
-
-| Vue | URL | Description |
-|-----|-----|-------------|
-| Vue mensuelle | `/accounting/index.php` | Tableau mois par mois + graphique Chart.js, navigation par année |
-| Rapport annuel | `/accounting/report.php` | P&L style rapport financier avec comparaison N vs N-1 et variation % |
-
-Les deux vues incluent un bouton **Imprimer / PDF** optimisé (CSS `@media print`, A4).  
-Le rapport annuel récupère automatiquement le nom de l'entreprise depuis les Paramètres.
-
-## Structure
-
-```
-public/
-  login.php          Connexion
-  setup.php          Création du premier compte admin
-  logout.php         Déconnexion
-  invoice/           Facturation (create, edit, list, pdf, duplicate…)
-  pipeline/          Pipeline commercial (kanban, convert…)
-  project/           Suivi projet
-  expense/           Dépenses
-  accounting/        Comptabilité (index.php mensuel, report.php annuel)
-  admin/users/       Gestion des utilisateurs (admin uniquement)
+public/          Points d'entrée PHP
+  invoice/       Facturation
+  devis/         Devis
+  avoir/         Avoirs
+  pipeline/      Pipeline commercial
+  project/       Projets
+  expense/       Dépenses
+  accounting/    Comptabilité
+  client/        Clients
+  admin/         Administration (utilisateurs, journal)
+  superadmin/    Gestion licences (ISSU DEV)
 src/
-  Auth/              Auth.php — guards de session et vérification des rôles
-  Database/          Repositories (Invoice, Opportunity, Project, Expense, Settings, User)
-  DTO/               Objets de transfert de données (readonly)
-  Services/          PDF (Dompdf), validation, conversion en lettres
-  ValueObjects/      Money
-templates/           Layout partagé (sidebar conditionnelle selon le rôle, topbar)
-storage/             Base SQLite (auto-générée)
+  Auth/          Authentification et guards de rôle
+  Database/      Repositories + migrations SQLite automatiques
+  Services/      PDF (Dompdf), licences, logs d'activité
+templates/       Layout partagé (sidebar, topbar)
+storage/         Base SQLite (non versionnée)
+config/          Clé secrète licence (non versionnée)
+tools/           Scripts CLI (keygen)
 ```
 
-## Règles métier clés
+---
+
+## Règles métier
 
 - Les **brouillons** n'entrent dans aucun calcul de CA ni de bénéfice.
-- Les **dépenses** ne peuvent être rattachées qu'aux factures Envoyées ou Payées.
-- La **valeur gagnée** dans le pipeline utilise le montant réel de la facture liée (pas l'estimation initiale) pour refléter le résultat de la négociation.
-- Le **PDF** utilise des tableaux HTML (`<table>`) — Dompdf ne supporte pas flexbox ni float.
+- Les **dépenses** ne peuvent être saisies que sur des factures envoyées ou payées.
+- La **valeur gagnée** dans le pipeline utilise le montant réel de la facture liée, pas l'estimation initiale.
+- Un **projet** est créé automatiquement quand une facture passe au statut "Envoyée".
+- Le **PDF** exige des `<table>` HTML — Dompdf ne supporte pas flexbox.
 
-## Paramètres
+---
 
-Les informations de l'entreprise (nom, adresse, logo, signature, TVA, pied de page) se configurent dans **Paramètres** et pré-remplissent automatiquement chaque nouvelle facture. Cette section est réservée aux **Gestionnaires**.
+## Documentation
+
+- [`docs/guide-utilisateur.md`](docs/guide-utilisateur.md) — guide complet pour les utilisateurs de l'application
+- [`docs/guide-installation.md`](docs/guide-installation.md) — procédure de déploiement chez un client
+
+---
+
+© ISSU DEV — Tous droits réservés.

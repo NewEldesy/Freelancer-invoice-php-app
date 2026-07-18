@@ -5,7 +5,8 @@ declare(strict_types=1);
 require_once __DIR__ . '/../../vendor/autoload.php';
 
 use App\Auth\Auth;
-Auth::requireManager();
+use App\Services\ActivityLogger;
+Auth::requireAdmin();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: /settings.php?tab=backup');
@@ -50,5 +51,6 @@ if (!copy($tmpPath, $dbPath)) {
     exit;
 }
 
+ActivityLogger::log('settings.restore', 'Restauration de la base de données');
 header('Location: ' . $back . '&restore_ok=1');
 exit;

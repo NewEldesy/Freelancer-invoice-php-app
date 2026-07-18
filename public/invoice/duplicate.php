@@ -9,6 +9,7 @@ Auth::requireManager();
 
 use App\Database\InvoiceRepository;
 use App\Services\LicenseService;
+use App\Services\ActivityLogger;
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: /invoice/list.php');
@@ -54,6 +55,7 @@ $newData = array_merge($source, [
 unset($newData['id'], $newData['created_at'], $newData['updated_at']);
 
 $newId = $repo->create($newData);
+ActivityLogger::log('invoice.duplicate', 'Duplication facture #' . $source['number'] . ' → #' . $newData['number']);
 
 header('Location: /invoice/edit.php?id=' . $newId . '&duplicated=1');
 exit;

@@ -85,12 +85,23 @@ require __DIR__ . '/../../templates/layout.php';
   </div>
   <div style="padding:18px 20px">
     <form method="POST" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
-      <div>
+      <input type="hidden" name="_csrf" value="<?= htmlspecialchars(Auth::csrfToken()) ?>">
+      <div style="position:relative">
         <label style="font-size:.73rem;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Édition</label>
-        <select name="edition" class="form-control" style="padding:8px 12px;border-radius:8px;border:1px solid var(--border);font-size:.83rem;min-width:130px">
-          <option value="pro">⭐ Pro</option>
-          <option value="enterprise"><i class="fa-solid fa-building"></i> Entreprise</option>
-        </select>
+        <input type="hidden" name="edition" id="edition-val" value="pro">
+        <div id="edition-btn" onclick="toggleEditionMenu()" style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;border:1px solid var(--border);font-size:.83rem;min-width:150px;cursor:pointer;background:#fff;user-select:none">
+          <i class="fa-solid fa-star" style="color:#f59e0b" id="edition-icon"></i>
+          <span id="edition-label">Pro</span>
+          <i class="fa-solid fa-chevron-down" style="margin-left:auto;font-size:.65rem;color:var(--muted)"></i>
+        </div>
+        <div id="edition-menu" style="display:none;position:absolute;top:calc(100% + 4px);left:0;min-width:160px;background:#fff;border:1px solid var(--border);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.1);z-index:100;overflow:hidden">
+          <div onclick="selectEdition('pro','<i class=fa-solid fa-star style=color:#f59e0b></i>','Pro')" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:.83rem" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
+            <i class="fa-solid fa-star" style="color:#f59e0b;width:14px"></i> Pro
+          </div>
+          <div onclick="selectEdition('enterprise','<i class=fa-solid fa-building style=color:#6d28d9></i>','Entreprise')" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:.83rem;border-top:1px solid var(--border-soft)" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
+            <i class="fa-solid fa-building" style="color:#6d28d9;width:14px"></i> Entreprise
+          </div>
+        </div>
       </div>
       <div>
         <label style="font-size:.73rem;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Période</label>
@@ -109,16 +120,34 @@ require __DIR__ . '/../../templates/layout.php';
   </div>
 </div>
 
+<!-- Barre d'actions de sélection (apparaît quand des cases sont cochées) -->
+<div id="selection-bar" style="display:none;position:sticky;top:12px;z-index:50;background:#0f172a;color:#fff;border-radius:10px;padding:12px 20px;margin-bottom:16px;display:none;align-items:center;gap:14px">
+  <i class="fa-solid fa-square-check" style="color:#f59e0b"></i>
+  <span id="selection-count" style="font-size:.85rem;font-weight:600">0 clé sélectionnée</span>
+  <div style="margin-left:auto;display:flex;gap:10px">
+    <button onclick="clearSelection()" style="background:rgba(255,255,255,.12);border:none;color:#fff;padding:7px 14px;border-radius:7px;font-size:.78rem;cursor:pointer;font-weight:600">
+      <i class="fa-solid fa-xmark"></i> Désélectionner
+    </button>
+    <button onclick="printSelected()" style="background:#f59e0b;border:none;color:#0f172a;padding:7px 16px;border-radius:7px;font-size:.78rem;cursor:pointer;font-weight:700">
+      <i class="fa-solid fa-print"></i> Imprimer la sélection
+    </button>
+  </div>
+</div>
+
 <!-- Keys table -->
 <div class="card">
   <div style="padding:14px 20px;border-bottom:1px solid var(--border-soft);display:flex;justify-content:space-between;align-items:center">
-    <div style="font-weight:700;color:var(--navy);font-size:.88rem">Toutes les clés</div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <input type="checkbox" id="check-all" onchange="toggleAll(this)" style="width:15px;height:15px;cursor:pointer" title="Tout sélectionner">
+      <div style="font-weight:700;color:var(--navy);font-size:.88rem">Toutes les clés</div>
+    </div>
     <div style="font-size:.72rem;color:var(--muted)">Cliquez sur une clé pour la copier</div>
   </div>
   <div style="overflow-x:auto">
   <table class="key-table">
     <thead>
       <tr>
+        <th style="width:36px"></th>
         <th>#</th>
         <th>Clé</th>
         <th>Édition</th>
@@ -132,6 +161,11 @@ require __DIR__ . '/../../templates/layout.php';
     <tbody>
     <?php foreach ($keys as $i => $k): ?>
     <tr>
+      <td>
+        <input type="checkbox" class="key-check" value="<?= $k['id'] ?>"
+               onchange="updateSelection()"
+               style="width:15px;height:15px;cursor:pointer">
+      </td>
       <td style="color:var(--muted);font-size:.72rem"><?= $i + 1 ?></td>
       <td>
         <span class="key-code" data-key="<?= htmlspecialchars($k['key_value']) ?>"
@@ -170,7 +204,7 @@ require __DIR__ . '/../../templates/layout.php';
     </tr>
     <?php endforeach; ?>
     <?php if (empty($keys)): ?>
-    <tr><td colspan="8" style="text-align:center;padding:30px;color:var(--muted)">Aucune clé générée</td></tr>
+    <tr><td colspan="9" style="text-align:center;padding:30px;color:var(--muted)">Aucune clé générée</td></tr>
     <?php endif; ?>
     </tbody>
   </table>
@@ -182,6 +216,54 @@ require __DIR__ . '/../../templates/layout.php';
 </div>
 
 <script>
+function toggleEditionMenu() {
+  const menu = document.getElementById('edition-menu');
+  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+function selectEdition(value, iconHtml, label) {
+  document.getElementById('edition-val').value = value;
+  document.getElementById('edition-label').textContent = label;
+  document.getElementById('edition-icon').outerHTML = iconHtml.replace('<i ', '<i id="edition-icon" ');
+  document.getElementById('edition-menu').style.display = 'none';
+}
+document.addEventListener('click', function(e) {
+  const btn = document.getElementById('edition-btn');
+  const menu = document.getElementById('edition-menu');
+  if (btn && !btn.contains(e.target) && menu && !menu.contains(e.target)) {
+    menu.style.display = 'none';
+  }
+});
+
+function updateSelection() {
+  const checked = document.querySelectorAll('.key-check:checked');
+  const bar = document.getElementById('selection-bar');
+  const count = document.getElementById('selection-count');
+  if (checked.length > 0) {
+    bar.style.display = 'flex';
+    count.textContent = checked.length + ' clé' + (checked.length > 1 ? 's sélectionnées' : ' sélectionnée');
+  } else {
+    bar.style.display = 'none';
+  }
+  document.getElementById('check-all').indeterminate =
+    checked.length > 0 && checked.length < document.querySelectorAll('.key-check').length;
+  document.getElementById('check-all').checked =
+    checked.length === document.querySelectorAll('.key-check').length && checked.length > 0;
+}
+function toggleAll(cb) {
+  document.querySelectorAll('.key-check').forEach(c => c.checked = cb.checked);
+  updateSelection();
+}
+function clearSelection() {
+  document.querySelectorAll('.key-check').forEach(c => c.checked = false);
+  document.getElementById('check-all').checked = false;
+  updateSelection();
+}
+function printSelected() {
+  const ids = Array.from(document.querySelectorAll('.key-check:checked')).map(c => c.value);
+  if (!ids.length) return;
+  window.open('/superadmin/keys_print.php?ids=' + ids.join(','), '_blank');
+}
+
 function copyKey(el) {
   navigator.clipboard.writeText(el.dataset.key).then(() => {
     const t = document.getElementById('copy-toast');

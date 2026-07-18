@@ -149,13 +149,13 @@ final class InvoiceRepository
             INSERT INTO invoices
                 (number, type, status, subject, issued_at, due_at,
                  issuer_name, issuer_address, issuer_phone, issuer_email, issuer_ifu, issuer_logo_path,
-                 client_name, client_address, client_contact,
+                 client_name, client_address, client_contact, client_whatsapp,
                  tax_rate, tax_label, signatory_title, signatory_name, footer_text,
                  prestation_label, prestation_amount, total_ht, total_net, origin_id)
             VALUES
                 (:number, :type, :status, :subject, :issued_at, :due_at,
                  :issuer_name, :issuer_address, :issuer_phone, :issuer_email, :issuer_ifu, :issuer_logo_path,
-                 :client_name, :client_address, :client_contact,
+                 :client_name, :client_address, :client_contact, :client_whatsapp,
                  :tax_rate, :tax_label, :signatory_title, :signatory_name, :footer_text,
                  :prestation_label, :prestation_amount, :total_ht, :total_net, :origin_id)
         ");
@@ -175,12 +175,13 @@ final class InvoiceRepository
                 issuer_name = :issuer_name, issuer_address = :issuer_address,
                 issuer_phone = :issuer_phone, issuer_email = :issuer_email,
                 issuer_ifu = :issuer_ifu, issuer_logo_path = :issuer_logo_path,
-                client_name = :client_name, client_address = :client_address, client_contact = :client_contact,
+                client_name = :client_name, client_address = :client_address, client_contact = :client_contact, client_whatsapp = :client_whatsapp,
                 tax_rate = :tax_rate, tax_label = :tax_label,
                 signatory_title = :signatory_title, signatory_name = :signatory_name,
                 footer_text = :footer_text,
                 prestation_label = :prestation_label, prestation_amount = :prestation_amount,
                 total_ht = :total_ht, total_net = :total_net,
+                origin_id = :origin_id,
                 updated_at = datetime('now','localtime')
             WHERE id = :id
         ");
@@ -370,9 +371,10 @@ final class InvoiceRepository
             ':issuer_email'    => $data['issuer_email']    ?? '',
             ':issuer_ifu'      => $data['issuer_ifu']      ?? '',
             ':issuer_logo_path'=> $data['issuer_logo_path']?? '',
-            ':client_name'     => $data['client_name']     ?? '',
+            ':client_name'     => $data['client_name']      ?? '',
             ':client_address'  => $data['client_address']  ?? '',
             ':client_contact'  => $data['client_contact']  ?? '',
+            ':client_whatsapp' => $data['client_whatsapp'] ?? '',
             ':tax_rate'        => (float) ($data['tax_rate']  ?? 5),
             ':tax_label'       => $data['tax_label']       ?? 'Prelevement 5%',
             ':signatory_title' => $data['signatory_title'] ?? '',

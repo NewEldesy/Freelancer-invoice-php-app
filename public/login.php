@@ -6,6 +6,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 use App\Database\UserRepository;
 use App\Auth\Auth;
+use App\Services\ActivityLogger;
 
 Auth::start();
 
@@ -26,6 +27,7 @@ if ($repo->count() === 0) {
 $error  = null;
 $setup  = isset($_GET['setup']);
 $logout = isset($_GET['logout']);
+$sessionExpired = isset($_GET['session_expired']);
 
 // Rate limiting : max 10 tentatives par tranche de 15 minutes (stocké en session)
 $rlKey    = 'login_attempts';
@@ -51,6 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($user !== null) {
             $_SESSION[$rlKey] = 0; // reset on success
             Auth::login($user);
+            ActivityLogger::log('auth.login', 'Connexion');
             header('Location: /index.php');
             exit;
         }
@@ -106,6 +109,9 @@ h1 { font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
   <?php if ($logout): ?>
   <div class="alert-success">✓ Vous avez été déconnecté.</div>
   <?php endif; ?>
+  <?php if ($sessionExpired): ?>
+  <div class="alert-error"><i class="fa-solid fa-triangle-exclamation"></i> Session invalide — la base de données a changé. Reconnectez-vous.</div>
+  <?php endif; ?>
   <?php if ($error): ?>
   <div class="alert-error"><i class="fa-solid fa-triangle-exclamation"></i> <?= htmlspecialchars($error) ?></div>
   <?php endif; ?>
@@ -141,6 +147,17 @@ h1 { font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
   </form>
 
   <script>
+    // Auto-dismiss alerts after 4 seconds
+    document.querySelectorAll('.alert-error, .alert-success').forEach(el => {
+      setTimeout(() => {
+        el.style.transition = 'opacity .4s ease, max-height .4s ease, margin .4s ease, padding .4s ease';
+        el.style.opacity = '0'; el.style.maxHeight = '0';
+        el.style.margin = '0'; el.style.padding = '0';
+        el.style.overflow = 'hidden';
+        setTimeout(() => el.remove(), 420);
+      }, 4000);
+    });
+
     // Convertir le champ mot de passe en type "password" après chargement
     document.getElementById('vis-password').type = 'password';
 

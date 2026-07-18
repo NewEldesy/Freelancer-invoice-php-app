@@ -35,16 +35,17 @@ final class ClientRepository
     public function create(array $data): int
     {
         $stmt = $this->db->prepare("
-            INSERT INTO clients (name, address, contact, email, phone, notes)
-            VALUES (:name, :address, :contact, :email, :phone, :notes)
+            INSERT INTO clients (name, address, contact, email, phone, whatsapp, notes)
+            VALUES (:name, :address, :contact, :email, :phone, :whatsapp, :notes)
         ");
         $stmt->execute([
-            'name'    => trim($data['name']    ?? ''),
-            'address' => trim($data['address'] ?? ''),
-            'contact' => trim($data['contact'] ?? ''),
-            'email'   => trim($data['email']   ?? ''),
-            'phone'   => trim($data['phone']   ?? ''),
-            'notes'   => trim($data['notes']   ?? ''),
+            'name'      => trim($data['name']      ?? ''),
+            'address'   => trim($data['address']   ?? ''),
+            'contact'   => trim($data['contact']   ?? ''),
+            'email'     => trim($data['email']     ?? ''),
+            'phone'     => trim($data['phone']     ?? ''),
+            'whatsapp'  => trim($data['whatsapp']  ?? ''),
+            'notes'     => trim($data['notes']     ?? ''),
         ]);
         return (int) $this->db->lastInsertId();
     }
@@ -54,18 +55,19 @@ final class ClientRepository
         $stmt = $this->db->prepare("
             UPDATE clients
             SET name=:name, address=:address, contact=:contact,
-                email=:email, phone=:phone, notes=:notes,
+                email=:email, phone=:phone, whatsapp=:whatsapp, notes=:notes,
                 updated_at=datetime('now','localtime')
             WHERE id=:id
         ");
         $stmt->execute([
-            'name'    => trim($data['name']    ?? ''),
-            'address' => trim($data['address'] ?? ''),
-            'contact' => trim($data['contact'] ?? ''),
-            'email'   => trim($data['email']   ?? ''),
-            'phone'   => trim($data['phone']   ?? ''),
-            'notes'   => trim($data['notes']   ?? ''),
-            'id'      => $id,
+            'name'      => trim($data['name']      ?? ''),
+            'address'   => trim($data['address']   ?? ''),
+            'contact'   => trim($data['contact']   ?? ''),
+            'email'     => trim($data['email']     ?? ''),
+            'phone'     => trim($data['phone']     ?? ''),
+            'whatsapp'  => trim($data['whatsapp']  ?? ''),
+            'notes'     => trim($data['notes']     ?? ''),
+            'id'        => $id,
         ]);
     }
 
@@ -74,11 +76,11 @@ final class ClientRepository
         $this->db->prepare("DELETE FROM clients WHERE id = ?")->execute([$id]);
     }
 
-    /** @return array{id:int,name:string,address:string,contact:string,email:string,phone:string}[] */
+    /** @return array{id:int,name:string,address:string,contact:string,email:string,phone:string,whatsapp:string}[] */
     public function allForSelect(): array
     {
         return $this->db->query(
-            "SELECT id, name, address, contact, email, phone FROM clients ORDER BY name ASC"
+            "SELECT id, name, address, contact, email, phone, whatsapp FROM clients ORDER BY name ASC"
         )->fetchAll();
     }
 }

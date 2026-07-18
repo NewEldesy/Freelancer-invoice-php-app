@@ -143,7 +143,8 @@ if ($logoPath && file_exists($logoPath)):
         <option value="<?= $c['id'] ?>"
             data-name="<?= htmlspecialchars($c['name']) ?>"
             data-address="<?= htmlspecialchars($c['address'] ?? '') ?>"
-            data-contact="<?= htmlspecialchars($c['contact'] ?? '') ?>">
+            data-contact="<?= htmlspecialchars($c['contact'] ?? '') ?>"
+            data-whatsapp="<?= htmlspecialchars($c['whatsapp'] ?? '') ?>">
             <?= htmlspecialchars($c['name']) ?>
         </option>
         <?php endforeach; ?>
@@ -163,14 +164,19 @@ if ($logoPath && file_exists($logoPath)):
         <label>Contact</label>
         <input type="text" id="f-client-contact" name="client_contact" value="<?= $fv('client_contact') ?>">
     </div>
+    <div class="field">
+        <label><i class="fa-brands fa-whatsapp" style="color:#25d366"></i> WhatsApp</label>
+        <input type="text" id="f-client-whatsapp" name="client_whatsapp" value="<?= $fv('client_whatsapp') ?>" placeholder="22961000000">
+    </div>
 </div>
 <script>
 function pickClient(sel) {
     const opt = sel.options[sel.selectedIndex];
     if (!opt.value) return;
-    document.getElementById('f-client-name').value    = opt.dataset.name    || '';
-    document.getElementById('f-client-address').value = opt.dataset.address || '';
-    document.getElementById('f-client-contact').value = opt.dataset.contact || '';
+    document.getElementById('f-client-name').value      = opt.dataset.name     || '';
+    document.getElementById('f-client-address').value   = opt.dataset.address  || '';
+    document.getElementById('f-client-contact').value   = opt.dataset.contact  || '';
+    document.getElementById('f-client-whatsapp').value  = opt.dataset.whatsapp || '';
 }
 </script>
 
@@ -234,7 +240,7 @@ function pickClient(sel) {
       <table style="width:100%;border-collapse:collapse;font-size:.83rem" id="cat-table">
         <?php foreach ($catalogue as $svc): ?>
         <tr class="cat-row" style="border-bottom:1px solid var(--border);cursor:pointer"
-            onclick="addFromCatalogue(<?= $svc['id'] ?>, <?= json_encode(htmlspecialchars($svc['description'])) ?>, <?= (int)$svc['unit_price'] ?>)"
+            onclick="addFromCatalogue(<?= $svc['id'] ?>, <?= htmlspecialchars(json_encode($svc['name']), ENT_QUOTES) ?>, <?= (int)$svc['unit_price'] ?>)"
             onmouseenter="this.style.background='var(--bg)'" onmouseleave="this.style.background=''">
           <td style="padding:10px 8px">
             <div style="font-weight:600;color:var(--navy)"><?= htmlspecialchars($svc['name']) ?></div>

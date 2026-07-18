@@ -60,19 +60,6 @@ require __DIR__ . '/../../templates/layout.php';
   </div>
 </div>
 
-<!-- Barre de recherche -->
-<div style="margin-bottom:14px">
-  <div style="position:relative;max-width:420px">
-    <span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted-light);font-size:14px"><i class="fa-solid fa-magnifying-glass"></i></span>
-    <input type="text" id="exp-search" placeholder="Rechercher une dépense, catégorie, facture…"
-           style="width:100%;padding:8px 11px 8px 34px;border:1px solid var(--border);border-radius:8px;
-                  font-size:.83rem;font-family:inherit;color:var(--text);background:var(--white);outline:none;
-                  transition:border .15s,box-shadow .15s"
-           onfocus="this.style.borderColor='var(--gold)';this.style.boxShadow='0 0 0 3px rgba(245,158,11,.12)'"
-           onblur="this.style.borderColor='var(--border)';this.style.boxShadow='none'">
-    <span id="search-count" style="position:absolute;right:11px;top:50%;transform:translateY(-50%);font-size:.72rem;color:var(--muted-light)"></span>
-  </div>
-</div>
 
 <!-- Répartition par catégorie + filtre -->
 <div style="display:grid;grid-template-columns:1fr 260px;gap:14px;margin-bottom:18px;align-items:start">
@@ -119,6 +106,14 @@ require __DIR__ . '/../../templates/layout.php';
 
 <!-- Table dépenses -->
 <div class="card">
+  <?php if (!empty($expenses)): ?>
+  <div style="padding:12px 16px;border-bottom:1px solid var(--border-soft);display:flex;align-items:center;gap:8px">
+    <i class="fa-solid fa-magnifying-glass" style="color:var(--muted-light);font-size:13px"></i>
+    <input type="text" id="exp-search" placeholder="Filtrer dans ce tableau…"
+           style="flex:1;border:none;outline:none;font-size:.83rem;font-family:inherit;color:var(--text);background:transparent">
+    <span id="search-count" style="font-size:.72rem;color:var(--muted-light);white-space:nowrap"></span>
+  </div>
+  <?php endif; ?>
   <?php if (empty($expenses)): ?>
   <div class="empty-state">
     <div class="empty-icon"><i class="fa-solid fa-receipt"></i></div>
@@ -182,23 +177,20 @@ require __DIR__ . '/../../templates/layout.php';
 </div>
 
 <script>
-const searchInput  = document.getElementById('exp-search');
-const searchCount  = document.getElementById('search-count');
-const tbody        = document.querySelector('.data-table tbody');
+const searchInput = document.getElementById('exp-search');
+const searchCount = document.getElementById('search-count');
+const tbody       = document.querySelector('.data-table tbody');
 
 if (searchInput && tbody) {
   searchInput.addEventListener('input', function () {
     const q    = this.value.toLowerCase().trim();
     const rows = tbody.querySelectorAll('tr');
     let visible = 0;
-
     rows.forEach(tr => {
-      const text = tr.textContent.toLowerCase();
-      const show = q === '' || text.includes(q);
+      const show = q === '' || tr.textContent.toLowerCase().includes(q);
       tr.style.display = show ? '' : 'none';
       if (show) visible++;
     });
-
     searchCount.textContent = q ? visible + ' résultat' + (visible > 1 ? 's' : '') : '';
   });
 }

@@ -6,6 +6,7 @@ require_once __DIR__ . '/../../../vendor/autoload.php';
 
 use App\Auth\Auth;
 use App\Database\UserRepository;
+use App\Services\ActivityLogger;
 
 Auth::requireAdmin();
 
@@ -17,10 +18,15 @@ Auth::verifyCsrf();
 
 $id   = (int) ($_POST['id'] ?? 0);
 $me   = Auth::user();
+$repo = new UserRepository();
 
-/* Prevent self-deletion */
+/* Prevent self-deletion and superadmin deletion */
 if ($id > 0 && $id !== (int)$me['id']) {
-    (new UserRepository())->delete($id);
+    $target = $repo->findById($id);
+    if ($target !== null && $target['role'] !== 'superadmin') {
+        $repo->delete($id);
+        ActivityLogger::log('user.delete', 'Suppression utilisateur : ' . $target['username']);
+    }
 }
 
 header('Location: /admin/users.php');

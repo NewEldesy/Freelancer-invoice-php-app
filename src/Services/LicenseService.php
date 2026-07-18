@@ -297,6 +297,7 @@ final class LicenseService
             'expires'    => $expires,
             'machine_id' => $machineId ?? '*',
             'issued_at'  => date('Y-m-d'),
+            'nonce'      => bin2hex(random_bytes(8)),
         ];
         $payloadB64 = rtrim(base64_encode(json_encode($payload, JSON_UNESCAPED_UNICODE)), '=');
         $sig        = strtoupper(substr(hash_hmac('sha256', $payloadB64, self::secret()), 0, 32));

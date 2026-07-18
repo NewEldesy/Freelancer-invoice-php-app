@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "freelancer-invoice": {
+      "command": "node",
+      "args": [
+        "C:\\Users\\ramel\\OneDrive\\Documents\\Freelancer-Invoice\\Freelancer-invoice-php-app\\mcp-server\\dist\\index.js"
+      ],
+      "env": {
+        "DB_PATH": "C:\\Users\\ramel\\OneDrive\\Documents\\Freelancer-Invoice\\Freelancer-invoice-php-app\\storage\\invoices.sqlite"
+      }
+    }
+  }
+}

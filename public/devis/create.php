@@ -9,6 +9,7 @@ Auth::requireManager();
 
 use App\Database\InvoiceRepository;
 use App\Services\RequestValidator;
+use App\Services\ActivityLogger;
 
 $repo    = new InvoiceRepository();
 $errors  = [];
@@ -25,6 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $validator = new RequestValidator();
     if ($validator->validate($postData)) {
         $id = $repo->create($postData);
+        ActivityLogger::log('devis.create', 'Création devis #' . ($postData['number'] ?? ''));
         header('Location: /devis/edit.php?id=' . $id . '&created=1');
         exit;
     }

@@ -19,13 +19,29 @@ final class Auth
         }
     }
 
-    /** Redirect to login if not authenticated. */
+    /** Redirect to login if not authenticated or if session user no longer exists in DB. */
     public static function check(): void
     {
         self::start();
         if (empty($_SESSION['user_id'])) {
             header('Location: /login.php');
             exit;
+        }
+
+        // Verify the session user still exists in the current database.
+        // Catches stale sessions after a DB swap, rename, or restore.
+        $now = time();
+        $lastCheck = $_SESSION['_db_check_at'] ?? 0;
+        if ($now - $lastCheck > 300) { // re-verify every 5 minutes
+            $pdo  = \App\Database\Database::connection();
+            $stmt = $pdo->prepare('SELECT id FROM users WHERE id = ? LIMIT 1');
+            $stmt->execute([$_SESSION['user_id']]);
+            if ($stmt->fetchColumn() === false) {
+                self::logout();
+                header('Location: /login.php?session_expired=1');
+                exit;
+            }
+            $_SESSION['_db_check_at'] = $now;
         }
     }
 
@@ -146,6 +162,7 @@ final class Auth
             'username' => $user['username'],
             'email'    => $user['email'],
             'role'     => $user['role'],
+            'avatar'   => $user['avatar'] ?? null,
         ];
     }
 

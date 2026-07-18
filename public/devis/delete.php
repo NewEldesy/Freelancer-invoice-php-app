@@ -14,6 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 Auth::verifyCsrf();
 
 use App\Database\InvoiceRepository;
+use App\Services\ActivityLogger;
 
 $repo   = new InvoiceRepository();
 $id     = (int) ($_POST['id'] ?? 0);
@@ -25,5 +26,6 @@ if ($record === null || $record['type'] !== 'DEVIS') {
 }
 
 $repo->delete($id);
+ActivityLogger::log('devis.delete', 'Suppression devis #' . $record['number']);
 header('Location: /devis/index.php?deleted=1');
 exit;

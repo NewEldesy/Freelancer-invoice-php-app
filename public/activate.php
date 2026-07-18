@@ -221,6 +221,7 @@ $machineId = LicenseService::machineId();
       <!-- Free activation -->
       <form method="POST" action="/activate.php">
         <input type="hidden" name="action" value="free">
+        <input type="hidden" name="_csrf" value="<?= htmlspecialchars(Auth::csrfToken()) ?>">
         <button type="submit" class="btn btn-outline" style="width:100%;margin-bottom:4px">
           Continuer en version gratuite →
         </button>
@@ -231,6 +232,7 @@ $machineId = LicenseService::machineId();
       <!-- Key activation -->
       <form method="POST" action="/activate.php">
         <input type="hidden" name="action" value="activate">
+        <input type="hidden" name="_csrf" value="<?= htmlspecialchars(Auth::csrfToken()) ?>">
         <label for="license_key">Clé de licence Pro / Entreprise</label>
         <input
           type="text"
@@ -256,5 +258,16 @@ $machineId = LicenseService::machineId();
   <div class="footer-note">Freelancer-invoice · © ISSU DEV · Tous droits réservés</div>
 </div>
 
+<script>
+document.querySelectorAll('.alert-error, .alert-success').forEach(el => {
+  setTimeout(() => {
+    el.style.transition = 'opacity .4s ease, max-height .4s ease, margin .4s ease, padding .4s ease';
+    el.style.opacity = '0'; el.style.maxHeight = '0';
+    el.style.margin = '0'; el.style.padding = '0';
+    el.style.overflow = 'hidden';
+    setTimeout(() => el.remove(), 420);
+  }, 4000);
+});
+</script>
 </body>
 </html>

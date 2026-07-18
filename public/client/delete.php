@@ -8,6 +8,7 @@ use App\Auth\Auth;
 Auth::requireManager();
 
 use App\Database\ClientRepository;
+use App\Services\ActivityLogger;
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: /client/index.php');
@@ -17,7 +18,12 @@ Auth::verifyCsrf();
 
 $id = (int) ($_POST['id'] ?? 0);
 if ($id > 0) {
-    (new ClientRepository())->delete($id);
+    $repo   = new ClientRepository();
+    $client = $repo->find($id);
+    if ($client !== null) {
+        $repo->delete($id);
+        ActivityLogger::log('client.delete', 'Suppression client : ' . $client['name']);
+    }
 }
 
 header('Location: /client/index.php');

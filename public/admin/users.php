@@ -37,10 +37,18 @@ require __DIR__ . '/../../templates/layout.php';
       </thead>
       <tbody>
       <?php foreach ($users as $user): ?>
+      <?php
+        $fullName    = trim(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? ''));
+        $isSelf      = (int)$user['id'] === (int)$me['id'];
+        $isSuperAdmin = $user['role'] === 'superadmin';
+      ?>
       <tr>
         <td>
           <div style="font-weight:600"><?= htmlspecialchars($user['username']) ?></div>
-          <?php if ((int)$user['id'] === (int)$me['id']): ?>
+          <?php if ($fullName !== ''): ?>
+          <div style="font-size:.75rem;color:var(--muted)"><?= htmlspecialchars($fullName) ?></div>
+          <?php endif; ?>
+          <?php if ($isSelf): ?>
           <div style="font-size:.7rem;color:var(--gold)">● vous</div>
           <?php endif; ?>
         </td>
@@ -58,7 +66,7 @@ require __DIR__ . '/../../templates/layout.php';
         </td>
         <td style="color:var(--muted);font-size:.8rem"><?= date('d/m/Y', strtotime($user['created_at'])) ?></td>
         <td>
-          <?php if ((int)$user['id'] !== (int)$me['id']): ?>
+          <?php if (!$isSelf && !$isSuperAdmin): ?>
           <form method="POST" action="/admin/users/delete.php" style="display:inline">
             <input type="hidden" name="id" value="<?= $user['id'] ?>">
             <button type="submit" class="btn btn-danger btn-sm btn-icon"
@@ -66,7 +74,7 @@ require __DIR__ . '/../../templates/layout.php';
                     title="Supprimer"><i class="fa-solid fa-trash"></i></button>
           </form>
           <?php else: ?>
-          <span style="font-size:.72rem;color:var(--muted-light)">—</span>
+          <span style="font-size:.72rem;color:var(--muted-light)"><?= $isSuperAdmin ? '<i class="fa-solid fa-lock" title="Compte protégé"></i>' : '—' ?></span>
           <?php endif; ?>
         </td>
       </tr>

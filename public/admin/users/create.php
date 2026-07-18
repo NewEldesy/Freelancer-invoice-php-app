@@ -7,6 +7,7 @@ require_once __DIR__ . '/../../../vendor/autoload.php';
 use App\Auth\Auth;
 use App\Database\UserRepository;
 use App\Services\LicenseService;
+use App\Services\ActivityLogger;
 
 Auth::requireAdmin();
 
@@ -26,23 +27,26 @@ if ($userLocked && $_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username'] ?? '');
-    $email    = trim($_POST['email']    ?? '');
-    $password = $_POST['password']      ?? '';
-    $confirm  = $_POST['confirm']       ?? '';
-    $role     = in_array($_POST['role'] ?? '', ['gestionnaire', 'utilisateur', 'admin'], true)
-                ? $_POST['role']
-                : 'utilisateur';
+    $username  = trim($_POST['username']   ?? '');
+    $email     = trim($_POST['email']      ?? '');
+    $password  = $_POST['password']        ?? '';
+    $confirm   = $_POST['confirm']         ?? '';
+    $firstName = trim($_POST['first_name'] ?? '');
+    $lastName  = trim($_POST['last_name']  ?? '');
+    $role      = in_array($_POST['role'] ?? '', ['gestionnaire', 'utilisateur', 'admin'], true)
+                 ? $_POST['role']
+                 : 'utilisateur';
 
-    if ($username === '')                              $errors[] = "Le nom d'utilisateur est obligatoire.";
-    if ($email === '')                                 $errors[] = "L'email est obligatoire.";
+    if ($username === '')                               $errors[] = "Le nom d'utilisateur est obligatoire.";
+    if ($email === '')                                  $errors[] = "L'email est obligatoire.";
     elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = "L'adresse email est invalide.";
-    if (strlen($password) < 6)                         $errors[] = "Le mot de passe doit faire au moins 6 caractères.";
+    if (strlen($password) < 6)                          $errors[] = "Le mot de passe doit faire au moins 6 caractères.";
     if ($password !== $confirm) $errors[] = "Les mots de passe ne correspondent pas.";
     if ($repo->findByUsername($username) !== null) $errors[] = "Ce nom d'utilisateur est déjà pris.";
 
     if (empty($errors)) {
-        $repo->create($username, $email, $password, $role);
+        $repo->create($username, $email, $password, $role, $firstName, $lastName);
+        ActivityLogger::log('user.create', 'Création utilisateur : ' . $username . ' (' . $role . ')');
         header('Location: /admin/users.php?created=1');
         exit;
     }
@@ -64,6 +68,14 @@ require __DIR__ . '/../../../templates/layout.php';
 
     <form method="POST">
       <div class="form-grid-2" style="margin-bottom:16px">
+        <div class="field">
+          <label>Prénom</label>
+          <input type="text" name="first_name" value="<?= htmlspecialchars($_POST['first_name'] ?? '') ?>">
+        </div>
+        <div class="field">
+          <label>Nom</label>
+          <input type="text" name="last_name" value="<?= htmlspecialchars($_POST['last_name'] ?? '') ?>">
+        </div>
         <div class="field">
           <label>Nom d'utilisateur *</label>
           <input type="text" name="username" value="<?= htmlspecialchars($_POST['username'] ?? '') ?>" required autofocus>

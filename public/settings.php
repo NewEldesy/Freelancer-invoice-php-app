@@ -5,7 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use App\Auth\Auth;
-Auth::requireManager();
+Auth::requireAdmin();
 
 use App\Database\SettingsRepository;
 use App\Database\OpportunityRepository;
@@ -17,6 +17,7 @@ $flashSuccess = null;
 $flashError   = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    Auth::verifyCsrf();
     $logoPath = $repo->get('issuer_logo_path');
 
     if (!empty($_FILES['logo']['tmp_name'])) {
@@ -129,17 +130,17 @@ if (isset($_GET['restore_error'])) {
       <div class="form-grid-2" style="margin-bottom:14px">
         <div class="field">
           <label>Nom de l'entreprise *</label>
-          <input type="text" name="issuer_name" value="<?= htmlspecialchars($s['issuer_name'] ?? '') ?>" placeholder="B'Tech Group SAS" required>
+          <input type="text" name="issuer_name" value="<?= htmlspecialchars($s['issuer_name'] ?? '') ?>" placeholder="Nom de votre entreprise" required>
         </div>
         <div class="field">
           <label>Adresse</label>
-          <input type="text" name="issuer_address" value="<?= htmlspecialchars($s['issuer_address'] ?? '') ?>" placeholder="ZONE 1, Secteur 28">
+          <input type="text" name="issuer_address" value="<?= htmlspecialchars($s['issuer_address'] ?? '') ?>" placeholder="Ville, Quartier / Secteur">
         </div>
       </div>
       <div class="form-grid-3">
         <div class="field">
           <label>Téléphone</label>
-          <input type="text" name="issuer_phone" value="<?= htmlspecialchars($s['issuer_phone'] ?? '') ?>" placeholder="(+226) 06 36 76 82">
+          <input type="text" name="issuer_phone" value="<?= htmlspecialchars($s['issuer_phone'] ?? '') ?>" placeholder="(+226) 12 34 56 78">
         </div>
         <div class="field">
           <label>Email</label>
@@ -147,7 +148,7 @@ if (isset($_GET['restore_error'])) {
         </div>
         <div class="field">
           <label>N°IFU</label>
-          <input type="text" name="issuer_ifu" value="<?= htmlspecialchars($s['issuer_ifu'] ?? '') ?>" placeholder="00179631E">
+          <input type="text" name="issuer_ifu" value="<?= htmlspecialchars($s['issuer_ifu'] ?? '') ?>" placeholder="00000000E">
         </div>
       </div>
 
@@ -156,11 +157,11 @@ if (isset($_GET['restore_error'])) {
       <div class="form-grid-2">
         <div class="field">
           <label>Titre</label>
-          <input type="text" name="signatory_title" value="<?= htmlspecialchars($s['signatory_title'] ?? '') ?>" placeholder="Le Président">
+          <input type="text" name="signatory_title" value="<?= htmlspecialchars($s['signatory_title'] ?? '') ?>" placeholder="Directeur Général">
         </div>
         <div class="field">
           <label>Nom</label>
-          <input type="text" name="signatory_name" value="<?= htmlspecialchars($s['signatory_name'] ?? '') ?>" placeholder="Limaba LOMPO">
+          <input type="text" name="signatory_name" value="<?= htmlspecialchars($s['signatory_name'] ?? '') ?>" placeholder="John Doe">
         </div>
       </div>
 
@@ -433,8 +434,9 @@ if (isset($_GET['restore_error'])) {
     </div>
     <div class="alert" style="background:#fff7ed;border:1px solid #fed7aa;color:#92400e;border-radius:8px;padding:10px 14px;font-size:.78rem;margin-bottom:16px">
       <i class="fa-solid fa-triangle-exclamation"></i>
-      <strong>Attention</strong> — cette action est irréversible. Toutes les données actuelles seront remplacées.
-      Un backup automatique de sécurité est créé avant la restauration (<code>storage/invoices-pre-restore-*.sqlite</code>).
+      <strong> Attention : </strong> cette action est irréversible. Toutes les données actuelles seront remplacées.
+      Un backup automatique de sécurité est créé avant la restauration 
+      <!-- (<code>storage/invoices-pre-restore-*.sqlite</code>). -->
     </div>
     <form method="POST" action="/settings/restore.php" enctype="multipart/form-data" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
       <div class="field" style="margin:0;flex:1;min-width:240px">

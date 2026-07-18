@@ -35,6 +35,23 @@
     return _fetch.call(this, url, opts);
   };
 })();
+
+/* ── Auto-dismiss alerts after 4 seconds ── */
+(function () {
+  function dismissAlert(el) {
+    el.style.transition = 'opacity .4s ease, max-height .4s ease, margin .4s ease, padding .4s ease';
+    el.style.opacity    = '0';
+    el.style.maxHeight  = '0';
+    el.style.margin     = '0';
+    el.style.padding    = '0';
+    el.style.overflow   = 'hidden';
+    setTimeout(() => el.remove(), 420);
+  }
+
+  document.querySelectorAll('.alert, .alert-success, .alert-error').forEach(el => {
+    setTimeout(() => dismissAlert(el), 4000);
+  });
+})();
 </script>
 </body>
 </html>

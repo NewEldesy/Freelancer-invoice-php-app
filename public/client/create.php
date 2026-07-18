@@ -8,6 +8,7 @@ use App\Auth\Auth;
 Auth::requireManager();
 
 use App\Database\ClientRepository;
+use App\Services\ActivityLogger;
 
 $repo   = new ClientRepository();
 $errors = [];
@@ -16,12 +17,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Auth::verifyCsrf();
 
     $data = [
-        'name'    => trim($_POST['name']    ?? ''),
-        'address' => trim($_POST['address'] ?? ''),
-        'contact' => trim($_POST['contact'] ?? ''),
-        'email'   => trim($_POST['email']   ?? ''),
-        'phone'   => trim($_POST['phone']   ?? ''),
-        'notes'   => trim($_POST['notes']   ?? ''),
+        'name'      => trim($_POST['name']      ?? ''),
+        'address'   => trim($_POST['address']   ?? ''),
+        'contact'   => trim($_POST['contact']   ?? ''),
+        'email'     => trim($_POST['email']     ?? ''),
+        'phone'     => trim($_POST['phone']     ?? ''),
+        'whatsapp'  => trim($_POST['whatsapp']  ?? ''),
+        'notes'     => trim($_POST['notes']     ?? ''),
     ];
 
     if ($data['name'] === '') $errors[] = 'Le nom du client est obligatoire.';
@@ -31,6 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($errors)) {
         $repo->create($data);
+        ActivityLogger::log('client.create', 'Nouveau client : ' . $data['name']);
         header('Location: /client/index.php?created=1');
         exit;
     }
@@ -64,6 +67,10 @@ require __DIR__ . '/../../templates/layout.php';
         <div class="field">
           <label>Téléphone</label>
           <input type="text" name="phone" value="<?= htmlspecialchars($_POST['phone'] ?? '') ?>">
+        </div>
+        <div class="field" style="grid-column:1/-1">
+          <label><i class="fa-brands fa-whatsapp" style="color:#25d366"></i> WhatsApp <span style="font-size:.72rem;color:var(--muted)">(format international, ex: 22961000000)</span></label>
+          <input type="text" name="whatsapp" value="<?= htmlspecialchars($_POST['whatsapp'] ?? '') ?>" placeholder="22961000000">
         </div>
         <div class="field" style="grid-column:1/-1">
           <label>Email</label>

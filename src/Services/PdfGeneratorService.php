@@ -37,9 +37,13 @@ final class PdfGeneratorService
         $totalNet  = $invoice->totalNet();
         $amountWords = $this->wordsService->convert($totalNet->amountCentimes);
 
-        $logoHtml = $invoice->issuer->logoPath && file_exists($invoice->issuer->logoPath)
-            ? '<img src="' . $invoice->issuer->logoPath . '" style="max-width:110px;max-height:75px;">'
-            : '';
+        $logoPath = $invoice->issuer->logoPath;
+        $logoHtml = '';
+        if ($logoPath && file_exists($logoPath)) {
+            $mime = mime_content_type($logoPath) ?: 'image/png';
+            $b64  = base64_encode(file_get_contents($logoPath));
+            $logoHtml = '<img src="data:' . $mime . ';base64,' . $b64 . '" style="max-width:110px;max-height:75px;">';
+        }
 
         $linesHtml  = '';
         $ref        = 1;
