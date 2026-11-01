@@ -94,8 +94,8 @@ final class ExpenseRepository
     }
 
     /**
-     * Monthly expense breakdown for a given year.
-     * Returns 12 rows filled with zeros for empty months.
+     * Répartition mensuelle des dépenses pour une année donnée.
+     * Retourne 12 lignes remplies de zéros pour les mois vides.
      *
      * @return array<int, array{month:int, total:int}>
      */

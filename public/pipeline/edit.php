@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $d = $record;
 
-$pageTitle   = 'Modifier — ' . htmlspecialchars($record['title']);
+$pageTitle   = 'Modifier : ' . htmlspecialchars($record['title']);
 $currentPage = 'pipeline';
 $topbarActions = '
   <a href="/pipeline/index.php" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Retour pipeline</a>
@@ -65,7 +65,7 @@ require __DIR__ . '/../../templates/layout.php';
     <?php endif; ?>
 
     <?php if ($d['invoice_id']): ?>
-    <div class="alert alert-success"><i class="fa-solid fa-circle-check"></i> Opportunité convertie — <a href="/invoice/edit.php?id=<?= $d['invoice_id'] ?>" style="font-weight:600">Voir la facture</a></div>
+    <div class="alert alert-success"><i class="fa-solid fa-circle-check"></i> Opportunité convertie <a href="/invoice/edit.php?id=<?= $d['invoice_id'] ?>" style="font-weight:600">Voir la facture</a></div>
     <?php endif; ?>
 
     <form method="POST">

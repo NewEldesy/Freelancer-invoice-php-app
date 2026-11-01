@@ -19,7 +19,7 @@ final class Auth
         }
     }
 
-    /** Redirect to login if not authenticated or if session user no longer exists in DB. */
+    /** Redirige vers la page de connexion si non authentifié ou si l'utilisateur de session n'existe plus en base. */
     public static function check(): void
     {
         self::start();
@@ -28,11 +28,11 @@ final class Auth
             exit;
         }
 
-        // Verify the session user still exists in the current database.
-        // Catches stale sessions after a DB swap, rename, or restore.
+        // Vérifie que l'utilisateur de session existe toujours dans la base courante.
+        // Gère les sessions obsolètes après un remplacement, renommage ou restauration de la base.
         $now = time();
         $lastCheck = $_SESSION['_db_check_at'] ?? 0;
-        if ($now - $lastCheck > 300) { // re-verify every 5 minutes
+        if ($now - $lastCheck > 300) { // re-vérification toutes les 5 minutes
             $pdo  = \App\Database\Database::connection();
             $stmt = $pdo->prepare('SELECT id FROM users WHERE id = ? LIMIT 1');
             $stmt->execute([$_SESSION['user_id']]);
@@ -46,8 +46,8 @@ final class Auth
     }
 
     /**
-     * Require gestionnaire or utilisateur role (business pages).
-     * Blocks admin accounts from accessing business data.
+     * Exige le rôle gestionnaire ou utilisateur (pages métier).
+     * Bloque l'accès aux comptes admin aux données métier.
      */
     public static function requireBusiness(): void
     {
@@ -62,8 +62,8 @@ final class Auth
     }
 
     /**
-     * Require gestionnaire role (write operations).
-     * Blocks admin and utilisateur from modifying business data.
+     * Exige le rôle gestionnaire (opérations d'écriture).
+     * Bloque les rôles admin et utilisateur pour la modification des données métier.
      */
     public static function requireManager(): void
     {
@@ -79,7 +79,7 @@ final class Auth
         }
     }
 
-    /** Redirect to dashboard if not admin. */
+    /** Redirige vers le tableau de bord si le rôle n'est pas admin. */
     public static function requireAdmin(): void
     {
         self::check();
@@ -89,7 +89,7 @@ final class Auth
         }
     }
 
-    /** Require superadmin role (license key management). */
+    /** Exige le rôle superadmin (gestion des clés de licence). */
     public static function requireSuperAdmin(): void
     {
         self::check();
@@ -105,11 +105,12 @@ final class Auth
     }
 
     /**
-     * Check if the current user can perform a given action.
+     * Vérifie si l'utilisateur courant peut effectuer une action donnée.
      *
-     * 'write'  → gestionnaire only
-     * 'read'   → gestionnaire or utilisateur (not admin)
-     * 'admin'  → admin only
+     * 'write'      → gestionnaire uniquement
+     * 'read'       → gestionnaire ou utilisateur (pas admin)
+     * 'admin'      → admin uniquement
+     * 'superadmin' → superadmin uniquement
      */
     public static function can(string $action): bool
     {
@@ -189,7 +190,7 @@ final class Auth
     {
         self::start();
         $_SESSION = [];
-        // Delete the session cookie from the browser
+        // Supprime le cookie de session du navigateur
         if (ini_get('session.use_cookies')) {
             $p = session_get_cookie_params();
             setcookie(session_name(), '', time() - 3600,

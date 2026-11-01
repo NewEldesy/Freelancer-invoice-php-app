@@ -81,8 +81,8 @@ final class InvoiceRepository
     }
 
     /**
-     * Monthly breakdown for a given year.
-     * Returns 12 rows (one per month), filled with zeros for months with no data.
+     * Répartition mensuelle pour une année donnée.
+     * Retourne 12 lignes (une par mois), remplies de zéros pour les mois sans données.
      *
      * @return array<int, array{month:int, ca_engage:int, ca_encaisse:int, nb_envoyee:int, nb_payee:int}>
      */
@@ -125,7 +125,7 @@ final class InvoiceRepository
         return $result;
     }
 
-    /** @return int[] List of years that have invoices */
+    /** @return int[] Liste des années pour lesquelles il existe des factures */
     public function availableYears(): array
     {
         $rows = $this->db->query("
@@ -210,7 +210,7 @@ final class InvoiceRepository
         $day = $date ?: date('Y-m-d');
         $datePrefix = str_replace('-', '', $day); // 20260624
 
-        // Use custom prefix from settings if defined, e.g. "FAC" → "FAC-20260624"
+        // Utiliser le préfixe personnalisé des paramètres si défini, ex : "FAC" → "FAC-20260624"
         $customPrefix = $this->db->query(
             "SELECT value FROM company_settings WHERE key = 'invoice_prefix'"
         )->fetchColumn();
@@ -322,8 +322,8 @@ final class InvoiceRepository
     }
 
     /**
-     * Batch lookup: returns a map of devisId → converted invoice row.
-     * Use instead of calling findConvertedInvoice() in a loop.
+     * Recherche groupée : retourne une map devisId → ligne de facture convertie.
+     * À utiliser à la place d'appels répétés à findConvertedInvoice() en boucle.
      * @param int[] $devisIds
      * @return array<int, array<string, mixed>>
      */

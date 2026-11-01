@@ -217,7 +217,7 @@ server.tool(
     );
     lines.forEach((l, i) => lineStmt.run(invoiceId, i, l.description, l.quantity, l.unit_price));
 
-    return { content: [{ type: 'text', text: `${type} créée : N° ${number} (ID: ${invoiceId}) — Total net : ${totalNet.toLocaleString()} FCFA (HT: ${totalHt.toLocaleString()}, taxe: ${tax.toLocaleString()})` }] };
+    return { content: [{ type: 'text', text: `${type} créée : N° ${number} (ID: ${invoiceId}) : Total net : ${totalNet.toLocaleString()} FCFA (HT: ${totalHt.toLocaleString()}, taxe: ${tax.toLocaleString()})` }] };
   }
 );
 
@@ -368,7 +368,7 @@ server.tool(
     const info = db().prepare(
       'INSERT INTO expenses (invoice_id, category, description, amount, date) VALUES (?,?,?,?,?)'
     ).run(invoice_id ?? null, category, description, amount, d);
-    return { content: [{ type: 'text', text: `Dépense enregistrée : ${description} — ${amount.toLocaleString()} FCFA (ID: ${info.lastInsertRowid})` }] };
+    return { content: [{ type: 'text', text: `Dépense enregistrée : ${description} : ${amount.toLocaleString()} FCFA (ID: ${info.lastInsertRowid})` }] };
   }
 );
 

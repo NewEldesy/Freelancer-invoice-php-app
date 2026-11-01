@@ -74,7 +74,7 @@ require __DIR__ . '/../../templates/layout.php';
                     title="Supprimer"><i class="fa-solid fa-trash"></i></button>
           </form>
           <?php else: ?>
-          <span style="font-size:.72rem;color:var(--muted-light)"><?= $isSuperAdmin ? '<i class="fa-solid fa-lock" title="Compte protégé"></i>' : '—' ?></span>
+          <span style="font-size:.72rem;color:var(--muted-light)"><?= $isSuperAdmin ? '<i class="fa-solid fa-lock" title="Compte protégé"></i>' : '/' ?></span>
           <?php endif; ?>
         </td>
       </tr>

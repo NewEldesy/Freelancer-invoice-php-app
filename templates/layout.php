@@ -1,7 +1,7 @@
 <?php
 \App\Auth\Auth::start();
 
-// Setup guard — if no users exist the DB is blank (new install or renamed file)
+// Setup guard if no users exist the DB is blank (new install or renamed file)
 $_currentPage = $_SERVER['PHP_SELF'] ?? '';
 if (!str_ends_with($_currentPage, '/setup.php') && !str_ends_with($_currentPage, '/login.php')) {
     $userCount = (int) \App\Database\Database::connection()
@@ -13,7 +13,7 @@ if (!str_ends_with($_currentPage, '/setup.php') && !str_ends_with($_currentPage,
     }
 }
 
-// License check — skip on the activation page itself
+// License check skip on the activation page itself
 if (!str_ends_with($_SERVER['PHP_SELF'] ?? '', '/activate.php')) {
     \App\Services\LicenseService::requireValid();
 }
@@ -26,7 +26,7 @@ $_licenseIsFree  = \App\Services\LicenseService::isFree();
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title><?= htmlspecialchars($pageTitle ?? 'Factures') ?> — Freelancer-invoice</title>
+<title><?= htmlspecialchars($pageTitle ?? 'Factures') ?> | Freelancer-invoice</title>
 <meta name="csrf-token" content="<?= htmlspecialchars(\App\Auth\Auth::csrfToken()) ?>">
 <link rel="stylesheet" href="/assets/fa/css/all.min.css">
 <style>

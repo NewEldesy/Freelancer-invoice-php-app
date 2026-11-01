@@ -179,7 +179,7 @@ require __DIR__ . '/../../templates/layout.php';
     <h2>
       Journal d'activité
       <span class="log-count"><?= count($logs) ?> entrée<?= count($logs) > 1 ? 's' : '' ?>
-      — du <?= date('d/m/Y', strtotime($from)) ?> au <?= date('d/m/Y', strtotime($to)) ?></span>
+      du <?= date('d/m/Y', strtotime($from)) ?> au <?= date('d/m/Y', strtotime($to)) ?></span>
     </h2>
     <a href="<?= htmlspecialchars($printUrl) ?>" target="_blank" class="btn btn-secondary btn-sm">
       <i class="fa-solid fa-print"></i> Imprimer
@@ -225,7 +225,7 @@ require __DIR__ . '/../../templates/layout.php';
         </td>
         <td><?= logBadge($log['action']) ?></td>
         <td style="font-size:.82rem"><?= htmlspecialchars($log['label']) ?></td>
-        <td style="font-size:.72rem;color:var(--muted-light)"><?= htmlspecialchars($log['ip'] ?? '—') ?></td>
+        <td style="font-size:.72rem;color:var(--muted-light)"><?= htmlspecialchars($log['ip'] ?? '/') ?></td>
       </tr>
       <?php endforeach; ?>
       </tbody>

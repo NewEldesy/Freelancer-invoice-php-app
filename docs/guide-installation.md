@@ -1,4 +1,4 @@
-# Guide d'installation — Freelancer-invoice
+# Guide d'installation
 
 > **Pour qui ?** Ce guide s'adresse au technicien qui installe et configure l'application chez un client final. Prévoir 15 à 30 minutes pour une installation complète.
 
@@ -12,14 +12,14 @@
 | Composer | toute version | Gestionnaire de dépendances PHP |
 | Système | Windows 10/11 | Testé avec XAMPP et Laragon |
 
-**Recommandation Windows :** utiliser **Laragon** (tout-en-un PHP + serveur) — installation en 2 minutes, aucune configuration PATH.
+**Recommandation Windows :** utiliser **Laragon** (tout-en-un PHP + serveur), installation en 2 minutes, aucune configuration PATH.
 
 - Laragon : https://laragon.org/download/ → version Full
 - XAMPP : https://www.apachefriends.org/
 
 ---
 
-## Étape 1 — Copier les fichiers
+## Étape 1. Copier les fichiers
 
 Placer le dossier de l'application dans le répertoire web du client :
 
@@ -29,7 +29,7 @@ Placer le dossier de l'application dans le répertoire web du client :
 
 ---
 
-## Étape 2 — Installer les dépendances
+## Étape 2. Installer les dépendances
 
 Ouvrir un terminal dans le dossier de l'application et exécuter :
 
@@ -41,11 +41,11 @@ composer install --no-dev --optimize-autoloader
 C:\xampp\php\php.exe C:\composer\composer.phar install --no-dev --optimize-autoloader
 ```
 
-> **Alternative Windows :** double-cliquer sur `install.bat` — le script détecte PHP et Composer, installe les dépendances et démarre le serveur.
+> **Alternative Windows :** double-cliquer sur `install.bat`, le script détecte PHP et Composer, installe les dépendances et démarre le serveur.
 
 ---
 
-## Étape 3 — Vérifier la clé de licence
+## Étape 3. Vérifier la clé de licence
 
 Le fichier `config/license.secret` doit être présent. C'est la clé privée ISSU DEV qui valide les licences clients.
 
@@ -59,9 +59,9 @@ Si le fichier est absent ou contient la valeur d'exemple, l'application afficher
 
 ---
 
-## Étape 4 — Démarrer l'application
+## Étape 4. Démarrer l'application
 
-### Option A — Serveur de développement PHP intégré (le plus simple)
+### Option A. Serveur de développement PHP intégré (le plus simple)
 
 ```bat
 # Double-cliquer sur start.bat
@@ -71,13 +71,13 @@ php -S localhost:8080 -t public
 
 L'application est accessible sur **http://localhost:8080**
 
-### Option B — Laragon (recommandé pour un usage permanent)
+### Option B. Laragon (recommandé pour un usage permanent)
 
 1. Placer le dossier dans `C:\laragon\www\`
 2. Laragon détecte automatiquement le dossier et crée un virtual host `freelancer-invoice.test`
 3. Démarrer Laragon → Start All
 
-### Option C — XAMPP avec Apache
+### Option C. XAMPP avec Apache
 
 Configurer un VirtualHost Apache pointant vers le dossier `public/` :
 
@@ -94,23 +94,23 @@ Configurer un VirtualHost Apache pointant vers le dossier `public/` :
 
 ---
 
-## Étape 5 — Première configuration
+## Étape 5. Première configuration
 
 1. Ouvrir **http://localhost:8080/setup.php** (ou l'URL correspondante)
 
    La page setup crée automatiquement :
-   - Le compte **Super Admin** (ISSU DEV — ne pas communiquer au client)
+   - Le compte **Super Admin**
    - Le compte **Admin** pour le client
    - 15 clés de licence pré-générées (5 Pro + 10 Entreprise)
 
-   > `setup.php` se désactive automatiquement dès qu'un utilisateur existe — impossible de l'exécuter deux fois.
+   > `setup.php` se désactive automatiquement dès qu'un utilisateur existe, impossible de l'exécuter deux fois.
 
 2. Se connecter avec le compte **Admin** créé
 3. Administration → Utilisateurs → créer les comptes du client (gestionnaire, utilisateurs)
 
 ---
 
-## Étape 6 — Paramètres entreprise
+## Étape 6. Paramètres entreprise
 
 Se connecter avec un compte **Gestionnaire** :
 
@@ -123,7 +123,7 @@ Ces informations apparaîtront sur toutes les factures PDF.
 
 ---
 
-## Étape 7 — Activation de la licence
+## Étape 7. Activation de la licence
 
 Sans licence, l'application démarre en plan **Gratuit** (fonctionnalités limitées).
 
@@ -148,7 +148,7 @@ S'assurer que PHP peut écrire dans ces dossiers :
 | `public/uploads/avatars/` | Photos de profil des utilisateurs |
 
 ```bat
-# Windows — via l'explorateur : clic droit → Propriétés → Sécurité
+# Windows via l'explorateur : clic droit → Propriétés → Sécurité
 # Donner le contrôle total à l'utilisateur qui exécute PHP (souvent SYSTEM ou l'utilisateur courant)
 ```
 
@@ -197,18 +197,18 @@ Vérifier que la clé a été générée pour l'identifiant machine exact affich
 ### Le logo ne s'affiche pas sur les PDF
 
 - Vérifier que PHP peut lire `public/uploads/`
-- Le logo doit être PNG ou JPG (pas de SVG — non supporté par Dompdf)
+- Le logo doit être PNG ou JPG (pas de SVG, non supporté par Dompdf)
 - Taille recommandée : max 500×200 px
 
 ### Session expirée après restauration de base
 
-Comportement normal — la restauration change les identifiants en base. Les utilisateurs doivent se reconnecter.
+Comportement normal, la restauration change les identifiants en base. Les utilisateurs doivent se reconnecter.
 
 ### `setup.php` affiche "déjà configuré"
 
 La base de données contient déjà des utilisateurs. Si c'est une réinstallation propre, supprimer `storage/invoices.sqlite` et relancer `setup.php`.
 
-> ⚠️ Supprimer la base de données efface toutes les données. S'assurer d'avoir une sauvegarde avant.
+> Supprimer la base de données efface toutes les données. S'assurer d'avoir une sauvegarde avant.
 
 ---
 

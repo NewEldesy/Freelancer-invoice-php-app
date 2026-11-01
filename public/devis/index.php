@@ -35,7 +35,7 @@ $filters = [
     'refusé'    => 'Refusés',
 ];
 
-// Batch load converted invoices — avoids N+1 in the table loop
+// Batch load converted invoices avoids N+1 in the table loop
 $devisIds    = array_column($all, 'id');
 $convertedMap = $repo->convertedInvoicesByDevisIds(array_map('intval', $devisIds));
 
@@ -101,16 +101,16 @@ require __DIR__ . '/../../templates/layout.php';
           <?php endif; ?>
         </td>
         <td>
-          <div style="font-weight:500"><?= htmlspecialchars($d['client_name'] ?: '—') ?></div>
+          <div style="font-weight:500"><?= htmlspecialchars($d['client_name'] ?: '/') ?></div>
           <?php if ($d['client_contact']): ?>
           <div style="font-size:.72rem;color:var(--muted-light)"><?= htmlspecialchars($d['client_contact']) ?></div>
           <?php endif; ?>
         </td>
         <td style="font-size:.8rem;color:var(--muted);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
-          <?= htmlspecialchars($d['subject'] ?: '—') ?>
+          <?= htmlspecialchars($d['subject'] ?: '/') ?>
         </td>
-        <td style="color:var(--muted);font-size:.8rem"><?= $d['issued_at'] ? date('d/m/Y', strtotime($d['issued_at'])) : '—' ?></td>
-        <td style="color:var(--muted);font-size:.8rem"><?= $d['due_at'] ? date('d/m/Y', strtotime($d['due_at'])) : '—' ?></td>
+        <td style="color:var(--muted);font-size:.8rem"><?= $d['issued_at'] ? date('d/m/Y', strtotime($d['issued_at'])) : '/' ?></td>
+        <td style="color:var(--muted);font-size:.8rem"><?= $d['due_at'] ? date('d/m/Y', strtotime($d['due_at'])) : '/' ?></td>
         <td style="text-align:right;font-weight:600;font-size:.84rem">
           <?= number_format((int)$d['total_net'], 0, ',', ' ') ?>
           <span style="font-size:.7rem;color:var(--muted);font-weight:400">FCFA</span>

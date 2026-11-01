@@ -41,7 +41,7 @@ require __DIR__ . '/../../templates/layout.php';
 
 <?php if ($overdueStats['count'] > 0 && $filterStatus !== 'retard'): ?>
 <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:10px 16px;margin-bottom:14px;font-size:.82rem;color:#92400e;display:flex;justify-content:space-between;align-items:center">
-  <span><i class="fa-solid fa-triangle-exclamation"></i> <strong><?= $overdueStats['count'] ?> facture<?= $overdueStats['count'] > 1 ? 's' : '' ?> en retard</strong> — <?= number_format($overdueStats['total'], 0, ',', ' ') ?> FCFA à relancer</span>
+  <span><i class="fa-solid fa-triangle-exclamation"></i> <strong><?= $overdueStats['count'] ?> facture<?= $overdueStats['count'] > 1 ? 's' : '' ?> en retard</strong> : <?= number_format($overdueStats['total'], 0, ',', ' ') ?> FCFA à relancer</span>
   <a href="?status=retard" style="font-size:.78rem;font-weight:600;color:#92400e;text-decoration:underline">Voir</a>
 </div>
 <?php endif; ?>
@@ -108,13 +108,13 @@ require __DIR__ . '/../../templates/layout.php';
             </span>
           </td>
           <td>
-            <div style="font-weight:500"><?= htmlspecialchars($inv['client_name'] ?: '—') ?></div>
+            <div style="font-weight:500"><?= htmlspecialchars($inv['client_name'] ?: '/') ?></div>
             <?php if ($inv['client_contact']): ?>
             <div style="font-size:.72rem;color:var(--muted-light)"><?= htmlspecialchars($inv['client_contact']) ?></div>
             <?php endif; ?>
           </td>
-          <td style="color:var(--muted);font-size:.8rem"><?= $inv['issued_at'] ? date('d/m/Y', strtotime($inv['issued_at'])) : '—' ?></td>
-          <td style="color:var(--muted);font-size:.8rem"><?= $inv['due_at'] ? date('d/m/Y', strtotime($inv['due_at'])) : '—' ?></td>
+          <td style="color:var(--muted);font-size:.8rem"><?= $inv['issued_at'] ? date('d/m/Y', strtotime($inv['issued_at'])) : '/' ?></td>
+          <td style="color:var(--muted);font-size:.8rem"><?= $inv['due_at'] ? date('d/m/Y', strtotime($inv['due_at'])) : '/' ?></td>
           <td style="text-align:right;font-size:.8rem;color:var(--muted)"><?= number_format((int)$inv['total_ht'], 0, ',', ' ') ?></td>
           <td style="text-align:right;font-weight:600;font-size:.84rem">
             <?= number_format((int)$inv['total_net'], 0, ',', ' ') ?>

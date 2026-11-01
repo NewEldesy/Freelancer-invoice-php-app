@@ -29,7 +29,7 @@ if ($opp === null) {
     exit;
 }
 
-/* Idempotency: already converted — redirect to the existing invoice */
+/* Idempotency: already converted redirect to the existing invoice */
 if (!empty($opp['invoice_id'])) {
     header('Location: /invoice/edit.php?id=' . (int)$opp['invoice_id']);
     exit;

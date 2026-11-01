@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $client = array_merge($client, $data);
 }
 
-$pageTitle     = 'Modifier — ' . htmlspecialchars($client['name']);
+$pageTitle     = 'Modifier : ' . htmlspecialchars($client['name']);
 $currentPage   = 'clients';
 $topbarActions = '<a href="/client/index.php" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Retour</a>';
 

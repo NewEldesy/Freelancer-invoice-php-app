@@ -103,7 +103,7 @@ function processDevisPost(string $existingLogo): array
     ], $logoPath];
 }
 
-$pageTitle     = 'Devis — ' . htmlspecialchars($record['number']);
+$pageTitle     = 'Devis : ' . htmlspecialchars($record['number']);
 $currentPage   = 'devis';
 $lockedType    = 'DEVIS';
 $devisStatuses = true;
@@ -126,7 +126,7 @@ if ($flashSuccess): ?>
 <?php if ($converted): ?>
 <div class="alert alert-success" style="margin-bottom:12px">
   <i class="fa-solid fa-circle-check"></i> Converti en facture
-  <strong><?= htmlspecialchars($converted['number']) ?></strong> —
+  <strong><?= htmlspecialchars($converted['number']) ?></strong> :
   <a href="/invoice/edit.php?id=<?= $converted['id'] ?>" style="font-weight:600">Voir la facture</a>
 </div>
 <?php elseif (Auth::can('write') && $record['status'] === 'accepté'): ?>

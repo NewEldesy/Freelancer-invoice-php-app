@@ -66,9 +66,9 @@ require __DIR__ . '/../../templates/layout.php';
           <div style="font-size:.7rem;color:var(--muted)"><?= htmlspecialchars(mb_substr($c['notes'], 0, 60)) ?><?= mb_strlen($c['notes']) > 60 ? '…' : '' ?></div>
           <?php endif; ?>
         </td>
-        <td style="font-size:.83rem"><?= htmlspecialchars($c['contact'] ?? '—') ?></td>
-        <td style="font-size:.83rem;color:var(--muted)"><?= htmlspecialchars($c['email'] ?? '—') ?></td>
-        <td style="font-size:.83rem;color:var(--muted)"><?= htmlspecialchars($c['phone'] ?? '—') ?></td>
+        <td style="font-size:.83rem"><?= htmlspecialchars($c['contact'] ?? '/') ?></td>
+        <td style="font-size:.83rem;color:var(--muted)"><?= htmlspecialchars($c['email'] ?? '/') ?></td>
+        <td style="font-size:.83rem;color:var(--muted)"><?= htmlspecialchars($c['phone'] ?? '/') ?></td>
         <td style="font-size:.78rem;color:var(--muted)"><?= htmlspecialchars(mb_substr($c['address'] ?? '', 0, 40)) ?><?= mb_strlen($c['address'] ?? '') > 40 ? '…' : '' ?></td>
         <td style="white-space:nowrap">
           <?php if (Auth::can('write')): ?>

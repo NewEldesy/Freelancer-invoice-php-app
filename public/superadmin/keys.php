@@ -196,10 +196,10 @@ require __DIR__ . '/../../templates/layout.php';
         <?php endif; ?>
       </td>
       <td style="font-size:.65rem;font-family:monospace;color:var(--muted)">
-        <?= $k['used_machine'] ? htmlspecialchars(substr($k['used_machine'], 0, 16)) . '…' : '—' ?>
+        <?= $k['used_machine'] ? htmlspecialchars(substr($k['used_machine'], 0, 16)) . '…' : '/' ?>
       </td>
       <td style="font-size:.72rem;color:var(--muted)">
-        <?= $k['used_at'] ? date('d/m/Y', strtotime($k['used_at'])) : '—' ?>
+        <?= $k['used_at'] ? date('d/m/Y', strtotime($k['used_at'])) : '/' ?>
       </td>
     </tr>
     <?php endforeach; ?>

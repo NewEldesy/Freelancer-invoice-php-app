@@ -45,7 +45,7 @@ $machineId = LicenseService::machineId();
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Activation — Freelancer-invoice</title>
+<title>Activation | Freelancer-invoice</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -205,7 +205,7 @@ $machineId = LicenseService::machineId();
         <div class="plan highlight">
           <div class="plan-badge">⭐ Recommandé</div>
           <div class="plan-name">Pro</div>
-          <div class="plan-price">— <span>clé requise</span></div>
+          <div class="plan-price"><span>clé requise</span></div>
           <ul class="plan-features">
             <li>Factures illimitées</li>
             <li>Pipeline illimité</li>

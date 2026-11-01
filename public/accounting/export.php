@@ -59,14 +59,14 @@ header('Pragma: no-cache');
 // UTF-8 BOM so Excel auto-detects encoding
 echo "\xEF\xBB\xBF";
 
-// ── MONTHLY export ────────────────────────────────────────────────────────────
+// MONTHLY export
 
 if ($type === 'monthly') {
     $invMonths = $invRepo->statsByMonth($year);
     $expMonths = $expRepo->statsByMonth($year);
 
     // Header block
-    echo csvRow([$company . ' — Comptabilité mensuelle ' . $year]);
+    echo csvRow([$company . ' | Comptabilité mensuelle ' . $year]);
     echo csvRow(['Généré le : ' . date('d/m/Y à H:i')]);
     echo csvRow([]);
 
@@ -164,7 +164,7 @@ $p['marge']         = $p['ca_engage'] > 0 ? round($p['benefice_brut'] / $p['ca_e
 $p['non_encaisse']  = $p['ca_engage'] - $p['ca_encaisse'];
 
 // Header block
-echo csvRow([$company . ' — Rapport financier annuel ' . $year]);
+echo csvRow([$company . ' | Rapport financier annuel ' . $year]);
 echo csvRow(['Généré le : ' . date('d/m/Y à H:i')]);
 echo csvRow([]);
 
@@ -186,7 +186,7 @@ echo csvRow(['=== CHARGES ===', '', '', '']);
 echo csvRow(['Total dépenses (FCFA)', $n['depenses'], $p['depenses'], pctDiff($p['depenses'], $n['depenses'])]);
 $ratioN = $n['ca_engage'] > 0 ? round($n['depenses'] / $n['ca_engage'] * 100, 1) : 0;
 $ratioP = $p['ca_engage'] > 0 ? round($p['depenses'] / $p['ca_engage'] * 100, 1) : 0;
-echo csvRow(['Ratio charges / CA engagé', $ratioN . '%', $ratioP . '%', '—']);
+echo csvRow(['Ratio charges / CA engagé', $ratioN . '%', $ratioP . '%', '/']);
 
 echo csvRow([]);
 

@@ -101,7 +101,7 @@ require __DIR__ . '/../../templates/layout.php';
 
 if ($invoiceLocked): ?>
 <div class="alert" style="background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:10px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px">
-  <div><strong><i class="fa-solid fa-lock"></i> Limite atteinte — Plan gratuit</strong><br><span style="font-size:.82rem">Maximum <?= LicenseService::invoiceMax() ?> factures sur le plan gratuit.</span></div>
+  <div><strong><i class="fa-solid fa-lock"></i> Limite du Plan gratuit atteinte</strong><br><span style="font-size:.82rem">Maximum <?= LicenseService::invoiceMax() ?> factures sur le plan gratuit.</span></div>
   <a href="/activate.php" class="btn btn-primary" style="white-space:nowrap"><i class="fa-solid fa-star"></i> Passer Pro</a>
 </div>
 <?php elseif (!empty($errors)): ?>

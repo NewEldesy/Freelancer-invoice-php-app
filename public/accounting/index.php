@@ -145,7 +145,7 @@ require __DIR__ . '/../../templates/layout.php';
 <div class="print-header" style="display:none; margin-bottom:18px; border-bottom:2px solid #0f172a; padding-bottom:12px;">
   <div style="display:flex; justify-content:space-between; align-items:flex-end;">
     <div>
-      <div style="font-size:18px; font-weight:800; color:#0f172a">Rapport comptable — <?= $currentYear ?></div>
+      <div style="font-size:18px; font-weight:800; color:#0f172a">Rapport comptable : <?= $currentYear ?></div>
       <div style="font-size:11px; color:#64748b; margin-top:3px">Généré le <?= date('d/m/Y à H:i') ?> · Freelancer-invoice</div>
     </div>
     <div style="text-align:right; font-size:11px; color:#64748b">
@@ -162,7 +162,7 @@ require __DIR__ . '/../../templates/layout.php';
   <a href="/accounting/index.php?year=<?= $y ?>"
      class="year-btn <?= $y === $currentYear ? 'active' : '' ?>"><?= $y ?></a>
   <?php endforeach; ?>
-  <span style="font-size:.75rem;color:var(--muted-light);margin-left:4px">— <?= count(array_filter($months, fn($m) => $m['ca_engage'] > 0)) ?> mois actifs</span>
+  <span style="font-size:.75rem;color:var(--muted-light);margin-left:4px">: <?= count(array_filter($months, fn($m) => $m['ca_engage'] > 0)) ?> mois actifs</span>
 </div>
 
 <!-- Stat cards annuelles -->
@@ -212,7 +212,7 @@ require __DIR__ . '/../../templates/layout.php';
 <!-- Tableau mensuel détaillé -->
 <div class="card">
   <div class="card-header">
-    <h2>Détail par mois — <?= $currentYear ?></h2>
+    <h2>Détail par mois : <?= $currentYear ?></h2>
     <span style="font-size:.75rem;color:var(--muted)"><?= $totalNbEnvoyee + $totalNbPayee ?> factures · <?= number_format($totalCaEngage, 0, ',', ' ') ?> FCFA engagés</span>
   </div>
   <div class="table-wrap">
@@ -241,17 +241,17 @@ require __DIR__ . '/../../templates/layout.php';
           <?php if ($isCurrentMonth): ?><span style="font-size:.68rem;color:var(--gold);margin-left:4px" class="no-print">● en cours</span><?php endif; ?>
         </td>
         <td class="<?= $isEmpty ? 'zero' : '' ?>">
-          <?= $isEmpty ? '—' : number_format($m['ca_engage'], 0, ',', ' ') . ' <span style="font-size:.7rem;color:var(--muted)">FCFA</span>' ?>
+          <?= $isEmpty ? ':' : number_format($m['ca_engage'], 0, ',', ' ') . ' <span style="font-size:.7rem;color:var(--muted)">FCFA</span>' ?>
         </td>
         <td class="<?= $isEmpty ? 'zero' : '' ?>">
-          <?= $isEmpty ? '—' : number_format($m['ca_encaisse'], 0, ',', ' ') . ' <span style="font-size:.7rem;color:var(--muted)">FCFA</span>' ?>
+          <?= $isEmpty ? ':' : number_format($m['ca_encaisse'], 0, ',', ' ') . ' <span style="font-size:.7rem;color:var(--muted)">FCFA</span>' ?>
         </td>
         <td class="<?= $isEmpty ? 'zero' : '' ?>">
-          <?= $m['depenses'] === 0 ? '<span class="zero">—</span>' : number_format($m['depenses'], 0, ',', ' ') . ' <span style="font-size:.7rem;color:var(--muted)">FCFA</span>' ?>
+          <?= $m['depenses'] === 0 ? '<span class="zero">/</span>' : number_format($m['depenses'], 0, ',', ' ') . ' <span style="font-size:.7rem;color:var(--muted)">FCFA</span>' ?>
         </td>
         <td>
           <?php if ($isEmpty): ?>
-          <span class="zero">—</span>
+          <span class="zero">/</span>
           <?php else: ?>
           <span class="<?= $m['benefice'] >= 0 ? 'benefice-pos' : 'benefice-neg' ?>">
             <?= ($m['benefice'] >= 0 ? '' : '') . number_format($m['benefice'], 0, ',', ' ') ?>
@@ -262,13 +262,13 @@ require __DIR__ . '/../../templates/layout.php';
         <td>
           <?php if ($marge !== null): ?>
           <span style="font-size:.8rem;font-weight:600;color:<?= $marge >= 0 ? '#059669' : '#dc2626' ?>"><?= $marge ?>%</span>
-          <?php else: ?><span class="zero">—</span><?php endif; ?>
+          <?php else: ?><span class="zero">/</span><?php endif; ?>
         </td>
         <td class="no-print" style="color:var(--muted);font-size:.78rem">
           <?php if ($m['nb_envoyee'] + $m['nb_payee'] > 0): ?>
           <span title="Envoyées" style="margin-right:6px"><i class="fa-solid fa-envelope-open-text"></i> <?= $m['nb_envoyee'] ?></span>
           <span title="Payées"><i class="fa-solid fa-circle-check"></i> <?= $m['nb_payee'] ?></span>
-          <?php else: ?><span class="zero">—</span><?php endif; ?>
+          <?php else: ?><span class="zero">/</span><?php endif; ?>
         </td>
       </tr>
       <?php endforeach; ?>

@@ -107,7 +107,7 @@ require __DIR__ . '/../../templates/layout.php';
           <td>
             <div style="font-weight:600;font-size:.83rem"><?= htmlspecialchars($proj['title']) ?></div>
           </td>
-          <td style="font-size:.8rem"><?= htmlspecialchars($proj['client_name'] ?: '—') ?></td>
+          <td style="font-size:.8rem"><?= htmlspecialchars($proj['client_name'] ?: '/') ?></td>
           <td>
             <a href="/invoice/edit.php?id=<?= $proj['invoice_id'] ?>"
                style="font-size:.78rem;font-weight:600;color:var(--navy);text-decoration:none">
@@ -118,7 +118,7 @@ require __DIR__ . '/../../templates/layout.php';
             <?= number_format((int)$proj['total_net'], 0, ',', ' ') ?> <span style="color:var(--muted);font-weight:400">FCFA</span>
           </td>
           <td style="text-align:right;font-size:.8rem;color:var(--red)">
-            <?= $costs > 0 ? '−' . number_format($costs, 0, ',', ' ') . ' FCFA' : '—' ?>
+            <?= $costs > 0 ? '−' . number_format($costs, 0, ',', ' ') . ' FCFA' : '/' ?>
           </td>
           <td style="text-align:right;font-size:.8rem;font-weight:700;<?= $margeClass ?>">
             <?= number_format($marge, 0, ',', ' ') ?> FCFA

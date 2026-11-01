@@ -46,7 +46,7 @@ $expenses = $expRepo->allForInvoice((int)$project['invoice_id']);
 $totalExp = array_sum(array_column($expenses, 'amount'));
 $marge    = (int)$project['total_net'] - $totalExp;
 
-$pageTitle   = 'Projet — ' . htmlspecialchars($project['title']);
+$pageTitle   = 'Projet : ' . htmlspecialchars($project['title']);
 $currentPage = 'projects';
 $topbarActions = '
   <a href="/expense/create.php?invoice_id=' . $project['invoice_id'] . '" class="btn btn-secondary"><i class="fa-solid fa-plus"></i> Ajouter dépense</a>
@@ -72,7 +72,7 @@ require __DIR__ . '/../../templates/layout.php';
            style="font-weight:700;color:var(--navy);text-decoration:none">
           <?= htmlspecialchars($project['invoice_number']) ?>
         </a>
-        <span style="color:var(--muted);font-size:.8rem"> · <?= htmlspecialchars($project['client_name'] ?: '—') ?></span>
+        <span style="color:var(--muted);font-size:.8rem"> · <?= htmlspecialchars($project['client_name'] ?: '/') ?></span>
         <span style="font-weight:600;color:var(--green);float:right"><?= number_format((int)$project['total_net'], 0, ',', ' ') ?> FCFA</span>
       </div>
 

@@ -9,17 +9,17 @@ use App\Database\Database;
 final class ActivityLogger
 {
     /**
-     * Log an action for the currently authenticated user.
+     * Enregistre une action pour l'utilisateur authentifié courant.
      *
-     * @param string $action  Dot-notation category, e.g. 'invoice.create'
-     * @param string $label   Human-readable description, e.g. 'Création facture #20250705-1'
+     * @param string $action  Catégorie en notation pointée, ex : 'invoice.create'
+     * @param string $label   Description lisible, ex : 'Création facture #20250705-1'
      */
     public static function log(string $action, string $label): void
     {
         $userId   = $_SESSION['user_id']              ?? null;
         $username = $_SESSION['auth_user']['username'] ?? 'système';
         $role     = $_SESSION['user_role']             ?? '';
-        // Use REMOTE_ADDR only — X-Forwarded-For is client-controlled and can be spoofed
+        // Utiliser uniquement REMOTE_ADDR ; X-Forwarded-For est contrôlable par le client et peut être falsifié
         $ip = $_SERVER['REMOTE_ADDR'] ?? null;
 
         try {
@@ -35,7 +35,7 @@ final class ActivityLogger
     }
 
     /**
-     * Fetch logs with optional filters. Returns rows ordered newest first.
+     * Récupère les journaux avec des filtres optionnels. Retourne les lignes du plus récent au plus ancien.
      *
      * @param array{from?:string,to?:string,user_id?:int,action?:string} $filters
      */

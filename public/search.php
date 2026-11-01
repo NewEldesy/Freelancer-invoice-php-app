@@ -108,8 +108,8 @@ require_once __DIR__ . '/../templates/layout.php';
     <a href="/invoice/edit.php?id=<?= $inv['id'] ?>" class="result-item">
       <div class="result-icon" style="background:var(--blue-bg);color:var(--blue)"><i class="fa-solid fa-file-invoice"></i></div>
       <div class="result-body">
-        <div class="result-title"><?= htmlspecialchars($inv['number']) ?> — <?= htmlspecialchars($inv['client_name']) ?></div>
-        <div class="result-sub"><?= htmlspecialchars($inv['subject'] ?: '—') ?> · <?= htmlspecialchars($inv['issued_at'] ?? '') ?></div>
+        <div class="result-title"><?= htmlspecialchars($inv['number']) ?> : <?= htmlspecialchars($inv['client_name']) ?></div>
+        <div class="result-sub"><?= htmlspecialchars($inv['subject'] ?: ':') ?> · <?= htmlspecialchars($inv['issued_at'] ?? '') ?></div>
       </div>
       <div>
         <span class="result-status" style="color:<?= $st['color'] ?>;border-color:currentColor"><?= $st['label'] ?></span>
@@ -128,8 +128,8 @@ require_once __DIR__ . '/../templates/layout.php';
     <a href="/devis/edit.php?id=<?= $d['id'] ?>" class="result-item">
       <div class="result-icon" style="background:var(--purple-bg);color:var(--purple)"><i class="fa-solid fa-file-circle-question"></i></div>
       <div class="result-body">
-        <div class="result-title"><?= htmlspecialchars($d['number']) ?> — <?= htmlspecialchars($d['client_name']) ?></div>
-        <div class="result-sub"><?= htmlspecialchars($d['subject'] ?: '—') ?> · <?= htmlspecialchars($d['issued_at'] ?? '') ?></div>
+        <div class="result-title"><?= htmlspecialchars($d['number']) ?> : <?= htmlspecialchars($d['client_name']) ?></div>
+        <div class="result-sub"><?= htmlspecialchars($d['subject'] ?: ':') ?> · <?= htmlspecialchars($d['issued_at'] ?? '') ?></div>
       </div>
       <div>
         <span class="result-status" style="color:<?= $st['color'] ?>;border-color:currentColor"><?= $st['label'] ?></span>

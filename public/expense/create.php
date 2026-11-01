@@ -99,7 +99,7 @@ require __DIR__ . '/../../templates/layout.php';
     <?php if ($expenseLocked): ?>
     <div class="alert" style="background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:10px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px">
       <div>
-        <strong><i class="fa-solid fa-lock"></i> Limite atteinte — Plan gratuit</strong><br>
+        <strong><i class="fa-solid fa-lock"></i> Limite du Plan gratuit atteinte</strong><br>
         <span style="font-size:.82rem">Vous avez atteint la limite de <strong><?= $expenseMax ?> dépenses</strong> du plan gratuit.</span>
       </div>
       <a href="/activate.php" class="btn btn-primary" style="white-space:nowrap;flex-shrink:0"><i class="fa-solid fa-star"></i> Passer Pro</a>
@@ -115,11 +115,11 @@ require __DIR__ . '/../../templates/layout.php';
         <div class="field">
           <label>Facture liée</label>
           <select name="invoice_id" id="invoice_id">
-            <option value="">— Aucune —</option>
+            <option value=""> Aucune </option>
             <?php foreach ($invoices as $inv): ?>
             <option value="<?= $inv['id'] ?>"
               <?= ((int)($_POST['invoice_id'] ?? $preselectedInvoice)) === (int)$inv['id'] ? 'selected' : '' ?>>
-              <?= htmlspecialchars($inv['number']) ?> · <?= htmlspecialchars($inv['client_name'] ?: '—') ?>
+              <?= htmlspecialchars($inv['number']) ?> · <?= htmlspecialchars($inv['client_name'] ?: '/') ?>
             </option>
             <?php endforeach; ?>
           </select>

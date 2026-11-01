@@ -8,13 +8,13 @@ use App\Database\Database;
 use PDO;
 
 /**
- * License system for Freelancer-invoice.
+ * Système de licence pour Freelancer-invoice.
  *
- * Key format: BASE64_PAYLOAD.HMAC32
+ * Format de clé : BASE64_PAYLOAD.HMAC32
  *   payload = base64_encode(json({edition, expires, machine_id}))
- *   HMAC32  = first 32 chars of hash_hmac('sha256', payload, SECRET)
+ *   HMAC32  = les 32 premiers caractères de hash_hmac('sha256', payload, SECRET)
  *
- * Editions: free | pro | enterprise
+ * Éditions : free | pro | enterprise
  */
 final class LicenseService
 {
@@ -35,6 +35,20 @@ final class LicenseService
         return self::$secret = $value;
     }
 
+    /** @internal Réservé aux tests : injecte un secret connu sans accès au système de fichiers. */
+    public static function setSecretForTesting(string $secret): void
+    {
+        self::$secret = $secret;
+        self::$cache  = null;
+    }
+
+    /** @internal Réservé aux tests : réinitialise tout l'état en mémoire. */
+    public static function resetForTesting(): void
+    {
+        self::$secret = null;
+        self::$cache  = null;
+    }
+
     private const FREE_LIMITS = [
         'invoice_max'   => 10,
         'duplicate_max' => 5,
@@ -48,7 +62,7 @@ final class LicenseService
 
     private static ?array $cache = null;
 
-    // ── Public API ────────────────────────────────────────────────────────────
+    // ── API publique ─────────────────────────────────────────────────────────
 
     public static function current(): array
     {
@@ -87,12 +101,12 @@ final class LicenseService
         return self::edition() === 'free';
     }
 
-    /** Ensure a valid license exists. Auto-activates free plan on first run. */
+    /** Vérifie qu'une licence valide existe. Active silencieusement le plan gratuit au premier démarrage. */
     public static function requireValid(): void
     {
         $lic = self::current();
         if ($lic['edition'] === 'none') {
-            // First run — silently activate free plan
+            // Premier démarrage : activation silencieuse du plan gratuit
             self::activateFree();
             self::$cache = null;
             return;
@@ -113,7 +127,7 @@ final class LicenseService
     public static function canAccounting(): bool  { return !self::isFree() || self::FREE_LIMITS['accounting']; }
     public static function canMultiUsers(): bool  { return !self::isFree() || self::FREE_LIMITS['multi_users']; }
 
-    /** Check if a new entry can be created. $current = current count from DB. */
+    /** Vérifie si une nouvelle entrée peut être créée. $current = nombre actuel en base. */
     public static function canAdd(string $feature, int $current): bool
     {
         return match ($feature) {
@@ -127,7 +141,7 @@ final class LicenseService
         };
     }
 
-    // ── Usage counters (for pdf / excel / duplicate on free plan) ─────────────
+    // ── Compteurs d'utilisation (pdf / excel / duplication sur plan gratuit) ──
 
     public static function getCounter(string $feature): int
     {
@@ -147,9 +161,9 @@ final class LicenseService
         )->execute([$feature]);
     }
 
-    // ── Activation ────────────────────────────────────────────────────────────
+    // Activation
 
-    /** Activate the free plan — no key required. */
+    /** Active le plan gratuit sans clé requise. */
     public static function activateFree(): void
     {
         $db = Database::connection();
@@ -162,8 +176,8 @@ final class LicenseService
     }
 
     /**
-     * Validate and activate a license key.
-     * Returns ['success'=>bool, 'error'=>string, 'edition'=>string].
+     * Valide et active une clé de licence.
+     * Retourne ['success'=>bool, 'error'=>string, 'edition'=>string].
      */
     public static function activate(string $rawKey): array
     {
@@ -176,14 +190,14 @@ final class LicenseService
 
         $payload = $result['payload'];
 
-        // Machine binding check (if key has machine_id)
+        // Vérification de liaison machine (si la clé contient un machine_id)
         if (!empty($payload['machine_id']) && $payload['machine_id'] !== '*') {
             if ($payload['machine_id'] !== self::machineId()) {
                 return ['success' => false, 'error' => 'Cette clé est liée à un autre poste.', 'edition' => ''];
             }
         }
 
-        // Resolve expiry + check reuse: key must not already be used on another machine
+        // Résolution de l'expiration + vérification de réutilisation : la clé ne doit pas déjà être utilisée sur un autre poste
         $db = Database::connection();
         $storedRow = $db->prepare("SELECT period, used, used_machine FROM license_keys WHERE key_value = ?");
         $storedRow->execute([$rawKey]);
@@ -195,12 +209,12 @@ final class LicenseService
 
         $expires = $stored ? self::periodToDate($stored['period']) : ($payload['expires'] ?? null);
 
-        // Expiry check (only for keys that were already activated before — edge case)
+        // Vérification d'expiration (uniquement pour les clés déjà activées, cas limite)
         if ($expires !== null && $expires < date('Y-m-d')) {
             return ['success' => false, 'error' => 'Cette clé de licence a expiré.', 'edition' => ''];
         }
 
-        // Store
+        // Enregistrement
         $db->exec("DELETE FROM license");
         $db->prepare(
             "INSERT INTO license (license_key, edition, expires_at, machine_id, activated_at)
@@ -213,21 +227,21 @@ final class LicenseService
         ]);
         self::$cache = null;
 
-        // Mark key as used in license_keys table if it was pre-generated
+        // Marquer la clé comme utilisée dans license_keys si elle était pré-générée
         self::markKeyUsed($rawKey, self::machineId());
 
         return ['success' => true, 'error' => '', 'edition' => $payload['edition']];
     }
 
-    // ── Stored key management ─────────────────────────────────────────────────
+    // Gestion des clés stockées
 
     /**
-     * Generate and store a key in the license_keys table.
-     * Returns the generated key string.
+     * Génère et enregistre une clé dans la table license_keys.
+     * Retourne la chaîne de clé générée.
      */
     public static function generateAndStore(string $edition, string $period): string
     {
-        // expires_at is intentionally NULL here — calculated at client activation
+        // expires_at est volontairement NULL ici, calculé lors de l'activation côté client
         $key = self::generate($edition, null);
 
         $db = Database::connection();
@@ -239,12 +253,12 @@ final class LicenseService
         return $key;
     }
 
-    /** Mark a stored key as used and compute its expiry from the stored period. */
+    /** Marque une clé stockée comme utilisée et calcule son expiration à partir de la période enregistrée. */
     public static function markKeyUsed(string $key, string $machineId): void
     {
         $db = Database::connection();
 
-        // Fetch the stored period so we can compute expires_at at activation time
+        // Récupérer la période stockée pour calculer expires_at au moment de l'activation
         $row = $db->prepare("SELECT period FROM license_keys WHERE key_value = ?");
         $row->execute([$key]);
         $stored = $row->fetch();
@@ -287,9 +301,9 @@ final class LicenseService
         };
     }
 
-    // ── Key generation (used by keygen.php) ──────────────────────────────────
+    // ── Génération de clé (utilisé par keygen.php) ───────────────────────────
 
-    /** Generate a signed license key. */
+    /** Génère une clé de licence signée. */
     public static function generate(string $edition, ?string $expires = null, ?string $machineId = null): string
     {
         $payload = [
@@ -304,7 +318,7 @@ final class LicenseService
         return $payloadB64 . '.' . $sig;
     }
 
-    // ── Internal ─────────────────────────────────────────────────────────────
+    // ── Interne ──────────────────────────────────────────────────────────────
 
     private static function validateKey(string $key): array
     {
@@ -315,7 +329,7 @@ final class LicenseService
 
         [$payloadB64, $sig] = $parts;
 
-        $payloadJson = base64_decode($payloadB64);
+        $payloadJson = base64_decode($payloadB64, true);
         if ($payloadJson === false) {
             return ['valid' => false, 'error' => 'Clé corrompue.', 'payload' => []];
         }

@@ -1,4 +1,4 @@
-# Guide utilisateur — Freelancer-invoice
+# Guide utilisateur
 
 > **Pour qui ?** Ce guide s'adresse aux gestionnaires et utilisateurs de l'application. Les administrateurs trouveront la section [Gestion des comptes](#gestion-des-comptes) qui leur est dédiée.
 
@@ -8,7 +8,7 @@
 
 Accédez à l'URL fournie par votre administrateur et entrez votre nom d'utilisateur et mot de passe.
 
-En cas d'oubli de mot de passe, contactez votre administrateur — il peut réinitialiser votre mot de passe depuis la gestion des utilisateurs.
+En cas d'oubli de mot de passe, contactez votre administrateur peut réinitialiser votre mot de passe depuis la gestion des utilisateurs.
 
 ---
 
@@ -70,7 +70,7 @@ Une fois l'opportunité **Gagnée** : cliquer sur **Convertir en facture**. Les 
 2. Sélectionner un client existant (le bouton "Choisir" pré-remplit les champs) ou saisir manuellement
 3. Ajouter les lignes de prestation (description, quantité, prix unitaire HT)
 4. La TVA et le total sont calculés automatiquement
-5. Enregistrer — la facture est créée en statut **Brouillon**
+5. Enregistrer la facture est créée en statut **Brouillon**
 
 ### Cycle de vie d'une facture
 
@@ -80,7 +80,7 @@ Brouillon → Envoyée → Payée
 ```
 
 - **Brouillon** : en préparation, non comptabilisé
-- **Envoyée** : transmise au client, entre dans le CA Engagé — déclenche la création automatique d'un projet
+- **Envoyée** : transmise au client, entre dans le CA Engagé et déclenche la création automatique d'un projet
 - **Payée** : encaissée, entre dans le CA Encaissé
 - **Annulée** : exclue de tous les calculs
 
@@ -92,7 +92,7 @@ Bouton **PDF** en haut à droite de n'importe quelle facture ou devis. Le PDF re
 
 ### Dupliquer une facture
 
-Bouton **Dupliquer** sur la liste des factures — crée une copie en brouillon avec un nouveau numéro et les dates du jour.
+Bouton **Dupliquer** sur la liste des factures crée une copie en brouillon avec un nouveau numéro et les dates du jour.
 
 ### Avoirs
 
@@ -217,7 +217,7 @@ Administration → Utilisateurs → **Nouvel utilisateur**
 
 ### Supprimer un utilisateur
 
-Bouton corbeille sur la ligne — impossible de supprimer le compte Super Admin ni son propre compte.
+Bouton corbeille sur la ligne impossible de supprimer le compte Super Admin ni son propre compte.
 
 ### Journal d'activité
 
@@ -227,7 +227,7 @@ Administration → Journal d'activité : toutes les actions de tous les utilisat
 
 ## Recherche globale
 
-Barre de recherche en haut de toutes les pages — recherche simultanément dans les factures, devis, clients et dépenses. Minimum 2 caractères.
+Barre de recherche en haut de toutes les pages recherche simultanément dans les factures, devis, clients et dépenses. Minimum 2 caractères.
 
 ---
 

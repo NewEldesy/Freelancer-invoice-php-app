@@ -360,7 +360,7 @@ require __DIR__ . '/../../templates/layout.php';
         <td>Ratio charges / CA engagé</td>
         <td style="font-weight:600"><?= $n['ca_engage'] > 0 ? round($n['depenses'] / $n['ca_engage'] * 100, 1) : 0 ?>%</td>
         <td style="color:var(--muted)"><?= $p['ca_engage'] > 0 ? round($p['depenses'] / $p['ca_engage'] * 100, 1) : 0 ?>%</td>
-        <td>—</td>
+        <td>/</td>
       </tr>
       <?php endif; ?>
 
@@ -397,10 +397,10 @@ require __DIR__ . '/../../templates/layout.php';
   </table>
 </div>
 
-<!-- ══ Monthly breakdown ══ -->
+<!-- Monthly breakdown -->
 <div class="rpt-card no-print-section">
   <div style="padding:14px 20px; border-bottom:1px solid var(--border-soft); display:flex; justify-content:space-between; align-items:center;">
-    <div style="font-weight:700;color:var(--navy);font-size:.88rem">Détail mensuel — <?= $currentYear ?></div>
+    <div style="font-weight:700;color:var(--navy);font-size:.88rem">Détail mensuel : <?= $currentYear ?></div>
     <span style="font-size:.72rem;color:var(--muted)">CA Engagé · Dépenses · Bénéfice</span>
   </div>
   <div style="overflow-x:auto">
@@ -435,18 +435,18 @@ require __DIR__ . '/../../templates/layout.php';
         <?= $MONTHS_FULL[$m] ?>
         <?php if ($isCurr): ?><span style="font-size:.65rem;color:var(--gold);margin-left:3px">●</span><?php endif; ?>
       </td>
-      <td><?= $empty ? '<span style="color:#94a3b8">—</span>' : fmt($caE) ?></td>
-      <td><?= $empty ? '<span style="color:#94a3b8">—</span>' : fmt($caC) ?></td>
-      <td><?= $dep === 0 ? '<span style="color:#94a3b8">—</span>' : fmt($dep) ?></td>
+      <td><?= $empty ? '<span style="color:#94a3b8">/</span>' : fmt($caE) ?></td>
+      <td><?= $empty ? '<span style="color:#94a3b8">/</span>' : fmt($caC) ?></td>
+      <td><?= $dep === 0 ? '<span style="color:#94a3b8">/</span>' : fmt($dep) ?></td>
       <td>
         <?php if (!$empty): ?>
         <span style="color:<?= $ben >= 0 ? '#059669' : '#dc2626' ?>;font-weight:600"><?= fmt($ben) ?></span>
-        <?php else: ?><span style="color:#94a3b8">—</span><?php endif; ?>
+        <?php else: ?><span style="color:#94a3b8">/</span><?php endif; ?>
       </td>
       <td>
         <?php if ($mar !== null): ?>
         <span style="font-weight:600;color:<?= $mar >= 0 ? '#059669' : '#dc2626' ?>"><?= $mar ?>%</span>
-        <?php else: ?><span style="color:#94a3b8">—</span><?php endif; ?>
+        <?php else: ?><span style="color:#94a3b8">/</span><?php endif; ?>
       </td>
     </tr>
     <?php endfor; ?>

@@ -318,7 +318,7 @@ $today = date('d/m/Y');
 
   <!-- Pied -->
   <div class="cert-footer">
-    <span class="note"><i class="fa-solid fa-triangle-exclamation" style="color:#dc2626"></i> Clé à usage unique — à conserver précieusement</span>
+    <span class="note"><i class="fa-solid fa-triangle-exclamation" style="color:#dc2626"></i> Clé à usage unique à conserver précieusement</span>
     <span class="date">Émis le <?= htmlspecialchars($today) ?></span>
   </div>
 
@@ -326,7 +326,7 @@ $today = date('d/m/Y');
 <?php endforeach; ?>
 </div>
 
-<!-- Instructions d'activation — une seule fois en bas de page -->
+<!-- Instructions d'activation, une seule fois en bas de page -->
 <div class="cert-steps" style="max-width:900px;margin:28px auto 0;-webkit-print-color-adjust:exact;print-color-adjust:exact">
   <div class="cert-steps-title"><i class="fa-solid fa-circle-check"></i> Comment activer votre licence</div>
   <table style="width:100%;border-collapse:collapse;table-layout:fixed">

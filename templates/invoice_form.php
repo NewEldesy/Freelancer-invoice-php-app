@@ -132,13 +132,13 @@ if ($logoPath && file_exists($logoPath)):
     </div>
 </div>
 
-<!-- ── Client ── -->
-<div class="section-title"><i class="fa-solid fa-user"></i> Client — Envoyé à</div>
+<!-- Client -->
+<div class="section-title"><i class="fa-solid fa-user"></i> Client Envoyé à</div>
 <?php if (!empty($clients)): ?>
 <div class="field" style="margin-bottom:12px">
     <label>Choisir depuis la base clients</label>
     <select id="client-picker" onchange="pickClient(this)">
-        <option value="">— Sélectionner un client (optionnel) —</option>
+        <option value=""> Sélectionner un client (optionnel) </option>
         <?php foreach ($clients as $c): ?>
         <option value="<?= $c['id'] ?>"
             data-name="<?= htmlspecialchars($c['name']) ?>"
@@ -278,7 +278,7 @@ function filterCat(q) {
 <!-- ── Ligne Prestation (toujours en dernier) ── -->
 <div class="section-title" style="margin-top:22px"><i class="fa-solid fa-screwdriver-wrench"></i> Frais de prestation
     <span style="font-size:.7rem;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;margin-left:6px">
-        — apparaît en dernière position dans la facture
+        apparaît en dernière position dans la facture
     </span>
 </div>
 <div style="display:flex;align-items:center;gap:12px;background:#fffbf0;border:1px solid #f5c040;border-radius:8px;padding:12px 16px">
@@ -315,12 +315,12 @@ function filterCat(q) {
 
 <!-- Aperçu totaux -->
 <div class="totals-preview">
-    <div class="row"><span>Total H.T</span><span id="prev-ht">—</span></div>
-    <div class="row"><span id="prev-tax-label">Prélèvement 5%</span><span id="prev-tax">—</span></div>
-    <div class="row final"><span>Total Net à Payer</span><span id="prev-net">—</span></div>
+    <div class="row"><span>Total H.T</span><span id="prev-ht"> : </span></div>
+    <div class="row"><span id="prev-tax-label">Prélèvement 5%</span><span id="prev-tax"> : </span></div>
+    <div class="row final"><span>Total Net à Payer</span><span id="prev-net"> : </span></div>
 </div>
 
-<!-- ── Signature ── -->
+<!-- Signature -->
 <div class="section-title"><i class="fa-solid fa-signature"></i> Signature</div>
 <div class="form-grid-2">
     <div class="field">

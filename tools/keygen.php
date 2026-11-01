@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Freelancer-invoice — Générateur de clés de licence
+ * Freelancer-invoice Générateur de clés de licence
  * Usage CLI :
  *
  *   php tools/keygen.php pro 3m
@@ -20,7 +20,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 use App\Services\LicenseService;
 
-// ── Période → date d'expiration ───────────────────────────────────────────────
+// Période → date d'expiration
 
 function resolveExpiry(?string $period): ?string
 {
@@ -58,7 +58,7 @@ function periodLabel(?string $period): string
     };
 }
 
-// ── Parse args ────────────────────────────────────────────────────────────────
+// Parse args
 
 $edition   = $argv[1] ?? null;
 $period    = $argv[2] ?? 'permanent';
@@ -71,7 +71,7 @@ if (!$edition || !in_array($edition, $validEditions, true)) {
     echo "\nUsage: php tools/keygen.php <edition> <periode> [machine_id]\n";
     echo "  edition   : pro | enterprise\n";
     echo "  periode   : 3m | 6m | 1y | 2y | permanent  (défaut: permanent)\n";
-    echo "  machine_id: identifiant du poste (optionnel — '*' = tout poste)\n\n";
+    echo "  machine_id: identifiant du poste (optionnel '*' = tout poste)\n\n";
     echo "Exemples:\n";
     echo "  php tools/keygen.php pro 3m\n";
     echo "  php tools/keygen.php pro 1y\n";
@@ -87,7 +87,7 @@ if (!in_array($period, $validPeriods, true) && !preg_match('/^\d{4}-\d{2}-\d{2}$
 
 $expires = resolveExpiry($period);
 
-// ── Generate ──────────────────────────────────────────────────────────────────
+// Generate
 
 $key = LicenseService::generate(
     edition:   $edition,
@@ -99,11 +99,11 @@ $expiresLabel = $expires ? date('d/m/Y', strtotime($expires)) . ' (' . periodLab
 $machineLabel = ($machineId !== '*') ? $machineId : 'Tout poste (*)';
 $editionLabel = strtoupper($edition);
 
-// ── Output ────────────────────────────────────────────────────────────────────
+// Output
 
 echo "\n";
 echo "╔══════════════════════════════════════════════════════╗\n";
-echo "║        INVOICES PROJECT — CLÉ DE LICENCE             ║\n";
+echo "║        INVOICES PROJECT CLÉ DE LICENCE             ║\n";
 echo "╚══════════════════════════════════════════════════════╝\n";
 echo "\n";
 echo "  Édition     : {$editionLabel}\n";

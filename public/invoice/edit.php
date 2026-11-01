@@ -51,7 +51,7 @@ if (isset($_GET['created'])) {
     $flashSuccess = 'Facture créée avec succès !';
 }
 if (isset($_GET['duplicated'])) {
-    $flashSuccess = 'Facture dupliquée — numéro ' . htmlspecialchars($record['number']) . ' · modifiez les lignes puis enregistrez.';
+    $flashSuccess = 'Facture dupliquée : numéro ' . htmlspecialchars($record['number']) . ' · modifiez les lignes puis enregistrez.';
 }
 if (isset($_GET['from_pipeline'])) {
     $flashSuccess = 'Opportunité convertie en facture ' . htmlspecialchars($record['number']) . ' · complétez les lignes puis enregistrez.';
@@ -61,7 +61,7 @@ if (isset($_GET['from_devis'])) {
 }
 if (isset($_GET['avoir_created']))  $flashSuccess = 'Avoir créé avec succès.';
 if (isset($_GET['avoir_deleted']))  $flashSuccess = 'Avoir supprimé.';
-if (isset($_GET['from_recurring'])) $flashSuccess = 'Facture récurrente générée — vérifiez les détails et enregistrez.';
+if (isset($_GET['from_recurring'])) $flashSuccess = 'Facture récurrente générée, vérifiez les détails et enregistrez.';
 
 $avoirs  = $repo->findAvoirs($id);
 $payRepo = new PaymentRepository();
@@ -137,7 +137,7 @@ function processInvoicePost(string $existingLogo): array
 }
 
 $invoice     = $record;
-$pageTitle   = 'Modifier — ' . htmlspecialchars($record['number']);
+$pageTitle   = 'Modifier : ' . htmlspecialchars($record['number']);
 $currentPage = 'list';
 $formAction  = '/invoice/edit.php';
 
@@ -202,7 +202,7 @@ $isOverdue = $isSent && !empty($record['due_at']) && $record['due_at'] < date('Y
 
   <?php if ($isOverdue): ?>
   <div style="padding:10px 20px;background:#fff7ed;border-bottom:1px solid #fed7aa">
-    <span style="font-size:.82rem;color:#92400e"><i class="fa-solid fa-triangle-exclamation"></i> <strong>Facture en retard</strong> — échéance dépassée depuis le <?= date('d/m/Y', strtotime($record['due_at'])) ?></span>
+    <span style="font-size:.82rem;color:#92400e"><i class="fa-solid fa-triangle-exclamation"></i> <strong>Facture en retard</strong> : échéance dépassée depuis le <?= date('d/m/Y', strtotime($record['due_at'])) ?></span>
   </div>
   <?php endif; ?>
 
@@ -235,7 +235,7 @@ $isOverdue = $isSent && !empty($record['due_at']) && $record['due_at'] < date('Y
       <tr>
         <td style="font-size:.82rem"><?= date('d/m/Y', strtotime($p['paid_at'])) ?></td>
         <td style="text-align:right;font-weight:600"><?= number_format((int)$p['amount'], 0, ',', ' ') ?> <span style="font-size:.7rem;color:var(--muted);font-weight:400">FCFA</span></td>
-        <td style="font-size:.8rem;color:var(--muted)"><?= htmlspecialchars($p['note'] ?? '—') ?></td>
+        <td style="font-size:.8rem;color:var(--muted)"><?= htmlspecialchars($p['note'] ?? '/') ?></td>
         <td>
           <?php if (Auth::can('write')): ?>
           <form method="POST" action="/invoice/payment/delete.php" style="display:inline"
@@ -318,7 +318,7 @@ $isOverdue = $isSent && !empty($record['due_at']) && $record['due_at'] < date('Y
       <?php foreach ($avoirs as $av): ?>
       <tr>
         <td style="font-weight:600;font-size:.83rem;color:var(--navy)"><?= htmlspecialchars($av['number']) ?></td>
-        <td style="font-size:.8rem;color:var(--muted)"><?= $av['issued_at'] ? date('d/m/Y', strtotime($av['issued_at'])) : '—' ?></td>
+        <td style="font-size:.8rem;color:var(--muted)"><?= $av['issued_at'] ? date('d/m/Y', strtotime($av['issued_at'])) : '/' ?></td>
         <td style="text-align:right;font-weight:600;font-size:.84rem">
           <?= number_format((int)$av['total_net'], 0, ',', ' ') ?>
           <span style="font-size:.7rem;color:var(--muted);font-weight:400">FCFA</span>

@@ -50,7 +50,7 @@ final class RecurringRepository
         $lines    = json_decode((string)$tmpl['lines'], true) ?: [];
         $totalHt  = array_sum(array_map(fn($l) => (int)$l['quantity'] * (int)$l['unit_price'], $lines));
         $tax      = (int) round($totalHt * (float)$tmpl['tax_rate'] / 100);
-        $totalNet = $totalHt + $tax + (int)$tmpl['prestation_amount'];
+        $totalNet = $totalHt - $tax + (int)$tmpl['prestation_amount'];
         $today    = date('Y-m-d');
 
         $invData = [
@@ -83,7 +83,7 @@ final class RecurringRepository
             'lines'             => $lines,
         ];
 
-        // SQLite ne supporte pas les transactions imbriquées — détecter une transaction
+        // SQLite ne supporte pas les transactions imbriquées et détecter une transaction
         // externe ouverte sur la même connexion singleton pour éviter un rollback silencieux.
         if ($this->db->inTransaction()) {
             throw new \LogicException('generateInvoice() ne peut pas être appelé dans une transaction active.');
@@ -91,7 +91,7 @@ final class RecurringRepository
 
         $this->db->beginTransaction();
         try {
-            // Avancer le template EN PREMIER — si la requête est interrompue
+            // Avancer le template EN PREMIER, si la requête est interrompue
             // après ça, le template est déjà avancé et ne sera plus dans dueNow().
             $this->markGenerated((int)$tmpl['id'], self::nextDate($today, $tmpl['interval_type']));
             $invoiceId = $repo->create($invData);
@@ -158,13 +158,22 @@ final class RecurringRepository
     /** Calcule la prochaine date en fonction de l'intervalle */
     public static function nextDate(string $from, string $interval): string
     {
-        $dt = new \DateTime($from);
+        $dt      = new \DateTime($from);
+        $origDay = (int) $dt->format('j');
+
         match ($interval) {
-            'hebdomadaire'  => $dt->modify('+7 days'),
-            'trimestriel'   => $dt->modify('+3 months'),
-            'annuel'        => $dt->modify('+1 year'),
-            default         => $dt->modify('+1 month'),  // mensuel
+            'hebdomadaire' => $dt->modify('+7 days'),
+            'trimestriel'  => $dt->modify('+3 months'),
+            'annuel'       => $dt->modify('+1 year'),
+            default        => $dt->modify('+1 month'),  // mensuel
         };
+
+        // Recadrage du débordement de fin de mois : 31 jan + 1 mois donne 3 mars en PHP.
+        // Détecte le débordement (nouveau jour < jour original) et recule au dernier jour du mois précédent.
+        if ($interval !== 'hebdomadaire' && (int) $dt->format('j') < $origDay) {
+            $dt->modify('last day of last month');
+        }
+
         return $dt->format('Y-m-d');
     }
 

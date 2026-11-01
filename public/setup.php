@@ -10,7 +10,7 @@ use App\Services\LicenseService;
 
 $repo = new UserRepository();
 
-/* Already configured — redirect */
+/* Already configured, redirect */
 if ($repo->count() > 0) {
     header('Location: /login.php');
     exit;
@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Configuration initiale — Freelancer-invoice</title>
+<title>Configuration initiale | Freelancer-invoice</title>
 <style>
 @import url('/assets/fonts/inter.css');
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

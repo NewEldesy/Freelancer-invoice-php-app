@@ -27,7 +27,7 @@ foreach ($dirs as $dir) {
 }
 
 if (empty($found)) {
-    echo "✓ Aucun emoji trouvé — toutes les icônes sont Font Awesome.\n";
+    echo "✓ Aucun emoji trouvé toutes les icônes sont Font Awesome.\n";
 } else {
     echo count($found) . " occurrence(s) trouvée(s) :\n\n";
     foreach ($found as $f) echo $f . "\n";

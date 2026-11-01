@@ -37,13 +37,13 @@ $periodLabel = ($from === $to)
     : 'du ' . date('d/m/Y', strtotime($from)) . ' au ' . date('d/m/Y', strtotime($to));
 
 $actionGroupLabel = match(explode('.', $action)[0]) {
-    'auth'     => ' — Connexions',
-    'invoice'  => ' — Factures',
-    'devis'    => ' — Devis',
-    'client'   => ' — Clients',
-    'user'     => ' — Utilisateurs',
-    'expense'  => ' — Dépenses',
-    'settings' => ' — Paramètres',
+    'auth'     => ' Connexions',
+    'invoice'  => ' Factures',
+    'devis'    => ' Devis',
+    'client'   => ' Clients',
+    'user'     => ' Utilisateurs',
+    'expense'  => ' Dépenses',
+    'settings' => ' Paramètres',
     default    => '',
 };
 ?>
@@ -51,7 +51,7 @@ $actionGroupLabel = match(explode('.', $action)[0]) {
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Journal d'activité — <?= htmlspecialchars($periodLabel) ?></title>
+<title>Journal d'activité | <?= htmlspecialchars($periodLabel) ?></title>
 <link rel="stylesheet" href="/assets/fa/css/all.min.css">
 <style>
 @page { size: A4 landscape; margin: 15mm 12mm; }
@@ -147,7 +147,7 @@ foreach ($logs as $l) {
     $byDay[$day] = ($byDay[$day] ?? 0) + 1;
 }
 arsort($byUser);
-$topUser = array_key_first($byUser) ?? '—';
+$topUser = array_key_first($byUser) ?? '/';
 ?>
 
 <div class="summary">
@@ -203,7 +203,7 @@ $topUser = array_key_first($byUser) ?? '—';
     <td><span class="role-badge <?= $roleClass ?>"><?= htmlspecialchars($log['role']) ?></span></td>
     <td><span class="badge <?= $badgeClass ?>"><?= htmlspecialchars($sub) ?></span></td>
     <td><?= htmlspecialchars($log['label']) ?></td>
-    <td style="color:#94a3b8"><?= htmlspecialchars($log['ip'] ?? '—') ?></td>
+    <td style="color:#94a3b8"><?= htmlspecialchars($log['ip'] ?? '/') ?></td>
   </tr>
   <?php endforeach; ?>
   </tbody>

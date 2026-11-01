@@ -1,7 +1,7 @@
 {
   "name": "freelancer-invoice-mcp",
   "version": "1.0.0",
-  "description": "MCP server for Freelancer-invoice — exposes invoices, quotes, clients and accounting via Claude",
+  "description": "MCP server for Freelancer-invoice exposes invoices, quotes, clients and accounting via Claude",
   "type": "module",
   "main": "dist/index.js",
   "scripts": {

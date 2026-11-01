@@ -72,7 +72,7 @@ require __DIR__ . '/../../templates/layout.php';
                    font-family:inherit;color:var(--text);background:var(--white);cursor:pointer;
                    appearance:none;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2394a3b8'/%3E%3C/svg%3E\");
                    background-repeat:no-repeat;background-position:right 10px center;min-width:220px">
-      <option value="">— Toutes les factures —</option>
+      <option value=""> Toutes les factures </option>
       <?php foreach ($invoices as $inv): ?>
       <option value="<?= $inv['id'] ?>" <?= $filterInvoice === (int)$inv['id'] ? 'selected' : '' ?>>
         <?= htmlspecialchars($inv['number']) ?><?= $inv['client_name'] ? ' · ' . htmlspecialchars($inv['client_name']) : '' ?>
@@ -151,10 +151,10 @@ require __DIR__ . '/../../templates/layout.php';
           </a>
           <div style="font-size:.7rem;color:var(--muted)"><?= htmlspecialchars($exp['client_name'] ?? '') ?></div>
           <?php else: ?>
-          <span style="color:var(--muted-light)">—</span>
+          <span style="color:var(--muted-light)">/</span>
           <?php endif; ?>
         </td>
-        <td style="color:var(--muted);font-size:.8rem"><?= $exp['date'] ? date('d/m/Y', strtotime($exp['date'])) : '—' ?></td>
+        <td style="color:var(--muted);font-size:.8rem"><?= $exp['date'] ? date('d/m/Y', strtotime($exp['date'])) : '/' ?></td>
         <td style="text-align:right;font-weight:700;color:var(--red)">
           <?= number_format((int)$exp['amount'], 0, ',', ' ') ?> <span style="font-size:.7rem;font-weight:400;color:var(--muted)">FCFA</span>
         </td>

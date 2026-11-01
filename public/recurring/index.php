@@ -84,7 +84,7 @@ foreach ($templates as $t):
     $nextClass = $daysLeft < 0 ? 'due' : ($daysLeft <= 7 ? 'coming' : 'ok');
     $nextLabel = $daysLeft < 0
         ? 'En retard de ' . abs($daysLeft) . ' j'
-        : ($daysLeft === 0 ? 'Génération aujourd\'hui' : 'Dans ' . $daysLeft . ' j — ' . $t['next_due_at']);
+        : ($daysLeft === 0 ? 'Génération aujourd\'hui' : 'Dans ' . $daysLeft . ' j ' . $t['next_due_at']);
 ?>
 <div class="rec-card <?= $t['active'] ? '' : 'inactive' ?>">
   <div class="rec-icon"><i class="fa-solid fa-arrows-rotate"></i></div>

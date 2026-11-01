@@ -118,7 +118,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $lines   = $postLines;
 }
 
-$pageTitle     = 'Nouvel avoir — facture ' . htmlspecialchars($origin['number']);
+$pageTitle     = 'Nouvel avoir, facture ' . htmlspecialchars($origin['number']);
 $currentPage   = 'list';
 $formAction    = '/avoir/create.php?invoice_id=' . $originId;
 $lockedType    = 'AVOIR';
@@ -136,7 +136,7 @@ if (!empty($errors)): ?>
 <div class="alert" style="background:#fff7ed;border:1px solid #fed7aa;color:#92400e;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:.83rem">
   <i class="fa-solid fa-triangle-exclamation"></i>
   Avoir sur la facture <strong><?= htmlspecialchars($origin['number']) ?></strong>
-  (<?= htmlspecialchars($origin['client_name']) ?>) — montant original : <?= number_format((int)$origin['total_net'], 0, ',', ' ') ?> FCFA.
+  (<?= htmlspecialchars($origin['client_name']) ?>) montant original : <?= number_format((int)$origin['total_net'], 0, ',', ' ') ?> FCFA.
   Ajustez les lignes et montants selon le remboursement.
 </div>
 

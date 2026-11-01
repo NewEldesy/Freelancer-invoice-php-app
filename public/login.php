@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Connexion — Freelancer-invoice</title>
+<title>Connexion | Freelancer-invoice</title>
 <style>
 @import url('/assets/fonts/inter.css');
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -110,7 +110,7 @@ h1 { font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
   <div class="alert-success">✓ Vous avez été déconnecté.</div>
   <?php endif; ?>
   <?php if ($sessionExpired): ?>
-  <div class="alert-error"><i class="fa-solid fa-triangle-exclamation"></i> Session invalide — la base de données a changé. Reconnectez-vous.</div>
+  <div class="alert-error"><i class="fa-solid fa-triangle-exclamation"></i> Session invalide, la base de données a changé. Reconnectez-vous.</div>
   <?php endif; ?>
   <?php if ($error): ?>
   <div class="alert-error"><i class="fa-solid fa-triangle-exclamation"></i> <?= htmlspecialchars($error) ?></div>
@@ -168,7 +168,7 @@ h1 { font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
     });
   </script>
 
-  <div class="foot">© ISSU DEV — Freelancer-invoice</div>
+  <div class="foot">© ISSU DEV, Freelancer-invoice</div>
 </div>
 </body>
 </html>

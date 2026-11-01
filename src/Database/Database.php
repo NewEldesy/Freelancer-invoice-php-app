@@ -259,7 +259,7 @@ final class Database
             CREATE INDEX IF NOT EXISTS idx_logs_user_id    ON activity_logs (user_id);
         ");
 
-        /* Safe column additions for existing databases */
+        /* Ajouts de colonnes sécurisés pour les bases existantes */
         foreach ([
             "ALTER TABLE invoices ADD COLUMN prestation_label  TEXT    NOT NULL DEFAULT 'Frais de prestation'",
             "ALTER TABLE invoices ADD COLUMN prestation_amount INTEGER NOT NULL DEFAULT 0",
@@ -293,23 +293,23 @@ final class Database
             CREATE INDEX IF NOT EXISTS idx_invoices_created_at
                 ON invoices (created_at DESC);
 
-            -- invoices : overdue() — filtre composé status + due_at
+            -- invoices : overdue() filtre composé status + due_at
             CREATE INDEX IF NOT EXISTS idx_invoices_status_due_at
                 ON invoices (status, due_at);
 
-            -- invoices : findAvoirs() et convertedInvoicesByDevisIds() — clé étrangère logique
+            -- invoices : findAvoirs() et convertedInvoicesByDevisIds() clé étrangère logique
             CREATE INDEX IF NOT EXISTS idx_invoices_origin_id
                 ON invoices (origin_id);
 
-            -- invoices : statsByMonth() — filtre + group sur issued_at
+            -- invoices : statsByMonth() filtre + group sur issued_at
             CREATE INDEX IF NOT EXISTS idx_invoices_issued_at
                 ON invoices (issued_at);
 
-            -- invoices : nextNumber() / countByPrefix() — LIKE 'PREFIX-%'
+            -- invoices : nextNumber() / countByPrefix() LIKE 'PREFIX-%'
             CREATE INDEX IF NOT EXISTS idx_invoices_number
                 ON invoices (number);
 
-            -- invoice_lines : linesOf() — lookup FK + tri sort_order
+            -- invoice_lines : linesOf() lookup FK + tri sort_order
             CREATE INDEX IF NOT EXISTS idx_invoice_lines_invoice_id
                 ON invoice_lines (invoice_id, sort_order);
 
@@ -325,7 +325,7 @@ final class Database
             CREATE INDEX IF NOT EXISTS idx_expenses_date
                 ON expenses (date);
 
-            -- recurring_templates : dueNow() — filtre composé active + next_due_at
+            -- recurring_templates : dueNow() filtre composé active + next_due_at
             CREATE INDEX IF NOT EXISTS idx_recurring_active_due
                 ON recurring_templates (active, next_due_at);
 

@@ -16,7 +16,7 @@ final class SearchRepository
     }
 
     /**
-     * Recherche globale — retourne un tableau groupé par type de résultat.
+     * Recherche globale retourne un tableau groupé par type de résultat.
      * @return array{invoices:array, devis:array, clients:array, expenses:array}
      */
     public function search(string $q): array

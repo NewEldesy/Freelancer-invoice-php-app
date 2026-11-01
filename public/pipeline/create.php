@@ -62,7 +62,7 @@ require __DIR__ . '/../../templates/layout.php';
     <?php if ($pipelineLocked): ?>
     <div class="alert" style="background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:10px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px">
       <div>
-        <strong><i class="fa-solid fa-lock"></i> Limite atteinte — Plan gratuit</strong><br>
+        <strong><i class="fa-solid fa-lock"></i> Limite du Plan gratuit atteinte</strong><br>
         <span style="font-size:.82rem">Vous avez atteint la limite de <strong><?= $pipelineMax ?> opportunités</strong> du plan gratuit.</span>
       </div>
       <a href="/activate.php" class="btn btn-primary" style="white-space:nowrap;flex-shrink:0"><i class="fa-solid fa-star"></i> Passer Pro</a>
@@ -109,7 +109,7 @@ require __DIR__ . '/../../templates/layout.php';
       <div class="field" style="margin-bottom:12px">
         <label>Choisir depuis la base clients</label>
         <select id="client-picker" onchange="pickClient(this)">
-          <option value="">— Sélectionner un client (optionnel) —</option>
+          <option value=""> Sélectionner un client (optionnel) </option>
           <?php foreach ($clients as $c): ?>
           <option value="<?= $c['id'] ?>"
               data-name="<?= htmlspecialchars($c['name']) ?>"

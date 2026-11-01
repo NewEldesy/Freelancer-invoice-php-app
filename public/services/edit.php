@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $service = array_merge($service, $data);
 }
 
-$pageTitle     = 'Modifier — ' . htmlspecialchars($service['name']);
+$pageTitle     = 'Modifier : ' . htmlspecialchars($service['name']);
 $currentPage   = 'services';
 $topbarActions = '<a href="/services/index.php" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Retour</a>';
 

@@ -41,7 +41,7 @@ $projStats    = $projRepo->stats();
 $finStats     = $expRepo->globalStats();
 $recent       = array_slice($repo->all(), 0, 6);
 
-/* Build chart data — CA mensuel Jan→mois courant (année en cours) */
+/* Build chart data, CA mensuel Jan→mois courant (année en cours) */
 $chartLabels   = [];
 $chartEngage   = [];
 $chartEncaisse = [];
@@ -263,8 +263,8 @@ require __DIR__ . '/../templates/layout.php';
               </a>
               <div style="font-size:.7rem;color:var(--muted-light)"><?= htmlspecialchars($inv['type']) ?></div>
             </td>
-            <td><?= htmlspecialchars($inv['client_name'] ?: '—') ?></td>
-            <td style="color:var(--muted);font-size:.78rem"><?= $inv['issued_at'] ? date('d/m/Y', strtotime($inv['issued_at'])) : '—' ?></td>
+            <td><?= htmlspecialchars($inv['client_name'] ?: '/') ?></td>
+            <td style="color:var(--muted);font-size:.78rem"><?= $inv['issued_at'] ? date('d/m/Y', strtotime($inv['issued_at'])) : '/' ?></td>
             <td style="text-align:right;font-weight:600;font-size:.84rem">
               <?= number_format((int)$inv['total_net'], 0, ',', ' ') ?> <span style="font-size:.7rem;color:var(--muted)">FCFA</span>
             </td>
@@ -347,7 +347,7 @@ require __DIR__ . '/../templates/layout.php';
 
 <!-- Graphique CA mensuel 12 mois -->
 <div class="card" style="margin-top:16px">
-  <div class="card-header"><h2>CA mensuel — <?= date('Y') ?></h2></div>
+  <div class="card-header"><h2>CA mensuel : <?= date('Y') ?></h2></div>
   <div class="card-body" style="padding:16px">
     <canvas id="monthlyChart" height="90"></canvas>
   </div>

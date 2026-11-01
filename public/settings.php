@@ -103,7 +103,7 @@ if (isset($_GET['restore_error'])) {
 <div class="alert alert-error" style="margin-bottom:16px"><i class="fa-solid fa-triangle-exclamation"></i> <?= htmlspecialchars($flashError) ?></div>
 <?php endif; ?>
 
-<!-- ══ COMPANY TAB ══ -->
+<!-- COMPANY TAB -->
 <?php if ($tab === 'company'): ?>
 <div>
 
@@ -111,13 +111,13 @@ if (isset($_GET['restore_error'])) {
   <div class="card-body">
     <form method="POST" enctype="multipart/form-data">
 
-      <!-- ── Logo ── -->
+      <!-- Logo -->
       <div class="section-title" style="margin-top:0"><i class="fa-solid fa-image"></i> Logo</div>
       <?php if (!empty($s['issuer_logo_path']) && file_exists($s['issuer_logo_path'])): ?>
         <div style="margin-bottom:10px">
           <img src="/uploads/<?= basename($s['issuer_logo_path']) ?>"
                style="max-height:70px;object-fit:contain;border-radius:6px;border:1px solid var(--border);padding:6px">
-          <div style="font-size:.75rem;color:var(--muted);margin-top:4px">Logo actuel — uploader un nouveau pour le remplacer</div>
+          <div style="font-size:.75rem;color:var(--muted);margin-top:4px">Logo actuel, uploader un nouveau pour le remplacer</div>
         </div>
       <?php endif; ?>
       <div class="field">
@@ -291,7 +291,7 @@ if (isset($_GET['restore_error'])) {
   <?php if (LicenseService::isFree()): ?>
   <div class="card" style="margin-bottom:16px">
     <div style="padding:16px 20px;border-bottom:1px solid var(--border-soft)">
-      <div style="font-weight:700;color:var(--navy);font-size:.88rem">Utilisation — Plan gratuit</div>
+      <div style="font-weight:700;color:var(--navy);font-size:.88rem">Utilisation du Plan gratuit</div>
       <div style="font-size:.72rem;color:var(--muted);margin-top:2px">Passez en Pro pour lever toutes les limites</div>
     </div>
     <div style="padding:20px 24px;display:flex;flex-direction:column;gap:16px">
@@ -336,7 +336,7 @@ if (isset($_GET['restore_error'])) {
     <div style="padding:0">
       <?php
       // [label, free_value, pro_value, enterprise_value]
-      // true = ✓, false = —, string = custom text
+      // true = ✓, false = -, string = custom text
       $features = [
           ['Facturation',            '10 max',    'Illimitée',  'Illimitée'],
           ['Duplication de factures','5 max',     'Illimitée',  'Illimitée'],
@@ -373,7 +373,7 @@ if (isset($_GET['restore_error'])) {
               if ($v === true):  ?>
                 <td style="text-align:center;padding:9px 16px"><span style="color:#059669;font-weight:700;font-size:1rem">✓</span></td>
               <?php elseif ($v === false): ?>
-                <td style="text-align:center;padding:9px 16px"><span style="color:#cbd5e1">—</span></td>
+                <td style="text-align:center;padding:9px 16px"><span style="color:#cbd5e1">/</span></td>
               <?php else: ?>
                 <td style="text-align:center;padding:9px 16px;font-size:.78rem;font-weight:600;color:<?= $i===1 ? '#64748b' : '#059669' ?>"><?= htmlspecialchars($v) ?></td>
               <?php endif;
