@@ -1,6 +1,6 @@
 # Freelancer-invoice
 
-Application de gestion commerciale pour freelances et PME — pipeline commercial, facturation, suivi de projets, dépenses, rentabilité et reporting comptable.
+Application de gestion commerciale pour freelances et PME, pipeline commercial, facturation, suivi de projets, dépenses, rentabilité et reporting comptable.
 
 Développé par **ISSU DEV**.
 
@@ -25,7 +25,7 @@ Développé par **ISSU DEV**.
 
 - PHP 8.1+ avec extensions : `pdo_sqlite`, `fileinfo`, `mbstring`
 - Composer
-- Aucune base de données à installer — SQLite auto-généré au premier démarrage
+- Aucune base de données à installer, SQLite auto-généré au premier démarrage
 
 ---
 
@@ -41,11 +41,11 @@ php -S localhost:8080 -t public
 # Sur Windows : double-cliquer sur start.bat
 ```
 
-3. Ouvrir **http://localhost:8080/setup.php** — créer le compte administrateur  
+3. Ouvrir **http://localhost:8080/setup.php** : créer le compte administrateur  
 4. Se connecter sur **http://localhost:8080/login.php**  
 5. Administration → Utilisateurs pour créer les comptes métier (gestionnaire / utilisateur)
 
-> La base `storage/invoices.sqlite` est créée automatiquement — aucune configuration supplémentaire.
+> La base `storage/invoices.sqlite` est créée automatiquement, aucune configuration supplémentaire.
 
 ---
 
@@ -56,7 +56,7 @@ php -S localhost:8080 -t public
 | **Super Admin** | Gestion des licences uniquement (compte ISSU DEV) |
 | **Administrateur** | Gestion des utilisateurs + consultation du journal d'activité |
 | **Gestionnaire** | Accès complet : création, modification, suppression sur tout le métier |
-| **Utilisateur** | Lecture seule — consultation sans modification |
+| **Utilisateur** | Lecture seule, consultation sans modification |
 
 ---
 
@@ -114,7 +114,7 @@ tools/           Scripts CLI (keygen)
 - Les **dépenses** ne peuvent être saisies que sur des factures envoyées ou payées.
 - La **valeur gagnée** dans le pipeline utilise le montant réel de la facture liée, pas l'estimation initiale.
 - Un **projet** est créé automatiquement quand une facture passe au statut "Envoyée".
-- Le **PDF** exige des `<table>` HTML — Dompdf ne supporte pas flexbox.
+- Le **PDF** exige des `<table>` HTML, Dompdf ne supporte pas flexbox.
 
 ---
 
