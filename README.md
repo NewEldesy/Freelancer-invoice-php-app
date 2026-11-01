@@ -105,11 +105,11 @@ php -S localhost:8080 -t public
 # Sur Windows : double-cliquer sur start.bat
 ```
 
-3. Ouvrir **http://localhost:8080/setup.php** — créer le compte administrateur  
+3. Ouvrir **http://localhost:8080/setup.php** créer le compte administrateur  
 4. Se connecter sur **http://localhost:8080/login.php**  
 5. Administration → Utilisateurs pour créer les comptes métier (gestionnaire / utilisateur)
 
-> La base `storage/invoices.sqlite` est créée automatiquement — aucune configuration supplémentaire.
+> La base `storage/invoices.sqlite` est créée automatiquement aucune configuration supplémentaire.
 
 ---
 

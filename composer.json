@@ -12,7 +12,10 @@
     "autoload": {
         "psr-4": {
             "App\\": "src/"
-        }
+        },
+        "files": [
+            "config/load_env.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

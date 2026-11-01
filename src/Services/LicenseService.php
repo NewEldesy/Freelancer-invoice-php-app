@@ -24,13 +24,20 @@ final class LicenseService
     {
         if (self::$secret !== null) return self::$secret;
 
+        // Priorité 1 : variable d'environnement LICENSE_SECRET (définie dans .env ou le système)
+        $envSecret = $_ENV['LICENSE_SECRET'] ?? getenv('LICENSE_SECRET') ?: '';
+        if ($envSecret !== '' && $envSecret !== 'REMPLACER_PAR_VOTRE_SECRET_UNIQUE_ICI') {
+            return self::$secret = $envSecret;
+        }
+
+        // Priorité 2 : fichier config/license.secret (rétrocompatibilité)
         $path = __DIR__ . '/../../config/license.secret';
         if (!is_file($path)) {
-            throw new \RuntimeException('Fichier de licence manquant : config/license.secret');
+            throw new \RuntimeException('Secret de licence manquant : définir LICENSE_SECRET dans .env ou créer config/license.secret');
         }
         $value = trim(file_get_contents($path));
         if ($value === '' || $value === 'REMPLACER_PAR_VOTRE_SECRET_UNIQUE_ICI') {
-            throw new \RuntimeException('Le secret de licence n\'a pas été configuré dans config/license.secret');
+            throw new \RuntimeException('Le secret de licence n\'a pas été configuré (LICENSE_SECRET dans .env ou config/license.secret)');
         }
         return self::$secret = $value;
     }

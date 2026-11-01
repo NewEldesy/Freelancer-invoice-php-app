@@ -16,7 +16,10 @@ final class Database
     public static function connection(): PDO
     {
         if (self::$instance === null) {
-            $path = __DIR__ . '/../../storage/invoices.sqlite';
+            $envPath = $_ENV['DB_PATH'] ?? getenv('DB_PATH') ?: '';
+            $path    = ($envPath !== '')
+                ? $envPath
+                : __DIR__ . '/../../storage/invoices.sqlite';
             self::$instance = new PDO('sqlite:' . $path);
             self::$instance->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             self::$instance->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
